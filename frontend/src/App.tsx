@@ -1,0 +1,128 @@
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Sidebar } from './components/layout/Sidebar';
+import { Login } from './pages/Login';
+import Admin from './pages/Admin';
+import { TvCheck } from './pages/oqa/TvCheck';
+import { PalletsCheck } from './pages/oqa/PalletsCheck';
+import { PalletsTvView } from './pages/oqa/PalletsTvView';
+import { LabelsCheck } from './pages/oqa/LabelsCheck';
+import { AqlCheck } from './pages/iqc/AqlCheck';
+import { PanelsCheck } from './pages/iqc/PanelsCheck';
+import { EpsCheck } from './pages/iqc/EpsCheck';
+import { CoversCheck } from './pages/iqc/CoversCheck';
+import { ComponentsCheck } from './pages/iqc/ComponentsCheck';
+import { PatrolCheck } from './pages/oqa/PatrolCheck';
+import { Dashboard } from './pages/Dashboard';
+import { KpiDashboard } from './pages/KpiDashboard';
+import { AqlCalculator } from './pages/AqlCalculator';
+import { useAuthStore, hydrateAuth } from './store/useAuthStore';
+import { useThemeStore } from './store/useThemeStore';
+import { Menu } from 'lucide-react';
+import { GlobalUI } from './components/ui/GlobalUI';
+
+// Layout
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      <div className="sidebar-container">
+        <Sidebar />
+      </div>
+      
+      <main className="main-content" style={{ flex: 1, padding: '30px', overflow: 'auto', backgroundColor: 'var(--c-bg-base)', position: 'relative' }}>
+        {children}
+      </main>
+    </div>
+  );
+};
+
+// Protected Route Wrapper
+const ProtectedRoute = ({ children, allowedPermissions, allowedRoles }: { children: React.ReactNode, allowedPermissions?: string[], allowedRoles?: string[] }) => {
+  const { user, isAuthenticated } = useAuthStore();
+  const location = useLocation();
+
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Admin ALWAYS has access
+  if (user?.role === 'Admin') return <>{children}</>;
+
+  // Check roles (Legacy/Coarse)
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/app/dashboard" replace />;
+  }
+
+  // Check custom permissions
+  if (allowedPermissions && user) {
+    const hasPerm = (user.permissions || []).some(p => allowedPermissions.includes(p));
+    if (!hasPerm) {
+      return <div style={{ padding: '20px', color: 'var(--c-text-primary)' }}>У вас нет доступа к этому модулю. Обратитесь к администратору.</div>;
+    }
+  }
+
+  return <>{children}</>;
+};
+
+
+function App() {
+  const { theme } = useThemeStore();
+
+  useEffect(() => {
+    hydrateAuth();
+    document.documentElement.setAttribute('data-theme', theme);
+
+    // Warm up audio context on first user interaction
+    const handleInteraction = () => {
+      import('./utils/audio').then(m => m.initAudioContext());
+      window.removeEventListener('click', handleInteraction);
+    };
+    window.addEventListener('click', handleInteraction);
+    return () => window.removeEventListener('click', handleInteraction);
+  }, [theme]);
+
+  return (
+    <Router>
+      <GlobalUI />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        <Route path="/oqa/pallets-tv" element={<PalletsTvView />} />
+        
+        <Route path="/app/*" element={
+          <ProtectedRoute>
+            <RootLayout>
+              <Routes>
+                <Route path="dashboard" element={<ProtectedRoute allowedPermissions={['dashboard']}><Dashboard /></ProtectedRoute>} />
+                <Route path="kpi" element={<ProtectedRoute allowedRoles={['Admin']}><KpiDashboard /></ProtectedRoute>} />
+                
+                {/* OQA */}
+                <Route path="oqa/tv" element={<ProtectedRoute allowedPermissions={['oqa_tv']}><TvCheck /></ProtectedRoute>} />
+                <Route path="oqa/pallets" element={<ProtectedRoute allowedPermissions={['oqa_pallets']}><PalletsCheck /></ProtectedRoute>} />
+                <Route path="oqa/labels" element={<ProtectedRoute allowedPermissions={['oqa_labels']}><LabelsCheck /></ProtectedRoute>} />
+                <Route path="oqa/patrol" element={<ProtectedRoute allowedPermissions={['oqa_patrol']}><PatrolCheck /></ProtectedRoute>} />
+                
+                {/* IQC */}
+                <Route path="iqc/aql" element={<ProtectedRoute allowedPermissions={['iqc_aql']}><AqlCheck /></ProtectedRoute>} />
+                <Route path="iqc/panels" element={<ProtectedRoute allowedPermissions={['iqc_panels']}><PanelsCheck /></ProtectedRoute>} />
+                <Route path="iqc/eps" element={<ProtectedRoute allowedPermissions={['iqc_eps']}><EpsCheck /></ProtectedRoute>} />
+                <Route path="iqc/covers" element={<ProtectedRoute allowedPermissions={['iqc_covers']}><CoversCheck /></ProtectedRoute>} />
+                <Route path="iqc/components" element={<ProtectedRoute allowedPermissions={['iqc_components']}><ComponentsCheck /></ProtectedRoute>} />
+                <Route path="iqc/aql-calculator" element={<ProtectedRoute allowedPermissions={['iqc_aql_calculator']}><AqlCalculator /></ProtectedRoute>} />
+
+                {/* ADMIN */}
+                <Route path="admin" element={<ProtectedRoute allowedPermissions={['admin_panel']}><Admin /></ProtectedRoute>} />
+
+                <Route path="*" element={<Navigate to="dashboard" replace />} />
+              </Routes>
+            </RootLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

@@ -1,0 +1,311 @@
+import React, { useState, useEffect } from 'react';
+import { useDataStore } from '../../store/useDataStore';
+import { translateToEnglish } from '../../utils/api';
+import { DsmTable } from '../../components/ui/DsmTable';
+import { CheckCircle2, Save, History, LayoutGrid } from 'lucide-react';
+
+const DEFAULT_CHECKPOINTS = [
+  "Антистатическая защита (браслеты/коврики)",
+  "Электрический винтоверт (график усилия)",
+  "Ионизаторы (исправность/график чистки)",
+  "LCM Panel (проверка подсветки)",
+  "Сверка спецификации с факт.значением.",
+  "Проверка винтов",
+  "Детали из пластика",
+  "Проверка паттернов",
+  "Термокамера",
+  "Баланс белого",
+  "Тест электробезопасности (HiPot, пробой)",
+  "Тест энергопотребления",
+  "Соблюдение технологической дисциплины",
+  "Этикетки и защитная пленка",
+  "Упаковка",
+  "Зона ремонта",
+  "Бережливое производство"
+];
+
+export const PatrolCheck = () => {
+  const { fetchLogs, saveLog, activeLot, tvModels, fetchTvModels, settings, fetchSettings, showToast } = useDataStore();
+  const [loading, setLoading] = useState(false);
+  const [records, setRecords] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'form' | 'history'>('form');
+
+  const checkpoints = settings.oqa_patrol_checkpoints 
+    ? JSON.parse(settings.oqa_patrol_checkpoints) 
+    : DEFAULT_CHECKPOINTS;
+
+  // Form State
+  const [model, setModel] = useState('');
+  const [otkNum, setOtkNum] = useState('');
+  const [checks, setChecks] = useState<Record<string, 'OK' | 'NG'>>({});
+  const [comment, setComment] = useState('');
+
+  useEffect(() => {
+    setChecks(checkpoints.reduce((acc: any, cp: string) => ({ ...acc, [cp]: 'OK' }), {}));
+  }, [settings.oqa_patrol_checkpoints]);
+
+  useEffect(() => {
+    fetchTvModels();
+    fetchSettings();
+    loadData();
+  }, [activeLot]);
+
+  useEffect(() => {
+    if (activeLot && tvModels.length > 0) {
+      const foundModel = tvModels.find(m => m.id === activeLot.tv_model_id);
+      if (foundModel) {
+        setModel(foundModel.name);
+      }
+    }
+  }, [activeLot, tvModels]);
+
+  const loadData = async () => {
+    setLoading(true);
+    const logs = await fetchLogs('oqa_patrol');
+    setRecords(logs.map(l => ({ 
+      id: l.id, 
+      timestamp: l.timestamp,
+      user_id: l.user_id,
+      status: l.status,
+      ...l.data 
+    })));
+    setLoading(false);
+  };
+
+  const toggleCheck = (name: string) => {
+    setChecks(prev => ({
+      ...prev,
+      [name]: prev[name] === 'OK' ? 'NG' : 'OK'
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!activeLot) return showToast('Выберите текущий лот в боковом меню!', 'warning');
+    if (!model) return showToast('Введите модель ТВ!', 'warning');
+    if (!otkNum) return showToast('Выберите номер ОТК!', 'warning');
+
+    const hasNG = Object.values(checks).some(v => v === 'NG');
+    
+    if (hasNG && !comment.trim()) {
+      return showToast('При наличии NG (дефектов) необходимо обязательно заполнить поле комментария!', 'warning');
+    }
+
+    let finalComment = comment;
+    if (comment.trim()) {
+      const en = await translateToEnglish(comment.trim());
+      if (en && en.toLowerCase() !== comment.trim().toLowerCase()) {
+        finalComment = `${comment.trim()} / ${en}`;
+      }
+    }
+
+    const ngOnlyChecks = Object.entries(checks)
+      .filter(([, status]) => status === 'NG')
+      .reduce((acc: any, [name, status]) => ({ ...acc, [name]: status }), {});
+
+    const data = {
+      model,
+      otkNum,
+      checks: ngOnlyChecks,
+      comment: finalComment
+    };
+
+    await saveLog('oqa_patrol', data, hasNG ? 'NG' : 'OK');
+    showToast('Запись сохранена');
+    setModel('');
+    setOtkNum('');
+    setChecks(checkpoints.reduce((acc: any, cp: string) => ({ ...acc, [cp]: 'OK' }), {}));
+    setComment('');
+    loadData();
+    setActiveTab('history');
+  };
+
+  const columns = [
+    { key: 'timestamp', label: 'Время', render: (val: string) => new Date(val).toLocaleTimeString() },
+    { key: 'model', label: 'Модель' },
+    { key: 'otkNum', label: 'ОТК №' },
+    { 
+      key: 'checks', 
+      label: 'Результат обхода',
+      render: (val: any) => {
+        const ngItems = Object.entries(val || {})
+          .filter(([, status]) => status === 'NG')
+          .map(([name]) => name);
+        
+        if (ngItems.length === 0) return <span style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem' }}>—</span>;
+        
+        return (
+          <div style={{ color: 'var(--c-danger)', fontSize: '0.75rem', fontWeight: 'bold', lineHeight: '1.2' }}>
+            {ngItems.join(', ')}
+          </div>
+        );
+      }
+    },
+    { key: 'comment', label: 'Комментарий' },
+    { 
+        key: 'status', 
+        label: 'Статус', 
+        render: (val: string) => (
+          <span style={{ color: val === 'OK' ? 'var(--c-success)' : 'var(--c-danger)', fontWeight: 'bold' }}>{val}</span>
+        )
+    }
+  ];
+
+  return (
+    <div className="animate-fade-in" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <h2 style={{ margin: 0 }}>Журнал обхода (Patrol Log)</h2>
+          <p style={{ color: 'var(--c-text-muted)', fontSize: '0.9rem' }}>Контроль технологической дисциплины на линии</p>
+        </div>
+        <div className="glass" style={{ display: 'flex', padding: '4px', borderRadius: '8px' }}>
+          <button 
+            onClick={() => setActiveTab('form')}
+            style={{ 
+              padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              background: activeTab === 'form' ? 'var(--c-accent)' : 'transparent',
+              color: activeTab === 'form' ? '#000' : 'var(--c-text-primary)',
+              display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: '0.2s'
+            }}
+          >
+            <LayoutGrid size={16} /> Форма
+          </button>
+          <button 
+            onClick={() => setActiveTab('history')}
+            style={{ 
+              padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              background: activeTab === 'history' ? 'var(--c-accent)' : 'transparent',
+              color: activeTab === 'history' ? '#000' : 'var(--c-text-primary)',
+              display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: '0.2s'
+            }}
+          >
+            <History size={16} /> История за сегодня
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'form' ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '20px', flex: 1, minHeight: 0 }}>
+          {/* Main Checklist */}
+          <div className="glass-panel" style={{ padding: '20px', overflowY: 'auto', borderRadius: 'var(--radius-lg)' }}>
+            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <CheckCircle2 size={20} color="var(--c-accent)" /> 
+              Контрольные точки
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+              {checkpoints.map((cp: string) => (
+                <div 
+                  key={cp} 
+                  onClick={() => toggleCheck(cp)}
+                  className="glass-panel hover-scale"
+                  style={{ 
+                    padding: '12px 16px', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    border: checks[cp] === 'NG' ? '1px solid var(--c-danger)' : '1px solid var(--c-border)',
+                    background: checks[cp] === 'NG' ? 'rgba(255, 77, 77, 0.1)' : 'var(--c-bg-surface-glass)'
+                  }}
+                >
+                  <span style={{ fontSize: '0.85rem', flex: 1 }}>{cp}</span>
+                  <div style={{ 
+                    padding: '4px 10px', 
+                    borderRadius: '4px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 'bold',
+                    background: checks[cp] === 'OK' ? 'var(--c-success)' : 'var(--c-danger)',
+                    color: '#000',
+                    marginLeft: '10px'
+                  }}>
+                    {checks[cp]}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Sidebar Form */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+              <h4 style={{ margin: '0 0 15px 0' }}>Основная информация</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '5px', color: 'var(--c-text-muted)' }}>Модель ТВ</label>
+                  <input 
+                    className="glass" 
+                    value={model} 
+                    onChange={e => setModel(e.target.value)} 
+                    placeholder="Напр. L32MB-ARU"
+                    style={{ width: '100%', padding: '10px' }} 
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '5px', color: 'var(--c-text-muted)' }}>ОТК №</label>
+                  <select 
+                    className="glass" 
+                    value={otkNum} 
+                    onChange={e => setOtkNum(e.target.value)} 
+                    style={{ 
+                      width: '100%', 
+                      padding: '10px', 
+                      background: 'var(--c-bg-surface-elevated)', 
+                      color: 'var(--c-text-primary)',
+                      border: '1px solid var(--c-border)',
+                      borderRadius: 'var(--radius-sm)'
+                    }} 
+                  >
+                    <option value="" style={{ background: 'var(--c-bg-surface-elevated)', color: 'var(--c-text-primary)' }}>-- Выберите --</option>
+                    {Array.from({ length: 15 }, (_, i) => i + 1).map(num => (
+                      <option key={num} value={num.toString()} style={{ background: 'var(--c-bg-surface-elevated)', color: 'var(--c-text-primary)' }}>{num}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '5px', color: 'var(--c-text-muted)' }}>Комментарии</label>
+                  <textarea 
+                    className="glass" 
+                    value={comment} 
+                    onChange={e => setComment(e.target.value)} 
+                    placeholder="Комментарий (Русский/Eng)..."
+                    style={{ width: '100%', padding: '10px', minHeight: '80px', resize: 'none' }} 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', background: 'var(--c-bg-surface-elevated)' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                  <span style={{ fontSize: '0.85rem' }}>Итого:</span>
+                  <span style={{ 
+                    fontWeight: 'bold', 
+                    color: Object.values(checks).some(v => v === 'NG') ? 'var(--c-danger)' : 'var(--c-success)' 
+                  }}>
+                    {Object.values(checks).some(v => v === 'NG') ? 'NG' : 'OK'}
+                  </span>
+               </div>
+               <button 
+                onClick={handleSave}
+                style={{ 
+                  width: '100%', padding: '15px', background: 'var(--c-accent)', border: 'none', borderRadius: '8px', 
+                  color: '#000', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
+                }}
+               >
+                 <Save size={18} /> Сохранить обход
+               </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ flex: 1, minHeight: 0 }}>
+           <DsmTable 
+             title="Последние обходы" 
+             columns={columns} 
+             data={records} 
+             loading={loading} 
+             hideAdd hideExport
+           />
+        </div>
+      )}
+    </div>
+  );
+};

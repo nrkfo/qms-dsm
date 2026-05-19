@@ -1,0 +1,126 @@
+
+> frontend@0.0.0 dev
+> vite
+
+Re-optimizing dependencies because lockfile has changed
+
+  VITE v5.4.21  ready in 325 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+09:54:45 [vite] hmr update /src/pages/Admin.tsx
+10:02:05 [vite] hmr update /src/pages/Admin.tsx
+10:11:49 [vite] hmr update /src/pages/Dashboard.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/Admin.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/iqc/CoversCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/components/ui/GlobalUI.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/components/ui/DsmTable.tsx
+14:25:01 [vite] hmr update /src/pages/oqa/TvCheck.tsx
+15:57:49 [vite] hmr update /src/pages/oqa/PatrolCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/iqc/CoversCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/components/ui/GlobalUI.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/DsmTable.tsx
+15:58:11 [vite] hmr update /src/pages/Admin.tsx
+16:22:12 [vite] hmr update /src/pages/Admin.tsx
+16:22:32 [vite] hmr update /src/pages/Admin.tsx
+16:22:41 [vite] hmr update /src/pages/Admin.tsx
+16:22:52 [vite] hmr update /src/pages/Admin.tsx
+16:46:38 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+16:46:49 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+16:47:03 [vite] hmr update /src/index.css
+16:47:18 [vite] hmr update /src/components/ui/GlobalUI.tsx
+16:47:29 [vite] hmr update /src/components/ui/DsmTable.tsx
+16:49:58 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+16:53:24 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+16:53:33 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+16:53:39 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+16:56:29 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+16:56:37 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+17:13:55 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+17:15:22 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+17:15:29 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+17:26:24 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+
+> frontend@0.0.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 355 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> frontend@0.0.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 325 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+18:33:53 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/components/ui/DsmTable.tsx
+18:33:57 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/DsmTable.tsx
+18:34:03 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+18:34:08 [vite] hmr update /src/pages/iqc/CoversCheck.tsx
+18:34:12 [vite] hmr update /src/pages/iqc/EpsCheck.tsx
+18:34:17 [vite] hmr update /src/pages/iqc/AqlCheck.tsx
+18:34:22 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+18:34:26 [vite] hmr update /src/pages/iqc/ComponentsCheck.tsx
+19:05:43 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/DsmTable.tsx
+19:05:49 [vite] hmr update /src/pages/oqa/LabelsCheck.tsx
+19:05:53 [vite] hmr update /src/components/layout/Sidebar.tsx
+09:13:57 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+09:15:44 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/components/ui/DsmTable.tsx
+09:15:50 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+09:18:03 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+09:18:07 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+09:18:12 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+09:45:07 [vite] hmr update /src/pages/oqa/TvCheck.tsx
+09:52:33 [vite] hmr update /src/pages/Admin.tsx
+11:19:22 [vite] hmr update /src/App.tsx
+11:19:35 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+11:22:08 [vite] hmr update /src/pages/Admin.tsx
+11:22:14 [vite] hmr update /src/App.tsx
+11:41:08 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+11:41:13 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+11:41:19 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+11:41:37 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+11:45:50 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+11:52:20 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+12:05:57 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+12:06:51 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+12:12:06 [vite] hmr update /src/pages/oqa/PalletsCheck.tsx
+12:12:12 [vite] hmr update /src/pages/Admin.tsx
+12:12:19 [vite] hmr update /src/App.tsx
+12:13:24 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:13:45 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:13:53 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:15:16 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:15:23 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:18:31 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:18:39 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:20:15 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:20:21 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:20:30 [vite] hmr update /src/pages/KpiDashboard.tsx
+12:32:14 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+12:38:53 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+12:39:03 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+12:39:11 [vite] hmr update /src/pages/Dashboard.tsx
+12:40:54 [vite] hmr update /src/App.tsx
+12:41:01 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+13:00:17 [vite] hmr update /src/pages/oqa/TvCheck.tsx
+13:00:28 [vite] hmr update /src/App.tsx, /src/pages/Login.tsx, /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+13:00:41 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+13:00:52 [vite] hmr update /src/pages/iqc/AqlCheck.tsx
+13:01:12 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx
+13:01:32 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx
+13:01:34 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+13:01:36 [vite] hmr update /src/pages/oqa/TvCheck.tsx
+13:02:13 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+13:02:15 [vite] hmr update /src/pages/oqa/PatrolCheck.tsx
+13:02:38 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+13:03:00 [vite] hmr update /src/pages/oqa/PalletsTvView.tsx
+13:59:08 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+14:01:15 [vite] hmr update /src/App.tsx, /src/pages/Login.tsx, /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+14:01:24 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+14:01:35 [vite] hmr update /src/pages/Login.tsx
+14:01:51 [vite] hmr update /src/pages/Login.tsx
+14:12:00 [vite] hmr update /src/App.tsx, /src/pages/Login.tsx, /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+14:12:08 [vite] hmr update /src/pages/iqc/CoversCheck.tsx, /src/pages/oqa/TvCheck.tsx, /src/pages/iqc/EpsCheck.tsx, /src/pages/iqc/ComponentsCheck.tsx, /src/pages/iqc/AqlCheck.tsx, /src/pages/Dashboard.tsx, /src/pages/oqa/PatrolCheck.tsx, /src/pages/KpiDashboard.tsx, /src/pages/iqc/PanelsCheck.tsx, /src/pages/oqa/PalletsCheck.tsx, /src/pages/Admin.tsx, /src/components/ui/GlobalUI.tsx, /src/pages/oqa/LabelsCheck.tsx, /src/components/layout/Sidebar.tsx, /src/components/ui/DsmTable.tsx, /src/pages/oqa/PalletsTvView.tsx
+14:12:18 [vite] hmr update /src/pages/Login.tsx
+16:34:10 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+16:34:23 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx
+16:34:32 [vite] hmr update /src/pages/iqc/PanelsCheck.tsx

@@ -1,0 +1,1782 @@
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+(node:45558) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Auto-backup failed (VACUUM): SQLITE_ERROR: cannot VACUUM - SQL statements in progress
+Telegram error: TypeError: fetch failed
+    at Object.fetch (node:internal/deps/undici/undici:11360:11)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  cause: ConnectTimeoutError: Connect Timeout Error
+      at onConnectTimeout (node:internal/deps/undici/undici:6616:28)
+      at node:internal/deps/undici/undici:6574:50
+      at Immediate._onImmediate (node:internal/deps/undici/undici:6605:13)
+      at processImmediate (node:internal/timers:476:21) {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup failed (VACUUM): SQLITE_ERROR: cannot VACUUM - SQL statements in progress
+Telegram error: TypeError: fetch failed
+    at Object.fetch (node:internal/deps/undici/undici:11360:11)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  cause: ConnectTimeoutError: Connect Timeout Error
+      at onConnectTimeout (node:internal/deps/undici/undici:6616:28)
+      at node:internal/deps/undici/undici:6574:50
+      at Immediate._onImmediate (node:internal/deps/undici/undici:6605:13)
+      at processImmediate (node:internal/timers:476:21) {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Proxy error: fetch failed
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup failed (VACUUM): SQLITE_ERROR: cannot VACUUM - SQL statements in progress
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user iqc
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user iqc
+[DEBUG] /api/tv/models fetched 3 models by user iqc
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user iqc
+[DEBUG] /api/tv/models fetched 3 models by user iqc
+[DEBUG] /api/tv/models fetched 3 models by user iqc
+Auto-backup failed (VACUUM): SQLITE_ERROR: cannot VACUUM - SQL statements in progress
+Auto-backup created successfully.
+Auto-backup failed (VACUUM): SQLITE_ERROR: cannot VACUUM - SQL statements in progress
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+Auto-backup failed (VACUUM): SQLITE_ERROR: cannot VACUUM - SQL statements in progress
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+[DEBUG] /api/tv/models fetched 3 models by user oqc
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+[DEBUG] /api/tv/models fetched 3 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+Auto-backup created successfully.
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+Auto-backup created successfully.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Proxy error: fetch failed
+Proxy error: fetch failed
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+[Font Extractor] Generating DejaVuSans.ttf from frontend base64...
+[Font Extractor] DejaVuSans.ttf created successfully.
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+(node:544987) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Error: SQLITE_ERROR: no such column: defect_type] {
+  errno: 1,
+  code: 'SQLITE_ERROR'
+}
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Error: SQLITE_ERROR: no such column: defect_type] {
+  errno: 1,
+  code: 'SQLITE_ERROR'
+}
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Error: SQLITE_ERROR: no such column: defect_type] {
+  errno: 1,
+  code: 'SQLITE_ERROR'
+}
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Error: SQLITE_ERROR: no such column: defect_type] {
+  errno: 1,
+  code: 'SQLITE_ERROR'
+}
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Error: SQLITE_ERROR: no such column: defect_type] {
+  errno: 1,
+  code: 'SQLITE_ERROR'
+}
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user iqc
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+Proxy error: fetch failed
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user admin
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+[DEBUG] /api/tv/models fetched 2 models by user oqc
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[HTTP Client] Attempt 1 failed (fetch failed). Retrying in 300ms...
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[HTTP Client] Attempt 2 failed (fetch failed). Retrying in 600ms...
+Proxy error: fetch failed
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+[DEBUG] /api/tv/models fetched 2 models by user unauthenticated
+
+> backend@1.0.0 dev
+> ts-node src/server.ts
+
+DSM-QMS Backend running on http://localhost:3001
+Connected to the SQLite database.
+[Migration] Migrating iqc_panels_logs to Generated Columns schema...
+[Migration] iqc_panels_logs migration to Generated Columns complete.
+[Migration] Migrating oqa_tv_logs to Generated Columns schema...
+[Migration] oqa_tv_logs migration to Generated Columns complete.

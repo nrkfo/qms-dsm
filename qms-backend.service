@@ -1,0 +1,16 @@
+[Unit]
+Description=QMS-DSM Backend Service
+After=network.target
+
+[Service]
+Type=simple
+User=nur
+WorkingDirectory=/home/nur/Рабочий стол/qms-dsm/backend
+ExecStart=/usr/bin/npm run dev
+Restart=always
+Environment=NODE_ENV=production
+StandardOutput=append:/home/nur/Рабочий стол/qms-dsm/backend.log
+StandardError=append:/home/nur/Рабочий стол/qms-dsm/backend.log
+
+[Install]
+WantedBy=multi-user.target
