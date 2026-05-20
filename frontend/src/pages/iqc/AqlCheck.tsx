@@ -242,8 +242,8 @@ export const AqlCheck = () => {
             <label style={{ display: 'block', fontSize: '11px', marginBottom: '5px', color: 'var(--c-text-muted)' }}>Лот</label>
             <select className="glass" value={lot} onChange={e => setLot(e.target.value)} style={{ width: '100%', padding: '8px', color: 'var(--c-text-primary)', fontWeight: 'bold' }}>
               <option value="">-- Выбор Лота --</option>
-              {lots.filter(l => l.status === 'active').map(l => (
-                <option key={l.id} value={l.name}>{l.name}</option>
+              {lots.map(l => (
+                <option key={l.id} value={l.name}>{l.name}{l.status === 'closed' ? ' (🔒 Закрыт)' : ''}</option>
               ))}
             </select>
           </div>
@@ -293,7 +293,7 @@ export const AqlCheck = () => {
                 >
                   <option value="">-- Выбор Лота --</option>
                   {lots.map(l => (
-                    <option key={l.id} value={l.name}>{l.name}</option>
+                    <option key={l.id} value={l.name}>{l.name}{l.status === 'closed' ? ' (🔒 Закрыт)' : ''}</option>
                   ))}
                 </select>
               </div>

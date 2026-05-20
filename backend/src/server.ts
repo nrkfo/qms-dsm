@@ -475,6 +475,22 @@ app.delete('/api/logs/:module/:id', authenticateToken, checkModulePermission, as
 
 // --- PERSISTENCE FOR MODULE LOGS ---
 
+app.get('/api/logs/oqa_labels/last-success', authenticateToken, (req, res) => {
+  db.get(
+    "SELECT timestamp FROM oqa_labels_logs WHERE status = 'OK' ORDER BY id DESC LIMIT 1",
+    [],
+    (err, row: any) => {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      const today8AM = new Date();
+      today8AM.setHours(8, 0, 0, 0);
+      
+      const timestamp = row ? row.timestamp : today8AM.toISOString();
+      res.json({ timestamp });
+    }
+  );
+});
+
 app.get('/api/logs/:module', authenticateToken, checkModulePermission, (req, res) => {
   const module = req.params.module as string;
   if (!VALID_MODULES.includes(module)) return res.status(400).json({ error: 'Invalid module' });
@@ -979,6 +995,40 @@ const logAudit = (userId: number, action: string, details: any) => {
   const ts = new Date().toISOString();
   db.run('INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)', [userId, action, JSON.stringify(sanitized), ts]);
 };
+
+app.get('/api/kpi/facts', authenticateToken, (req, res) => {
+  const { date } = req.query;
+  if (!date || typeof date !== 'string') {
+    return res.status(400).json({ error: 'Missing or invalid date parameter' });
+  }
+
+  db.get('SELECT * FROM daily_kpi_facts WHERE date = ?', [date], (err, row: any) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) {
+      return res.json({ date, mes_fact: null, aql_plan: null });
+    }
+    res.json(row);
+  });
+});
+
+app.post('/api/kpi/facts', authenticateToken, (req, res) => {
+  const { date, mes_fact, aql_plan } = req.body;
+  if (!date || typeof date !== 'string') {
+    return res.status(400).json({ error: 'Missing or invalid date' });
+  }
+  const user = (req as any).user;
+
+  db.run(
+    'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan) VALUES (?, ?, ?)',
+    [date, mes_fact ?? 0, aql_plan ?? 0],
+    (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      logAudit(user.id, 'SAVE_KPI_FACTS', { date, mes_fact, aql_plan });
+      broadcast({ type: 'DATA_UPDATED', module: 'kpi_facts' });
+      res.json({ success: true, date, mes_fact, aql_plan });
+    }
+  );
+});
 
 app.get('/api/settings', authenticateToken, (req, res) => {
   db.all('SELECT * FROM global_settings', [], (err, rows) => {

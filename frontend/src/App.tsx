@@ -20,15 +20,61 @@ import { useAuthStore, hydrateAuth } from './store/useAuthStore';
 import { useThemeStore } from './store/useThemeStore';
 import { Menu } from 'lucide-react';
 import { GlobalUI } from './components/ui/GlobalUI';
+import { useDataStore } from './store/useDataStore';
 
 // Layout
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const location = useLocation();
+  const { fetchLastLabelCheckTime } = useDataStore();
 
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: any = null;
+
+    const connectSSE = () => {
+      console.log('Global SSE: Connecting...');
+      eventSource = new EventSource('/api/events');
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'DATA_UPDATED') {
+            if (data.module === 'oqa_labels') {
+              console.log('Global SSE: Label check update received, syncing timer.');
+              fetchLastLabelCheckTime();
+              // Dispatch custom event to notify mounted components like LabelsCheck.tsx to refresh
+              window.dispatchEvent(new CustomEvent('oqa_labels_updated'));
+            }
+          }
+        } catch (e) {
+          console.error('Global SSE error parsing message', e);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.warn('Global SSE failed, reconnecting in 3s...', err);
+        if (eventSource) {
+          eventSource.close();
+        }
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = setTimeout(connectSSE, 3000);
+      };
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      clearTimeout(reconnectTimeout);
+    };
+  }, [fetchLastLabelCheckTime]);
 
   return (
     <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>

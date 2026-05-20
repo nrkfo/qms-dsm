@@ -33,6 +33,17 @@ export const LabelsCheck = () => {
     setTimeout(() => snInputRef.current?.focus(), 50);
   }, [activeLot]);
 
+  useEffect(() => {
+    const handleUpdate = () => {
+      loadData();
+    };
+    window.addEventListener('oqa_labels_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('oqa_labels_updated', handleUpdate);
+    };
+  }, [activeLot]);
+
+
   const loadData = async () => {
     setLoading(true);
     const backendLogs = await fetchLogs('oqa_labels');

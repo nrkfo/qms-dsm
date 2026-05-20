@@ -169,6 +169,14 @@ const db = new sqlite3.Database(dbPath, (err) => {
         value TEXT
       )`);
 
+      // Daily KPI facts table
+      db.run(`CREATE TABLE IF NOT EXISTS daily_kpi_facts (
+        date TEXT PRIMARY KEY,
+        mes_fact INTEGER DEFAULT 0,
+        aql_plan INTEGER DEFAULT 0
+      )`);
+
+
       // Audit logs table
       db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

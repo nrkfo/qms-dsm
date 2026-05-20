@@ -28,6 +28,27 @@ export const KpiDashboard = () => {
   const [isLive, setIsLive] = useState(false);
   const pulseRef = useRef<any>(null);
 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const handleVerifyAndClose = async () => {
+    setIsVerifying(true);
+    setPasswordError('');
+    try {
+      await api.post('/auth/verify', { password: passwordInput });
+      await useDataStore.getState().saveKpiFacts(dateFilter, mesFact || 0, currentAqlPlan);
+      setShowPasswordModal(false);
+      setPasswordInput('');
+    } catch (e: any) {
+      console.error('Password verification failed', e);
+      setPasswordError('Неверный пароль. Пожалуйста, попробуйте еще раз.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
     fetchLots();
@@ -48,20 +69,20 @@ export const KpiDashboard = () => {
   }, [settings.oqa_shift_config, mesFact]);
 
   useEffect(() => {
-    fetchMesFact();
+    fetchMesFact(dateFilter);
     const interval = setInterval(() => {
-      fetchMesFact();
+      fetchMesFact(dateFilter);
       fetchKpiData();
       fetchGlobalMetrics();
       setLastUpdate(new Date());
     }, 10000);
     return () => clearInterval(interval);
-  }, [dateFilter, activeLot?.id, currentAqlPlan]);
+  }, [dateFilter]);
 
   useEffect(() => {
     fetchKpiData();
     fetchGlobalMetrics();
-  }, [dateFilter, activeLot?.id, currentAqlPlan]);
+  }, [dateFilter, activeLot?.id]);
 
   // Real-time SSE
   useEffect(() => {
@@ -71,6 +92,7 @@ export const KpiDashboard = () => {
         const data = JSON.parse(event.data);
         if (data.type === 'DATA_UPDATED') {
           console.log('Real-time update received:', data);
+          fetchMesFact(dateFilter);
           fetchKpiData();
           fetchGlobalMetrics();
           setLastUpdate(new Date());
@@ -91,7 +113,7 @@ export const KpiDashboard = () => {
   };
 
   const fetchKpiData = async () => {
-    setLoading(true);
+    if (!stats) setLoading(true);
     try {
       const lotIdParam = activeLot?.id ? `&lot_id=${activeLot.id}` : '';
       const logs = await api.get(`/logs/oqa_tv?date=${dateFilter}${lotIdParam}`);
@@ -210,6 +232,7 @@ export const KpiDashboard = () => {
         };
       });
 
+      processed.sort((a: any, b: any) => a.id.localeCompare(b.id));
       setStats(processed);
     } catch (e) {
       console.error('Failed to fetch KPI data', e);
@@ -301,10 +324,36 @@ export const KpiDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--c-accent)' }}>
             <h4 style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>ФАКТ ВЫПУСКА (MES)</h4>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: mesLoading ? 'var(--c-accent)' : 'var(--c-text-primary)' }}>
-              {mesFact ?? '...'} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>шт</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginTop: '5px' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--c-text-primary)' }}>
+                {mesFact ?? '...'} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>шт</span>
+              </div>
+              <button
+                onClick={() => {
+                  setPasswordInput('');
+                  setPasswordError('');
+                  setShowPasswordModal(true);
+                }}
+                className="hover-scale"
+                style={{
+                  padding: '6px 12px',
+                  background: 'var(--c-accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                🔒 Завершить смену
+              </button>
             </div>
-            <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem' }}>реальные данные из MES</div>
+            <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', marginTop: '10px' }}>реальные данные из MES</div>
          </div>
          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--c-success)' }}>
             <h4 style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>ВЫПОЛНЕНИЕ ПЛАНА (AQL)</h4>
@@ -328,61 +377,65 @@ export const KpiDashboard = () => {
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '100px' }}>
                 <div className="spinner"></div>
               </div>
-            ) : stats?.length > 0 ? stats.sort((a: any, b: any) => a.id.localeCompare(b.id)).map((insp: any) => (
-              <div key={insp.id} className="glass-panel animate-slide-up" style={{ padding: '25px', borderRadius: 'var(--radius-lg)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'var(--c-accent-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--c-accent)', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                      {insp.id}
+            ) : stats?.length > 0 ? stats.map((insp: any) => {
+              const personalTarget = currentAqlPlan > 0 ? Math.max(1, Math.round(currentAqlPlan / 3)) : 0;
+              const compliance = personalTarget > 0 ? Math.min(100, Math.round((insp.totalChecked / personalTarget) * 100)) : 100;
+              return (
+                <div key={insp.id} className="glass-panel" style={{ padding: '25px', borderRadius: 'var(--radius-lg)', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                      <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'var(--c-accent-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--c-accent)', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                        {insp.id}
+                      </div>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{insp.name}</h3>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--c-text-muted)' }}>
+                          Последняя проверка: <span style={{ color: 'var(--c-text-primary)' }}>{insp.lastCheckTime ? new Date(insp.lastCheckTime).toLocaleTimeString() : '---'}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{insp.name}</h3>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--c-text-muted)' }}>
-                        Последняя проверка: <span style={{ color: 'var(--c-text-primary)' }}>{insp.lastCheckTime ? new Date(insp.lastCheckTime).toLocaleTimeString() : '---'}</span>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ padding: '4px 10px', background: compliance >= 100 ? 'var(--c-success-muted)' : compliance >= 80 ? 'var(--c-warning-muted)' : 'var(--c-danger-muted)', color: compliance >= 100 ? 'var(--c-success)' : compliance >= 80 ? 'var(--c-warning)' : 'var(--c-danger)', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                        {compliance >= 100 ? 'ЦЕЛЬ ДОСТИГНУТА' : 'В ПРОЦЕССЕ'}
                       </div>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ padding: '4px 10px', background: insp.compliance >= 100 ? 'var(--c-success-muted)' : insp.compliance >= 80 ? 'var(--c-warning-muted)' : 'var(--c-danger-muted)', color: insp.compliance >= 100 ? 'var(--c-success)' : insp.compliance >= 80 ? 'var(--c-warning)' : 'var(--c-danger)', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>
-                      {insp.compliance >= 100 ? 'ЦЕЛЬ ДОСТИГНУТА' : 'В ПРОЦЕССЕ'}
-                    </div>
-                  </div>
-                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-                  {renderMetricCircle(insp.compliance, 'var(--c-accent)', 'Sampling', `${insp.totalChecked} / ${insp.personalTarget}`)}
-                  {renderMetricCircle(insp.integrity, 'var(--c-success)', 'Integrity', 'Достоверность')}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: insp.avgLeadTime > insp.leadTimeTarget ? 'var(--c-danger)' : 'var(--c-success)' }}>
-                        {Math.round(insp.avgLeadTime)}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+                    {renderMetricCircle(compliance, 'var(--c-accent)', 'Sampling', `${insp.totalChecked} / ${personalTarget}`)}
+                    {renderMetricCircle(insp.integrity, 'var(--c-success)', 'Integrity', 'Достоверность')}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: insp.avgLeadTime > insp.leadTimeTarget ? 'var(--c-danger)' : 'var(--c-success)' }}>
+                          {Math.round(insp.avgLeadTime)}
+                        </div>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--c-text-muted)', textTransform: 'uppercase' }}>мин/ТВ</div>
                       </div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--c-text-muted)', textTransform: 'uppercase' }}>мин/ТВ</div>
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>Lead Time</div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--c-text-muted)' }}>Среднее: {insp.avgLeadTime.toFixed(1)}</div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>Lead Time</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--c-text-muted)' }}>Среднее: {insp.avgLeadTime.toFixed(1)}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ borderTop: '1px solid var(--c-border)', paddingTop: '15px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '5px' }}>
-                      <span style={{ color: 'var(--c-text-muted)' }}>Темп последнего интервала</span>
-                      <span style={{ fontWeight: 'bold', color: insp.lastInterval > insp.leadTimeTarget ? 'var(--c-danger)' : 'var(--c-success)' }}>
-                        {insp.lastInterval > 0 ? insp.lastInterval.toFixed(1) : '--'} мин
-                      </span>
+                  <div style={{ borderTop: '1px solid var(--c-border)', paddingTop: '15px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                     <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '5px' }}>
+                        <span style={{ color: 'var(--c-text-muted)' }}>Темп последнего интервала</span>
+                        <span style={{ fontWeight: 'bold', color: insp.lastInterval > insp.leadTimeTarget ? 'var(--c-danger)' : 'var(--c-success)' }}>
+                          {insp.lastInterval > 0 ? insp.lastInterval.toFixed(1) : '--'} мин
+                        </span>
+                      </div>
+                      <div style={{ height: '6px', background: 'var(--c-bg-base)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${Math.min(100, (insp.totalChecked / (currentAqlPlan || 1)) * 100)}%`, height: '100%', background: 'var(--c-accent)', transition: 'width 1s ease' }}></div>
+                      </div>
                     </div>
-                    <div style={{ height: '6px', background: 'var(--c-bg-base)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.min(100, (insp.totalChecked / (currentAqlPlan || 1)) * 100)}%`, height: '100%', background: 'var(--c-accent)', transition: 'width 1s ease' }}></div>
-                    </div>
+                    {insp.avgLeadTime > insp.leadTimeTarget && <span title="Превышение среднего времени"><AlertTriangle size={18} color="var(--c-danger)" /></span>}
+                    {insp.lastInterval > (insp.leadTimeTarget + 12) && <span title="Длительный перерыв между проверками"><Clock size={18} color="var(--c-warning)" /></span>}
                   </div>
-                  {insp.avgLeadTime > insp.leadTimeTarget && <span title="Превышение среднего времени"><AlertTriangle size={18} color="var(--c-danger)" /></span>}
-                  {insp.lastInterval > (insp.leadTimeTarget + 12) && <span title="Длительный перерыв между проверками"><Clock size={18} color="var(--c-warning)" /></span>}
                 </div>
-              </div>
-            )) : (
+              );
+            }) : (
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '80px', background: 'var(--c-bg-surface-glass)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--c-border)' }}>
                  <Users size={48} color="var(--c-text-muted)" style={{ marginBottom: '20px', opacity: 0.5 }} />
                  <p style={{ color: 'var(--c-text-muted)' }}>Записей о проверках не найдено.</p>
@@ -462,6 +515,116 @@ export const KpiDashboard = () => {
           </div>
         </div>
       </div>
+
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          animation: 'fade-in 0.2s ease'
+        }}>
+          <div className="glass-panel animate-scale-in" style={{
+            width: '400px',
+            padding: '30px',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--c-accent-muted)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              🔒 Подтверждение пароля
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--c-text-muted)', marginBottom: '20px' }}>
+              Для завершения смены и сохранения всех данных KPI в базу, пожалуйста, введите текущий пароль от вашего аккаунта.
+            </p>
+            
+            <input 
+              type="password"
+              placeholder="Введите ваш пароль"
+              value={passwordInput}
+              onChange={(e) => {
+                setPasswordInput(e.target.value);
+                setPasswordError('');
+              }}
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter') {
+                  await handleVerifyAndClose();
+                }
+              }}
+              disabled={isVerifying}
+              className="glass"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: passwordError ? '1px solid var(--c-danger)' : '1px solid var(--c-border)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                color: '#fff',
+                marginBottom: '15px',
+                fontSize: '0.95rem',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+              autoFocus
+            />
+
+            {passwordError && (
+              <div style={{ color: 'var(--c-danger)', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold' }}>
+                ⚠️ {passwordError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordInput('');
+                  setPasswordError('');
+                }}
+                disabled={isVerifying}
+                style={{
+                  padding: '10px 18px',
+                  background: 'transparent',
+                  border: '1px solid var(--c-border)',
+                  borderRadius: '6px',
+                  color: 'var(--c-text-muted)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600
+                }}
+              >
+                Отмена
+              </button>
+              <button 
+                onClick={handleVerifyAndClose}
+                disabled={isVerifying || !passwordInput}
+                style={{
+                  padding: '10px 18px',
+                  background: 'var(--c-accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {isVerifying ? 'Проверка...' : 'Подтвердить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

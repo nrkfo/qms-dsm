@@ -22,6 +22,7 @@ interface DataState {
   lastLabelCheckTimestamp: number;
   setLastLabelCheckTimestamp: (time: number) => void;
   isLabelAlarmActive: () => boolean;
+  fetchLastLabelCheckTime: () => Promise<void>;
 
   saveLog: (moduleId: string, data: any, status: string) => Promise<void>;
   fetchLogs: (moduleId: string) => Promise<any[]>;
@@ -66,7 +67,8 @@ interface DataState {
   // MES Integration
   mesFact: number | null;
   mesLoading: boolean;
-  fetchMesFact: () => Promise<void>;
+  fetchMesFact: (dateFilter?: string) => Promise<void>;
+  saveKpiFacts: (date: string, mesFact: number, aqlPlan: number) => Promise<void>;
   
   // Global UI
   toast: { message: string, type: 'success' | 'error' | 'warning', id: number } | null;
@@ -117,6 +119,19 @@ export const useDataStore = create<DataState>((set, get) => {
       const lastCheck = get().lastLabelCheckTimestamp;
       const limit = Number(get().settings?.label_timer_limit) || 3600000;
       return (Date.now() - lastCheck) >= limit;
+    },
+    fetchLastLabelCheckTime: async () => {
+      try {
+        const res = await api.get('/logs/oqa_labels/last-success');
+        if (res && res.timestamp) {
+          const time = new Date(res.timestamp).getTime();
+          set({ lastLabelCheckTime: time, lastLabelCheckTimestamp: time });
+          localStorage.setItem('lastLabelCheckTime_dsm', time.toString());
+          localStorage.setItem('lastLabelCheckTimestamp_dsm', time.toString());
+        }
+      } catch (e) {
+        console.error('Failed to fetch last label check time', e);
+      }
     },
     
     fetchLots: async () => {
@@ -188,7 +203,7 @@ export const useDataStore = create<DataState>((set, get) => {
           data,
           status
         });
-        if (moduleId === 'oqa_labels') {
+        if (moduleId === 'oqa_labels' && status === 'OK') {
           get().setLastLabelCheckTimestamp(Date.now());
         }
       } catch (e) {
@@ -279,6 +294,7 @@ export const useDataStore = create<DataState>((set, get) => {
     fetchSettings: async () => {
       const data = await api.get('/settings');
       set({ settings: data });
+      await get().fetchLastLabelCheckTime();
     },
     updateSettings: async (newSettings) => {
       await api.put('/settings', newSettings);
@@ -352,12 +368,35 @@ export const useDataStore = create<DataState>((set, get) => {
       await api.delete(`/components-master/${id}`);
       set(s => ({ componentsMaster: s.componentsMaster.filter(c => c.id !== id) }));
     },
-    fetchMesFact: async () => {
-      const url = get().settings?.mes_dashboard_url || 'http://192.168.210.210:8000/tablo/lines/1/dashboard/';
+    fetchMesFact: async (dateFilter) => {
+      const today = new Date().toISOString().split('T')[0];
+      const targetDate = dateFilter || today;
+      
       set({ mesLoading: true });
+      
+      // If it's a past date, fetch strictly from the database
+      if (targetDate !== today) {
+        try {
+          const dbFact = await api.get(`/kpi/facts?date=${targetDate}`);
+          if (dbFact && dbFact.mes_fact !== null && dbFact.mes_fact !== undefined) {
+            set({ mesFact: dbFact.mes_fact });
+          } else {
+            set({ mesFact: 0 });
+          }
+        } catch (e) {
+          console.error('Failed to fetch past KPI facts', e);
+          set({ mesFact: 0 });
+        } finally {
+          set({ mesLoading: false });
+        }
+        return;
+      }
+
+      // If it's today, try live MES proxy, but also check database
       try {
-        // We use the proxy to bypass CORS for the local MES IP
+        const url = get().settings?.mes_dashboard_url || 'http://192.168.210.210:8000/tablo/lines/1/dashboard/';
         const res = await api.post('/mes/proxy', { url });
+        let factVal = 0;
         
         if (res && res.html) {
           const html = res.html;
@@ -367,46 +406,86 @@ export const useDataStore = create<DataState>((set, get) => {
           
           if (jsonMatch && jsonMatch[1]) {
             try {
-              // Unescape unicode (e.g. \u0022 -> ")
               const unescaped = jsonMatch[1].replace(/\\u([0-9a-fA-F]{4})/g, (match: string, grp: string) => String.fromCharCode(parseInt(grp, 16)));
               const data = JSON.parse(unescaped);
-              
               const fact = data.metrics?.curr_device_count;
               if (typeof fact === 'number') {
-                set({ mesFact: fact });
-                console.log('MES Fact updated from JSON:', fact);
-                return;
+                factVal = fact;
               }
             } catch (e) {
               console.error('Failed to parse MES JSON', e);
             }
           }
           
-          // Original robust fallback as a last resort
-          const labelIndex = html.indexOf('ФАКТ (ШТ)');
-          if (labelIndex !== -1) {
-            const contentBefore = html.substring(0, labelIndex);
-            const matches = [...contentBefore.matchAll(/>(\d{1,5})</g)];
-            if (matches.length > 0) {
-              const val = parseInt(matches[matches.length - 1][1]);
-              if (val > 0) {
-                set({ mesFact: val });
-                return;
+          if (factVal === 0) {
+            const labelIndex = html.indexOf('ФАКТ (ШТ)');
+            if (labelIndex !== -1) {
+              const contentBefore = html.substring(0, labelIndex);
+              const matches = [...contentBefore.matchAll(/>(\d{1,5})</g)];
+              if (matches.length > 0) {
+                const val = parseInt(matches[matches.length - 1][1]);
+                if (val > 0) factVal = val;
               }
             }
           }
           
-          const fallbackMatch = html.match(/(\d{1,5})\s*ФАКТ\s*\(ШТ\)/i) || 
-                                html.match(/ФАКТ\s*\(ШТ\)[\s\S]*?>(\d{1,5})</i);
+          if (factVal === 0) {
+            const fallbackMatch = html.match(/(\d{1,5})\s*ФАКТ\s*\(ШТ\)/i) || 
+                                  html.match(/ФАКТ\s*\(ШТ\)[\s\S]*?>(\d{1,5})</i);
+            if (fallbackMatch && fallbackMatch[1]) {
+              factVal = parseInt(fallbackMatch[1]);
+            }
+          }
+        }
+
+        if (factVal > 0) {
+          set({ mesFact: factVal });
           
-          if (fallbackMatch && fallbackMatch[1]) {
-            set({ mesFact: parseInt(fallbackMatch[1]) });
+          // Save it automatically to the database for today so it's persisted!
+          let planVal = 0;
+          if (get().settings.oqa_shift_config) {
+            try {
+              const config = JSON.parse(get().settings.oqa_shift_config);
+              const ratio = (config.ratio_checked || 13) / (config.ratio_produced || 280);
+              planVal = Math.round(factVal * ratio);
+            } catch (e) {}
+          }
+          
+          await api.post('/kpi/facts', { date: today, mes_fact: factVal, aql_plan: planVal });
+        } else {
+          // If live fetch fails or is 0, fallback to database saved today value
+          const dbFact = await api.get(`/kpi/facts?date=${today}`);
+          if (dbFact && dbFact.mes_fact !== null && dbFact.mes_fact !== undefined) {
+            set({ mesFact: dbFact.mes_fact });
+          } else {
+            set({ mesFact: 0 });
           }
         }
       } catch (e) {
-        console.error('Failed to fetch MES Fact', e);
+        console.error('Failed to fetch live MES Fact, loading from DB fallback', e);
+        // DB fallback
+        try {
+          const dbFact = await api.get(`/kpi/facts?date=${today}`);
+          if (dbFact && dbFact.mes_fact !== null && dbFact.mes_fact !== undefined) {
+            set({ mesFact: dbFact.mes_fact });
+          } else {
+            set({ mesFact: 0 });
+          }
+        } catch (dbErr) {
+          set({ mesFact: 0 });
+        }
       } finally {
         set({ mesLoading: false });
+      }
+    },
+    saveKpiFacts: async (date, mesFact, aqlPlan) => {
+      try {
+        await api.post('/kpi/facts', { date, mes_fact: mesFact, aql_plan: aqlPlan });
+        set({ mesFact: mesFact });
+        get().showToast('KPI показатели успешно сохранены в базе', 'success');
+      } catch (e) {
+        console.error('Failed to save KPI facts manually', e);
+        get().showToast('Ошибка при сохранении KPI показателей', 'error');
       }
     },
 
