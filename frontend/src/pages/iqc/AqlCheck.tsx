@@ -223,7 +223,7 @@ export const AqlCheck = () => {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ height: 'calc(100% + 60px)', margin: '-30px', display: 'flex', flexDirection: 'column' }}>
+    <div className="animate-fade-in responsive-flex-container">
       <div className="glass-panel" style={{ padding: '20px', borderRadius: 0, borderBottom: '1px solid var(--c-border)', flexShrink: 0 }}>
         <h2 style={{ marginTop: 0, color: 'var(--c-accent)', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'10px'}}>
@@ -256,7 +256,7 @@ export const AqlCheck = () => {
             <input className="glass" type="date" value={prodDate} onChange={e => setProdDate(e.target.value)} style={{ width: '100%', padding: '7px', color: 'var(--c-text-primary)', border: '1px solid var(--c-border)' }} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr) auto', gap: '20px', alignItems: 'end' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', alignItems: 'end' }}>
           <div><label style={{ display: 'block', fontSize: '12px', marginBottom: '5px' }}>Кол-во получено</label><input className="glass" type="number" min="1" value={qty} onChange={e => setQty(Number(e.target.value))} placeholder='0' style={{ width: '100%', padding: '12px', fontSize: '18px', fontWeight: 'bold', color: 'var(--c-accent)' }} /></div>
           <div><label style={{ display: 'block', fontSize: '12px', marginBottom: '5px' }}>Уровень</label><select className="glass" value={level} onChange={e => setLevel(e.target.value)} style={{ width: '100%', padding: '12px', fontSize: '16px', fontWeight: 'bold' }}><option value="I">I</option><option value="II">II</option><option value="III">III</option></select></div>
           <div><label style={{ display: 'block', fontSize: '12px', marginBottom: '5px' }}>AQL %</label><select className="glass" value={aql} onChange={e => setAql(e.target.value)} style={{ width: '100%', padding: '12px', fontSize: '16px' }}><option value="">-- Выбрать --</option>{['0.065','0.1','0.15','0.25','0.4','0.65','1.0','1.5','2.5','4.0','6.5'].map(a=><option key={a} value={a}>{a}%</option>)}</select></div>
@@ -269,7 +269,7 @@ export const AqlCheck = () => {
           <div style={{ flex: 1, textAlign: 'center' }}> <div style={{ fontSize: '12px', color: 'var(--c-text-muted)', marginBottom: '5px' }}>Решение</div> <div style={{ fontSize: '24px', fontWeight: 'bold', color: calculation?.decision === 'OK' ? 'var(--c-success)' : calculation?.decision === 'NG' ? 'var(--c-danger)' : 'var(--c-text-muted)' }}>{calculation?.decision || 'В ОЖИДАНИИ'}</div> </div>
         </div>
       </div>
-      <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+      <div className="responsive-flex-content table-mobile-responsive" style={{ padding: '20px' }}>
         <DsmTable title="История Журнала входного контроля AQL" columns={columns} data={records} loading={loading} hideAdd hideExport onDelete={handleDelete} onEdit={handleEdit} />
       </div>
 

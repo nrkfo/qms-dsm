@@ -229,8 +229,8 @@ export const Dashboard = () => {
   };
 
   const ALL_MODULES = [
-    { id: 'oqa_tv', title: 'Выборочный контроль ГП', desc: 'ТВ сверено' },
-    { id: 'oqa_pallets', title: 'Приемка паллет ГП', desc: 'поддонов загружено' },
+    { id: 'oqa_tv', title: 'Выборочный контроль ГП', desc: 'Проверено ТВ' },
+    { id: 'oqa_pallets', title: 'Приемка паллет ГП', desc: 'Проверено поддонов' },
     { id: 'oqa_labels', title: 'Проверка этикетки', desc: 'сканирований этикеток' },
     { id: 'oqa_patrol', title: 'Журнал обхода', desc: 'обходов выполнено' },
     { id: 'iqc_aql', title: 'Журнал входного контроля AQL', desc: 'партий проверено' },
@@ -269,7 +269,7 @@ export const Dashboard = () => {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
             Дашборд качества
@@ -337,7 +337,7 @@ export const Dashboard = () => {
           </>
         ) : (
           <div className="glass-panel animate-slide-up" style={{ padding: '0', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-            <div style={{ padding: '20px', background: 'var(--c-bg-surface-elevated)', borderBottom: '1px solid var(--c-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '20px', background: 'var(--c-bg-surface-elevated)', borderBottom: '1px solid var(--c-border)', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <button 
                   onClick={() => setSelectedModule(null)} 
@@ -364,8 +364,8 @@ export const Dashboard = () => {
               {logsLoading && moduleLogs.length === 0 ? <div style={{ textAlign: 'center', padding: '40px' }}><div className="spinner"></div> Загрузка...</div> : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {moduleLogs.length === 0 ? <div style={{ padding: '40px', textAlign: 'center', color: 'var(--c-text-muted)' }}>Записей не найдено</div> : moduleLogs.map(log => (
-                    <div key={log.id} className="glass-panel" style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                       <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flex: 1 }}>
+                    <div key={log.id} className="glass-panel" style={{ padding: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', flex: 1 }}>
                           <div style={{ minWidth: '80px', fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '-'}</div>
                           <div style={{ 
                              padding: '4px 10px', 

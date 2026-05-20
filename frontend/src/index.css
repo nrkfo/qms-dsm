@@ -237,3 +237,233 @@ button {
   animation: pulse-info 1.5s ease-out forwards;
 }
 
+/* ========================================== */
+/*           RESPONSIVE MOBILE STYLES         */
+/* ========================================== */
+
+.split-layout-container {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  height: calc(100% + 60px);
+  margin: -30px;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--c-text-primary);
+  background: var(--c-bg-base);
+}
+
+.split-layout-sidebar {
+  border-right: 1px solid var(--c-border);
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-bg-surface-elevated);
+  height: 100%;
+  box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.split-layout-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.table-mobile-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile Header Bar */
+.mobile-header-bar {
+  display: none;
+  height: var(--header-height);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--c-border);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  padding: 0 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Drawer Mobile Sidebar styling and overlays */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+}
+
+/* Responsive Flex Split Layout Utilities */
+.responsive-flex-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-family: var(--font-sans);
+  color: var(--c-text-primary);
+  overflow: hidden;
+  background: var(--c-bg-base);
+}
+
+.responsive-flex-split {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.responsive-flex-sidebar {
+  width: 320px;
+  border-right: 1px solid var(--c-border);
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  background: var(--c-bg-surface-elevated);
+}
+
+.responsive-flex-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Media Queries for responsive adaptation */
+@media (max-width: 1024px) {
+  html, body, #root {
+    overflow: auto !important;
+    height: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .responsive-flex-container {
+    position: relative !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .responsive-flex-split {
+    flex-direction: column !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+  
+  .responsive-flex-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--c-border) !important;
+  }
+  
+  .responsive-flex-content {
+    overflow: visible !important;
+    flex: none !important;
+  }
+
+  .split-layout-container {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    min-height: calc(100vh - 60px);
+  }
+
+  .split-layout-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--c-border) !important;
+    padding: 20px !important;
+    box-shadow: none !important;
+  }
+
+  .split-layout-content {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  .split-layout-content > div {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Responsive cards list wrapping */
+  .grid-mobile-1col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-header-bar {
+    display: flex !important;
+  }
+
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .sidebar-container.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.open {
+    display: block !important;
+  }
+
+  .main-content {
+    padding: 15px !important;
+    padding-top: calc(var(--header-height) + 15px) !important;
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
+  /* Avoid iOS keyboard zoom by enforcing min 16px font-size */
+  input[type="text"], input[type="password"], select, textarea {
+    font-size: 16px !important; 
+  }
+
+  /* Adjust button touch target sizes */
+  button, .btn {
+    min-height: 44px;
+  }
+  
+  /* Horizontal scroll for table instead of squishing columns */
+  .table-mobile-responsive table {
+    min-width: 750px !important;
+  }
+
+  .app-container {
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+}
+
+

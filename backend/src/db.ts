@@ -217,6 +217,19 @@ const db = new sqlite3.Database(dbPath, (err) => {
         description TEXT
       )`);
 
+      // Breaks table
+      db.run(`CREATE TABLE IF NOT EXISTS breaks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        start_time TEXT,
+        end_time TEXT
+      )`);
+
+      // Add default breaks
+      db.run(`INSERT OR IGNORE INTO breaks (name, start_time, end_time) VALUES ('Первый перерыв', '10:00', '10:15')`);
+      db.run(`INSERT OR IGNORE INTO breaks (name, start_time, end_time) VALUES ('Обед', '12:00', '13:00')`);
+      db.run(`INSERT OR IGNORE INTO breaks (name, start_time, end_time) VALUES ('Второй перерыв', '15:00', '15:15')`);
+
       // Add default settings
       db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('label_timer_limit', '3600000')`);
       db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('data_retention_days', '90')`);

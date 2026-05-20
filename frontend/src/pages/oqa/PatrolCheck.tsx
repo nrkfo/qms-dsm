@@ -151,7 +151,7 @@ export const PatrolCheck = () => {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h2 style={{ margin: 0 }}>Журнал обхода (Patrol Log)</h2>
@@ -184,7 +184,7 @@ export const PatrolCheck = () => {
       </div>
 
       {activeTab === 'form' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '20px', flex: 1, minHeight: 0 }}>
+        <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '20px', flex: 1 }}>
           {/* Main Checklist */}
           <div className="glass-panel" style={{ padding: '20px', overflowY: 'auto', borderRadius: 'var(--radius-lg)' }}>
             <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -296,7 +296,7 @@ export const PatrolCheck = () => {
           </div>
         </div>
       ) : (
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <div className="table-mobile-responsive" style={{ flex: 1 }}>
            <DsmTable 
              title="Последние обходы" 
              columns={columns} 

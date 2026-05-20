@@ -76,6 +76,7 @@ export const TvCheck = () => {
   const [extraTests, setExtraTests] = useState<string[]>([]);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [editDefects, setEditDefects] = useState<string[]>([]);
@@ -286,88 +287,97 @@ export const TvCheck = () => {
   };
 
   const handleAdd = async () => {
-    setValidationError('');
-    if (mnBox.trim().toUpperCase() !== mnTv.trim().toUpperCase()) {
-      setValidationError('❌ MN Коробки и MN ТВ не совпадают!');
-      setMnBox('');
-      setMnTv('');
-      setTimeout(() => mnBoxRef.current?.focus(), 50);
-      return;
-    }
-    if (!mnBox.trim() || !mnTv.trim()) {
-      setValidationError('⚠️ Введите оба серийных номера!');
-      setTimeout(() => mnBoxRef.current?.focus(), 50);
-      return;
-    }
-
-    if (!scannedModel) {
-      setValidationError('❌ Модель не распознана в базе данных!');
-      showToast('Модель не распознана! Запись не добавлена.', 'error');
-      playSound('ng');
-      setMnBox('');
-      setMnTv('');
-      setTimeout(() => mnBoxRef.current?.focus(), 50);
-      return;
-    }
-
-    const isDuplicate = records.some(r => 
-      (mnBox && r.mnBox?.trim().toUpperCase() === mnBox.trim().toUpperCase()) || 
-      (mnTv && r.mnTv?.trim().toUpperCase() === mnTv.trim().toUpperCase())
-    );
-    if (isDuplicate) {
-      setValidationError('❌ Этот ТВ уже проверялся (дубликат)!');
-      showToast('Ошибка! Этот ТВ уже проверялся в текущем лоте.', 'error');
-      playSound('ng');
-      setMnBox('');
-      setMnTv('');
-      setTimeout(() => mnBoxRef.current?.focus(), 50);
-      return;
-    }
-
-    let finalComment = comment;
-    if (comment.trim()) {
-      const en = await translateToEnglish(comment.trim());
-      if (en && en.toLowerCase() !== comment.trim().toLowerCase()) {
-        finalComment = `${comment.trim()} / ${en}`;
+    if (isAdding) return;
+    setIsAdding(true);
+    try {
+      setValidationError('');
+      if (mnBox.trim().toUpperCase() !== mnTv.trim().toUpperCase()) {
+        setValidationError('❌ MN Коробки и MN ТВ не совпадают!');
+        setMnBox('');
+        setMnTv('');
+        setTimeout(() => mnBoxRef.current?.focus(), 50);
+        return;
       }
+      if (!mnBox.trim() || !mnTv.trim()) {
+        setValidationError('⚠️ Введите оба серийных номера!');
+        setTimeout(() => mnBoxRef.current?.focus(), 50);
+        return;
+      }
+
+      if (!scannedModel) {
+        setValidationError('❌ Модель не распознана в базе данных!');
+        showToast('Модель не распознана! Запись не добавлена.', 'error');
+        playSound('ng');
+        setMnBox('');
+        setMnTv('');
+        setTimeout(() => mnBoxRef.current?.focus(), 50);
+        return;
+      }
+
+      const isDuplicate = records.some(r => 
+        (mnBox && r.mnBox?.trim().toUpperCase() === mnBox.trim().toUpperCase()) || 
+        (mnTv && r.mnTv?.trim().toUpperCase() === mnTv.trim().toUpperCase())
+      );
+      if (isDuplicate) {
+        setValidationError('❌ Этот ТВ уже проверялся (дубликат)!');
+        showToast('Ошибка! Этот ТВ уже проверялся в текущем лоте.', 'error');
+        playSound('ng');
+        setMnBox('');
+        setMnTv('');
+        setTimeout(() => mnBoxRef.current?.focus(), 50);
+        return;
+      }
+
+      let finalComment = comment;
+      if (comment.trim()) {
+        const en = await translateToEnglish(comment.trim());
+        if (en && en.toLowerCase() !== comment.trim().toLowerCase()) {
+          finalComment = `${comment.trim()} / ${en}`;
+        }
+      }
+
+      let finalDefects = selectedDefects.join(', ');
+      if (finalDefects) {
+        const enDef = await translateToEnglish(finalDefects);
+        if (enDef && enDef.toLowerCase() !== finalDefects.toLowerCase()) finalDefects = `${finalDefects} / ${enDef}`;
+      }
+
+      let finalTests = extraTests.join(', ');
+      if (finalTests) {
+        const enTest = await translateToEnglish(finalTests);
+        if (enTest && enTest.toLowerCase() !== finalTests.toLowerCase()) finalTests = `${finalTests} / ${enTest}`;
+      }
+
+      const data = {
+        date: new Date().toLocaleString('ru-RU'),
+        mnBox,
+        mnTv,
+        inspector: qcNumber,
+        defects: finalDefects,
+        tests: finalTests,
+        comments: finalComment,
+        model: identifiedModelName
+      };
+
+      const saveStatus = (boxNorm !== tvNorm || selectedDefects.length > 0 || isModelMismatch) ? 'NG' : 'OK';
+
+      await saveLog('oqa_tv', data, saveStatus);
+      playSound('add');
+
+      setMnBox('');
+      setMnTv('');
+      setSelectedDefects([]);
+      setExtraTests([]);
+      setComment('');
+      setValidationError('');
+      setTimeout(() => mnBoxRef.current?.focus(), 50);
+      loadData();
+    } catch (err: any) {
+      console.error(err);
+      showToast('Ошибка при добавлении в отчет', 'error');
+    } finally {
+      setIsAdding(false);
     }
-
-    let finalDefects = selectedDefects.join(', ');
-    if (finalDefects) {
-      const enDef = await translateToEnglish(finalDefects);
-      if (enDef && enDef.toLowerCase() !== finalDefects.toLowerCase()) finalDefects = `${finalDefects} / ${enDef}`;
-    }
-
-    let finalTests = extraTests.join(', ');
-    if (finalTests) {
-      const enTest = await translateToEnglish(finalTests);
-      if (enTest && enTest.toLowerCase() !== finalTests.toLowerCase()) finalTests = `${finalTests} / ${enTest}`;
-    }
-
-    const data = {
-      date: new Date().toLocaleString('ru-RU'),
-      mnBox,
-      mnTv,
-      inspector: qcNumber,
-      defects: finalDefects,
-      tests: finalTests,
-      comments: finalComment,
-      model: identifiedModelName
-    };
-
-    const saveStatus = (boxNorm !== tvNorm || selectedDefects.length > 0 || isModelMismatch) ? 'NG' : 'OK';
-
-    await saveLog('oqa_tv', data, saveStatus);
-
-
-    setMnBox('');
-    setMnTv('');
-    setSelectedDefects([]);
-    setExtraTests([]);
-    setComment('');
-    setValidationError('');
-    setTimeout(() => mnBoxRef.current?.focus(), 50);
-    loadData();
   };
 
   const exportExcel = async () => {
@@ -423,22 +433,10 @@ export const TvCheck = () => {
 
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      fontFamily: 'var(--font-sans)',
-      color: 'var(--c-text-primary)',
-      overflow: 'hidden',
-      background: 'var(--c-bg-base)'
-    }}>
+    <div className="responsive-flex-container">
 
       {/* Top Header */}
-      <div className="glass-panel" style={{ borderBottom: '1px solid var(--c-border)', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '20px', fontSize: '14px', borderRadius: '0' }}>
+      <div className="glass-panel" style={{ borderBottom: '1px solid var(--c-border)', padding: '10px 15px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px', fontSize: '14px', borderRadius: '0' }}>
         <strong style={{ color: 'var(--c-accent)' }}>Выборочный контроль ГП</strong>
         <div style={{
           backgroundColor: 'var(--c-accent-muted)',
@@ -471,9 +469,9 @@ export const TvCheck = () => {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+      <div className="responsive-flex-split">
         {/* Left Sidebar: Form */}
-        <div className="glass-panel" style={{ width: '320px', borderRight: '1px solid var(--c-border)', display: 'flex', flexDirection: 'column', borderRadius: 0 }}>
+        <div className="glass-panel responsive-flex-sidebar">
           <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
             <fieldset style={{ border: '1px solid var(--c-border)', borderRadius: 'var(--radius-sm)', padding: '15px', margin: 0, marginBottom: '15px' }}>
               <legend style={{ fontSize: '12px', color: 'var(--c-text-muted)', padding: '0 5px' }}>Сверка серийных номеров</legend>
@@ -545,12 +543,28 @@ export const TvCheck = () => {
               </div>
             )}
 
-            <button onClick={handleAdd} style={{ width: '100%', padding: '12px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 'bold', cursor: 'pointer' }}>+ В отчёт</button>
+            <button 
+              onClick={handleAdd} 
+              disabled={isAdding}
+              style={{ 
+                width: '100%', 
+                padding: '12px', 
+                background: isAdding ? 'var(--c-border)' : 'var(--c-accent)', 
+                color: '#000', 
+                border: 'none', 
+                borderRadius: 'var(--radius-sm)', 
+                fontWeight: 'bold', 
+                cursor: isAdding ? 'not-allowed' : 'pointer',
+                opacity: isAdding ? 0.7 : 1
+              }}
+            >
+              {isAdding ? 'Добавление...' : '+ В отчёт'}
+            </button>
           </div>
         </div>
 
         {/* Right Content: Table */}
-        <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="responsive-flex-content table-mobile-responsive">
           {loading ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', color: 'var(--c-accent)' }}>
               <div className="spinner"></div>
@@ -698,83 +712,104 @@ export const TvCheck = () => {
       )}
 
       {editingRecord && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(5px)' }}>
-          <div className="glass-panel animate-scale-in" style={{ width: '600px', padding: '30px', maxHeight: '90vh', overflowY: 'auto', background: 'white', color: '#000' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, color: '#000' }}>Редактировать запись: {editingRecord.mnBox}</h3>
-              <button onClick={() => setEditingRecord(null)} style={{ background: 'none', border: 'none', color: '#000', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(5px)', padding: '15px' }}>
+          <div className="glass-panel animate-scale-in" style={{ 
+            width: '600px', 
+            maxHeight: '90vh', 
+            height: '650px',
+            display: 'flex', 
+            flexDirection: 'column', 
+            background: 'var(--c-bg-surface)', 
+            color: 'var(--c-text-primary)',
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            padding: 0,
+            border: '1px solid var(--c-border)'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 25px', borderBottom: '1px solid var(--c-border)', flexShrink: 0 }}>
+              <h3 style={{ margin: 0, color: 'var(--c-text-primary)' }}>Редактировать запись: {editingRecord.mnBox}</h3>
+              <button onClick={() => setEditingRecord(null)} style={{ background: 'none', border: 'none', color: 'var(--c-text-primary)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
             </div>
-            <div style={{ display: 'grid', gap: '20px' }}>
+
+            {/* Scrollable Body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label style={{ fontSize: '12px', color: '#666', marginBottom: '10px', display: 'block' }}>ДЕФЕКТЫ</label>
+                <label style={{ fontSize: '12px', color: 'var(--c-text-secondary)', marginBottom: '10px', display: 'block', fontWeight: 'bold' }}>ДЕФЕКТЫ</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   {DEFECT_LIST.map(d => (
                     <button key={d} onClick={() => setEditDefects(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])} className="glass" style={{
-                      padding: '8px', fontSize: '11px', textAlign: 'left',
-                      background: editDefects.includes(d) ? 'var(--c-danger)' : '#eee',
-                      color: editDefects.includes(d) ? '#fff' : '#000',
-                      border: '1px solid #ccc'
+                      padding: '10px 8px', fontSize: '11px', textAlign: 'left',
+                      background: editDefects.includes(d) ? 'var(--c-danger)' : 'var(--c-bg-surface-elevated)',
+                      color: editDefects.includes(d) ? '#fff' : 'var(--c-text-primary)',
+                      border: '1px solid var(--c-border)',
+                      borderRadius: '6px',
+                      cursor: 'pointer'
                     }}>{editDefects.includes(d) ? '✓ ' : '+ '} {d}</button>
                   ))}
                 </div>
               </div>
               <div>
-                <label style={{ fontSize: '12px', color: '#666', marginBottom: '10px', display: 'block' }}>ТЕСТЫ</label>
+                <label style={{ fontSize: '12px', color: 'var(--c-text-secondary)', marginBottom: '10px', display: 'block', fontWeight: 'bold' }}>ТЕСТЫ</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   {tvTests.map(t => (
                     <button key={t.id} onClick={() => setEditTests(prev => prev.includes(t.name) ? prev.filter(x => x !== t.name) : [...prev, t.name])} className="glass" style={{
-                      padding: '8px', fontSize: '11px', textAlign: 'left',
-                      background: editTests.includes(t.name) ? 'var(--c-accent)' : '#eee',
-                      color: '#000',
-                      border: '1px solid #ccc'
+                      padding: '10px 8px', fontSize: '11px', textAlign: 'left',
+                      background: editTests.includes(t.name) ? 'var(--c-accent-muted)' : 'var(--c-bg-surface-elevated)',
+                      color: 'var(--c-text-primary)',
+                      border: '1px solid var(--c-border)',
+                      borderRadius: '6px',
+                      cursor: 'pointer'
                     }}>{editTests.includes(t.name) ? '☑ ' : '☐ '} {t.name}</button>
                   ))}
                 </div>
               </div>
               <div>
-                <label style={{ fontSize: '12px', color: '#666', marginBottom: '5px', display: 'block' }}>КОММЕНТАРИЙ</label>
+                <label style={{ fontSize: '12px', color: 'var(--c-text-secondary)', marginBottom: '5px', display: 'block', fontWeight: 'bold' }}>КОММЕНТАРИЙ</label>
                 <textarea
                   className="glass"
                   placeholder="Комментарий (Русский/Eng)..."
                   value={editComment}
                   onChange={e => setEditComment(e.target.value)}
-                  style={{ width: '100%', padding: '10px', minHeight: '80px', color: '#000', border: '1px solid #ccc', background: '#fff' }}
+                  style={{ width: '100%', padding: '10px', minHeight: '80px', color: 'var(--c-text-primary)', border: '1px solid var(--c-border)', background: 'var(--c-bg-surface-elevated)', borderRadius: '6px' }}
                 />
               </div>
-              <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={handleUpdate}
-                  style={{
-                    flex: 1,
-                    padding: '15px',
-                    background: 'var(--c-accent)',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  СОХРАНИТЬ ИЗМЕНЕНИЯ
-                </button>
-                <button
-                  onClick={handleDelete}
-                  style={{
-                    padding: '15px',
-                    background: 'var(--c-danger-muted)',
-                    color: 'var(--c-danger)',
-                    border: '1px solid var(--c-danger)',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  УДАЛИТЬ
-                </button>
-              </div>
+            </div>
+
+            {/* Footer containing Save/Delete buttons */}
+            <div style={{ padding: '20px 25px', borderTop: '1px solid var(--c-border)', display: 'flex', gap: '10px', background: 'var(--c-bg-surface-elevated)', flexShrink: 0 }}>
+              <button
+                onClick={handleUpdate}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'var(--c-accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                }}
+              >
+                СОХРАНИТЬ ИЗМЕНЕНИЯ
+              </button>
+              <button
+                onClick={handleDelete}
+                style={{
+                  padding: '14px 20px',
+                  background: 'var(--c-danger-muted)',
+                  color: 'var(--c-danger)',
+                  border: '1px solid var(--c-danger)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                УДАЛИТЬ
+              </button>
             </div>
           </div>
         </div>

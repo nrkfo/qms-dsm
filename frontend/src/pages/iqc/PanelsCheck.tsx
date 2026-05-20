@@ -520,10 +520,10 @@ export const PanelsCheck = () => {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', paddingBottom: '30px' }}>
+    <div className="animate-fade-in responsive-flex-container" style={{ paddingBottom: '30px' }}>
       
       {/* Header Info */}
-      <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: 0, color: 'var(--c-accent)' }}>Инспекция матриц (Auto-Scan)</h3>
           <span style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>Лот: {activeLot?.name || 'Не выбран'}</span>
@@ -553,7 +553,7 @@ export const PanelsCheck = () => {
 
       {/* Primary Scan Area */}
       <div className="glass-panel" style={{ padding: '30px', borderRadius: 'var(--radius-lg)', marginBottom: '20px', background: 'var(--c-bg-surface-elevated)', border: '2px solid var(--c-accent-muted)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+        <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '14px', marginBottom: '10px', color: 'var(--c-accent)', fontWeight: 'bold' }}>1. SCAN PART CODE</label>
             <input 
@@ -588,7 +588,7 @@ export const PanelsCheck = () => {
 
 
       {/* History Table */}
-      <div style={{ flex: 1, minHeight: '400px' }}>
+      <div className="responsive-flex-content table-mobile-responsive" style={{ flex: 1, minHeight: '400px' }}>
         <DsmTable 
           title="История инспекции (нажмите на строку для редактирования)" 
           columns={columns} 

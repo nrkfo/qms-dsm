@@ -108,16 +108,11 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 // Auth Middleware
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   // Allow unauthenticated GET requests to TV panel resources
-  if (req.method === 'GET') {
-    const publicPaths = [
-      '/api/lots',
-      '/api/tv/models',
-      '/api/logs/oqa_pallets'
-    ];
-    if (publicPaths.includes(req.path)) {
-      return next();
-    }
-  }
+  const isPublicPath = req.method === 'GET' && [
+    '/api/lots',
+    '/api/tv/models',
+    '/api/logs/oqa_pallets'
+  ].includes(req.path);
 
   const authHeader = req.headers['authorization'];
   let token = authHeader && authHeader.split(' ')[1];
@@ -130,6 +125,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
         (req as any).user = { id: 0, username: 'API_SYSTEM', role: 'Admin' };
         return next();
       }
+      if (isPublicPath) return next();
       return res.status(403).json({ error: 'Invalid API Key' });
     });
     return;
@@ -140,10 +136,16 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     token = req.query.token as string;
   }
 
-  if (!token) return res.status(401).json({ error: 'Access denied' });
+  if (!token) {
+    if (isPublicPath) return next();
+    return res.status(401).json({ error: 'Access denied' });
+  }
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) return res.status(401).json({ error: 'Invalid token' });
+    if (err) {
+      if (isPublicPath) return next();
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     (req as any).user = user;
     next();
   });
@@ -900,6 +902,40 @@ app.delete('/api/tv/tests/:id', authenticateToken, (req, res) => {
   });
 });
 
+// Breaks CRUD
+app.get('/api/breaks', authenticateToken, (req, res) => {
+  db.all('SELECT * FROM breaks ORDER BY start_time ASC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.post('/api/breaks', authenticateToken, (req, res) => {
+  const { name, start_time, end_time } = req.body;
+  db.run('INSERT INTO breaks (name, start_time, end_time) VALUES (?, ?, ?)', [name, start_time, end_time], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    logAudit((req as any).user.id, 'CREATE_BREAK', { name, start_time, end_time });
+    res.json({ id: this.lastID, name, start_time, end_time });
+  });
+});
+
+app.put('/api/breaks/:id', authenticateToken, (req, res) => {
+  const { name, start_time, end_time } = req.body;
+  db.run('UPDATE breaks SET name = ?, start_time = ?, end_time = ? WHERE id = ?', [name, start_time, end_time, req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    logAudit((req as any).user.id, 'UPDATE_BREAK', { id: req.params.id, name, start_time, end_time });
+    res.json({ success: true });
+  });
+});
+
+app.delete('/api/breaks/:id', authenticateToken, (req, res) => {
+  db.run('DELETE FROM breaks WHERE id = ?', [req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    logAudit((req as any).user.id, 'DELETE_BREAK', { id: req.params.id });
+    res.json({ success: true });
+  });
+});
+
 // --- SETTINGS & AUDIT ---
 const sanitizeAuditDetails = (details: any): any => {
   if (!details) return details;
@@ -1618,6 +1654,11 @@ const runMaintenance = async () => {
     });
   });
 
+  // 1.1 Prune audit_logs older than 30 days (1 month)
+  db.run(`DELETE FROM audit_logs WHERE timestamp < datetime('now', '-30 days')`, function(err) {
+    if (!err && this.changes > 0) console.log(`[Retention] Pruned ${this.changes} audit logs older than 30 days.`);
+  });
+
   // 2. Scheduled Backup logic can be integrated with a real cron or setInterval
   // For this environment, we simulate a check every hour
 };
@@ -1685,6 +1726,15 @@ cron.schedule('0 20 * * *', () => {
   } catch (err: any) {
     console.error('[Backup Cron] Scheduled backup job encountered an error:', err.message);
   }
+});
+
+// Run initial audit log pruning on startup
+db.serialize(() => {
+  db.run(`DELETE FROM audit_logs WHERE timestamp < datetime('now', '-30 days')`, function(err) {
+    if (!err && this.changes > 0) {
+      console.log(`[Startup] Pruned ${this.changes} outdated audit log entries older than 30 days.`);
+    }
+  });
 });
 
 app.listen(PORT, () => {

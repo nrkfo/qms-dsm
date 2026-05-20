@@ -89,7 +89,7 @@ export const AqlCalculator = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '30px' }}>
+      <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '30px' }}>
         {/* Inputs */}
         <div className="glass-panel" style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>

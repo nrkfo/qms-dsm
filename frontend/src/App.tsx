@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { Login } from './pages/Login';
@@ -23,10 +23,44 @@ import { GlobalUI } from './components/ui/GlobalUI';
 
 // Layout
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location]);
+
   return (
     <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      <div className="sidebar-container">
+      <div className={`sidebar-container${isMobileSidebarOpen ? ' open' : ''}`}>
         <Sidebar />
+      </div>
+      
+      {/* Mobile overlay backdrop */}
+      <div 
+        className={`sidebar-overlay${isMobileSidebarOpen ? ' open' : ''}`}
+        onClick={() => setIsMobileSidebarOpen(false)}
+      />
+
+      {/* Mobile Top Navigation Header */}
+      <div className="mobile-header-bar">
+        <button 
+          onClick={() => setIsMobileSidebarOpen(true)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--c-text-primary)',
+            cursor: 'pointer',
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Menu size={24} />
+        </button>
+        <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--c-accent)', letterSpacing: '0.5px' }}>QMS-DSM</span>
+        <div style={{ width: '24px' }} />
       </div>
       
       <main className="main-content" style={{ flex: 1, padding: '30px', overflow: 'auto', backgroundColor: 'var(--c-bg-base)', position: 'relative' }}>

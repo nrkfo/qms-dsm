@@ -1,3 +1,10 @@
 *.log
 *.sqlite-shm
 *.sqlite-wal
+
+# Logs
+*.log
+frontend.log
+
+# Database
+backend/database.sqlite

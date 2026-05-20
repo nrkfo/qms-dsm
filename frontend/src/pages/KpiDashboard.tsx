@@ -97,6 +97,13 @@ export const KpiDashboard = () => {
       const logs = await api.get(`/logs/oqa_tv?date=${dateFilter}${lotIdParam}`);
       const auditLogs = await api.get(`/audit-logs?date=${dateFilter}`);
       
+      let breaks = [];
+      try {
+        breaks = await api.get('/breaks');
+      } catch (err) {
+        console.error('Failed to fetch breaks', err);
+      }
+      
       const hourly: any = {};
       for (let i = 8; i < 22; i++) hourly[i] = 0;
       
@@ -136,8 +143,8 @@ export const KpiDashboard = () => {
       setHourlyData(Object.entries(hourly).map(([h, count]) => ({ hour: h, count })));
 
       auditLogs.forEach((alog: any) => {
-        if (alog.action === 'UPDATE_LOG' && alog.details?.module === 'oqa_tv') {
-          const logId = alog.details.id;
+        if (alog.action === 'UPDATE_LOG_OQA_TV') {
+          const logId = alog.details?.id;
           const inspectorNum = logIdToInspector[logId];
           if (inspectorNum && inspectors[inspectorNum]) {
             inspectors[inspectorNum].updates++;
@@ -160,7 +167,30 @@ export const KpiDashboard = () => {
         let lastInterval = 0;
         
         for (let i = 1; i < sortedTimes.length; i++) {
-          const diff = (sortedTimes[i] - sortedTimes[i - 1]) / (1000 * 60);
+          const t1 = sortedTimes[i - 1];
+          const t2 = sortedTimes[i];
+          
+          let breakOverlapMs = 0;
+          breaks.forEach((B: any) => {
+            if (!B.start_time || !B.end_time) return;
+            const [sh, sm] = B.start_time.split(':');
+            const [eh, em] = B.end_time.split(':');
+            
+            // Construct start/end of break on target dateFilter day
+            const bStart = new Date(`${dateFilter}T${sh}:${sm}:00`).getTime();
+            const bEnd = new Date(`${dateFilter}T${eh}:${em}:00`).getTime();
+            
+            if (isNaN(bStart) || isNaN(bEnd)) return;
+            
+            // Math overlap: max(0, min(t2, bEnd) - max(t1, bStart))
+            const overlap = Math.max(0, Math.min(t2, bEnd) - Math.max(t1, bStart));
+            breakOverlapMs += overlap;
+          });
+          
+          const rawDiffMs = t2 - t1;
+          const netDiffMs = Math.max(0, rawDiffMs - breakOverlapMs);
+          const diff = netDiffMs / (1000 * 60);
+          
           if (diff < 60) { 
             totalInterval += diff; 
             intervalCount++; 
@@ -222,7 +252,7 @@ export const KpiDashboard = () => {
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '100%', padding: '0 20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
             <TrendingUp color="var(--c-accent)" size={28} /> KPI сотрудников
@@ -290,10 +320,10 @@ export const KpiDashboard = () => {
          </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '25px', alignItems: 'start' }}>
+      <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '25px', alignItems: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--c-accent)' }}>Производительность инспекторов</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+          <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
             {loading && !stats ? (
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '100px' }}>
                 <div className="spinner"></div>

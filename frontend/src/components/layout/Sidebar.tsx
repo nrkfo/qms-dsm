@@ -12,8 +12,19 @@ export const Sidebar = () => {
   const [isLabelAlarm, setIsLabelAlarm] = useState(false);
   const [isLotModalOpen, setIsLotModalOpen] = useState(false);
   const [draftLotId, setDraftLotId] = useState<number | null>(activeLot?.id || null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsedState, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isCollapsed = isMobile ? false : isCollapsedState;
 
   useEffect(() => {
     const checkAlarm = () => {
@@ -90,9 +101,11 @@ export const Sidebar = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', marginBottom: '10px' }}>
           {!isCollapsed && <h2 style={{ color: 'var(--c-accent)', margin: 0, textShadow: 'var(--shadow-neon)' }}>QMS-DSM</h2>}
           
-          <button onClick={() => setIsCollapsed(!isCollapsed)} className="glass" style={{ padding: '6px', display: 'flex', borderRadius: 'var(--radius-sm)' }}>
-            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
+          {!isMobile && (
+            <button onClick={() => setIsCollapsed(!isCollapsedState)} className="glass" style={{ padding: '6px', display: 'flex', borderRadius: 'var(--radius-sm)' }}>
+              {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            </button>
+          )}
         </div>
 
         {/* Global Lot Selection Button */}

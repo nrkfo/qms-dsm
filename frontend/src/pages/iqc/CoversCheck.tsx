@@ -153,7 +153,7 @@ export const CoversCheck = () => {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="animate-fade-in responsive-flex-container" style={{ gap: '24px' }}>
       <div className="glass-panel" style={{ padding: '24px', borderRadius: 'var(--radius-lg)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ margin: 0, color: 'var(--c-accent)' }}>Замеры задних крышек</h2>
@@ -196,7 +196,7 @@ export const CoversCheck = () => {
         </div>
       </div>
 
-      <div style={{ flex: 1 }}>
+      <div className="responsive-flex-content table-mobile-responsive" style={{ flex: 1 }}>
         <DsmTable 
           title="История замеров крышек" 
           columns={columns} 

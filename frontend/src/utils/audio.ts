@@ -26,7 +26,7 @@ const playNote = (context: AudioContext, freq: number, startTime: number, durati
   osc.stop(startTime + duration);
 };
 
-export const playSound = (type: 'ok' | 'ng') => {
+export const playSound = (type: 'ok' | 'ng' | 'add') => {
   try {
     initAudioContext();
     if (!audioContext) return;
@@ -35,6 +35,10 @@ export const playSound = (type: 'ok' | 'ng') => {
       // Rising positive chime
       playNote(audioContext, 659.25, audioContext.currentTime, 0.2, 'triangle'); // E5
       playNote(audioContext, 880, audioContext.currentTime + 0.07, 0.3, 'triangle'); // A5
+    } else if (type === 'add') {
+      // Pleasant double success chime for adding to report
+      playNote(audioContext, 523.25, audioContext.currentTime, 0.1, 'sine'); // C5
+      playNote(audioContext, 783.99, audioContext.currentTime + 0.08, 0.25, 'sine'); // G5
     } else {
       // Professional Error buzz
       playNote(audioContext, 150, audioContext.currentTime, 0.3, 'sawtooth');

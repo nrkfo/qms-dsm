@@ -135,6 +135,8 @@ export const PalletsCheck = () => {
       return null;
     };
 
+
+
     const expectedModel = tvModels.find(m => m.id === activeLot?.tv_model_id);
     const scannedModel = identifyModel(barcode);
     
@@ -326,9 +328,9 @@ export const PalletsCheck = () => {
   );
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100% + 60px)', margin: '-30px', fontFamily: 'var(--font-sans)', color: 'var(--c-text-primary)' }}>
+    <div className="animate-fade-in responsive-flex-container">
       
-      <div className="glass-panel" style={{ padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 0, borderBottom: '1px solid var(--c-border)' }}>
+      <div className="glass-panel" style={{ padding: '15px 20px', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', borderRadius: 0, borderBottom: '1px solid var(--c-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '18px', fontWeight: 'bold' }}>
           <div>📦 <span style={{ color: 'var(--c-text-secondary)' }}>ЛОТ:</span> <span style={{ color: 'var(--c-accent)' }}>{activeLot?.name || 'Не выбран'}</span></div>
           {activeLot && (
@@ -390,7 +392,7 @@ export const PalletsCheck = () => {
         </button>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '0 20px', display: 'flex', flexDirection: 'column' }}>
+      <div className="responsive-flex-content table-mobile-responsive" style={{ padding: '0 20px' }}>
         {loading ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', color: 'var(--c-accent)' }}>
             <div className="spinner"></div>

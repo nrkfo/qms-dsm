@@ -63,8 +63,8 @@ export const LabelsCheck = () => {
 
     calculateTime();
 
-    // 15 seconds interval check
-    const timer = setInterval(calculateTime, 15000);
+    // 1 second interval check for real-time updates
+    const timer = setInterval(calculateTime, 1000);
 
     // Event listener for tab focus recovery
     const handleVisibilityChange = () => {
@@ -229,27 +229,9 @@ export const LabelsCheck = () => {
   const eanFixes = getFixes(model?.label_ean_fix);
 
   return (
-    <div className="animate-fade-in" style={{ 
-      display: 'grid', 
-      gridTemplateColumns: '400px 1fr', 
-      height: 'calc(100% + 60px)', 
-      margin: '-30px', 
-      fontFamily: 'var(--font-sans)', 
-      color: 'var(--c-text-primary)', 
-      overflow: 'hidden',
-      background: 'var(--c-bg-base)'
-    }}>
+    <div className="animate-fade-in split-layout-container">
       {/* Sidebar - Full Height */}
-      <div style={{ 
-        borderRight: '1px solid var(--c-border)', 
-        padding: '40px 30px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        background: 'var(--c-bg-surface-elevated)',
-        height: '100%',
-        boxShadow: '10px 0 30px rgba(0,0,0,0.1)',
-        zIndex: 10
-      }}>
+      <div className="split-layout-sidebar">
         <div style={{ background: 'var(--c-bg-base)', border: '1px solid var(--c-border)', padding: '20px', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)' }}>
           <div style={{ fontSize: '11px', color: 'var(--c-text-muted)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>Time until next check</div>
           <div style={{ fontFamily: 'monospace', fontSize: '42px', fontWeight: 'bold', color: isAlarm ? 'var(--c-danger)' : 'var(--c-accent)' }}>
@@ -310,7 +292,7 @@ export const LabelsCheck = () => {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div className="split-layout-content">
         <div className="glass-panel" style={{ padding: '15px 25px', borderBottom: '1px solid var(--c-border)', borderRadius: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--c-bg-surface-glass)' }}>
           <strong style={{ color: 'var(--c-text-secondary)' }}>Проверка этикеток [ЛОТ: <span style={{ color: 'var(--c-accent)' }}>{activeLot?.name || 'Не выбран'}</span>]</strong>
           {model && <span style={{ fontSize: '12px', background: 'var(--c-accent-muted)', color: 'var(--c-accent)', padding: '4px 8px', borderRadius: '4px' }}>{model.name}</span>}
@@ -322,7 +304,7 @@ export const LabelsCheck = () => {
             <span style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>Total: {logs.length} records</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+          <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
             {logs.length === 0 ? (
                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--c-text-muted)', marginTop: '50px', padding: '50px', background: 'var(--c-bg-surface-glass)', borderRadius: '12px', border: '1px dashed var(--c-border)' }}>No scans recorded yet for this session.</div>
             ) : (

@@ -69,3 +69,29 @@ sudo docker restart qms-nginx
 ```bash
 sudo docker stop qms-nginx
 ```
+
+---
+
+## 📜 Просмотр логов аудита в терминале (Audit Logs CLI)
+
+Для просмотра истории системных изменений и слежения за логами аудита в реальном времени используйте встроенную утилиту из корневой папки проекта:
+
+* **Слежение за изменениями в реальном времени (аналог tail -f)**:
+  ```bash
+  node show-audit-logs.js -f
+  ```
+
+* **Просмотр истории последних N записей**:
+  ```bash
+  node show-audit-logs.js -n 50
+  ```
+
+* **Фильтрация логов по ключевому слову действия (например, UPDATE или DELETE)**:
+  ```bash
+  node show-audit-logs.js --action UPDATE
+  ```
+
+* **Справка по доступным командам**:
+  ```bash
+  node show-audit-logs.js --help
+  ```

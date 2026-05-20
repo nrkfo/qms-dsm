@@ -26,7 +26,7 @@ const Admin = () => {
     suppliers, fetchSuppliers, addSupplier, deleteSupplier, updateSupplier,
     fetchArticles, addArticle, deleteArticle, updateArticle, importArticles,
     settings, fetchSettings, updateSettings,
-    auditLogs, fetchAuditLogs, downloadBackup,
+    downloadBackup,
     tvModels, fetchTvModels, tvTests, fetchTvTests, addTvTest, deleteTvTest,
     componentsMaster, fetchComponentsMaster, addComponentMaster, deleteComponentMaster,
     showToast, showConfirm
@@ -34,16 +34,11 @@ const Admin = () => {
 
   const [activeTab, setActiveTab] = useState('settings');
   const [localSettings, setLocalSettings] = useState<any>({});
-  const [loadingAudit, setLoadingAudit] = useState(false);
 
   useEffect(() => {
     fetchLots();
     fetchSuppliers();
     fetchSettings();
-    if (activeTab === 'audit') {
-      setLoadingAudit(true);
-      fetchAuditLogs().finally(() => setLoadingAudit(false));
-    }
     if (activeTab === 'lots' || activeTab === 'tv_settings' || activeTab === 'labels_settings' || activeTab === 'pallets_settings') {
       fetchTvModels();
     }
@@ -90,7 +85,7 @@ const Admin = () => {
   );
 
   return (
-    <div className="animate-fade-in" style={{ 
+    <div className="animate-fade-in responsive-flex-container" style={{ 
       position: 'absolute',
       top: 0,
       left: 0,
@@ -111,8 +106,8 @@ const Admin = () => {
           <div style={{ display: 'flex', gap: '2px', paddingRight: '15px', borderRight: '1px solid var(--c-border-muted)' }}>
             <TabButton id="settings" label="Система" icon="🛠️" />
             <TabButton id="master" label="Справочники" icon="📚" />
-            <TabButton id="audit" label="Аудит" icon="📜" />
             <TabButton id="translations" label="Переводчик" icon="🌍" />
+            <TabButton id="breaks" label="Перерывы" icon="⏱️" />
           </div>
 
           <div style={{ display: 'flex', gap: '2px', padding: '0 15px', borderRight: '1px solid var(--c-border-muted)' }}>
@@ -145,17 +140,10 @@ const Admin = () => {
         {activeTab === 'panels_settings' && <PanelsSettingsManagement />}
         {activeTab === 'components_settings' && <ComponentsSettingsManagement />}
         {activeTab === 'translations' && <TranslationsManagement />}
-        {activeTab === 'audit' && (
-          loadingAudit ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', gap: '20px' }}>
-              <div className="spinner"></div>
-              <p style={{ color: 'var(--c-text-muted)' }}>Загрузка истории изменений...</p>
-            </div>
-          ) : <AuditLogTable auditLogs={auditLogs} />
-        )}
+        {activeTab === 'breaks' && <BreaksManagement />}
         {activeTab === 'settings' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '30px', alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', alignItems: 'start' }}>
                <UserManagement />
                <LotManagement />
             </div>
@@ -257,22 +245,22 @@ const UserManagement = () => {
     <div style={{ maxWidth: '900px' }}>
       <div className="glass-panel" style={{ padding: '25px', marginBottom: '25px' }}>
         <h3>Новый пользователь</h3>
-        <form onSubmit={handleCreateUser} style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-          <input className="glass" placeholder="Логин" value={newUname} onChange={e=>setNewUname(e.target.value)} style={{flex:1, padding:'10px'}} />
-          <input className="glass" type="password" placeholder="Пароль" value={newPass} onChange={e=>setNewPass(e.target.value)} style={{flex:1, padding:'10px'}} />
-          <select className="glass" value={newRole} onChange={e=>setNewRole(e.target.value)} style={{padding:'10px'}}> <option value="Inspector">Инспектор</option> <option value="Admin">Админ</option> </select>
-          <button type="submit" style={{padding:'10px 20px', background:'var(--c-accent)', border:'none', borderRadius:'4px', color:'#000'}}>Создать</button>
+        <form onSubmit={handleCreateUser} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
+          <input className="glass" placeholder="Логин" value={newUname} onChange={e=>setNewUname(e.target.value)} style={{flex:'1 1 200px', padding:'10px'}} />
+          <input className="glass" type="password" placeholder="Пароль" value={newPass} onChange={e=>setNewPass(e.target.value)} style={{flex:'1 1 200px', padding:'10px'}} />
+          <select className="glass" value={newRole} onChange={e=>setNewRole(e.target.value)} style={{flex:'1 1 150px', padding:'10px'}}> <option value="Inspector">Инспектор</option> <option value="Admin">Админ</option> </select>
+          <button type="submit" style={{flex:'1 1 120px', padding:'10px 20px', background:'var(--c-accent)', border:'none', borderRadius:'4px', color:'#000'}}>Создать</button>
         </form>
       </div>
       {users.map(u => (
         <div key={u.id} className="glass-panel" style={{ padding: '15px', marginBottom:'10px' }}>
           {editingUser === u.id ? (
-            <form onSubmit={(e) => handleUpdateUser(e, u.id)} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <input className="glass" value={editUname} onChange={e=>setEditUname(e.target.value)} style={{flex:1, padding:'8px'}} required />
-              <input className="glass" type="password" placeholder="Новый пароль" value={editPass} onChange={e=>setEditPass(e.target.value)} style={{flex:1, padding:'8px'}} />
-              <select className="glass" value={editRole} onChange={e=>setEditRole(e.target.value)} style={{padding:'8px'}}> <option value="Inspector">Инспектор</option> <option value="Admin">Админ</option> </select>
-              <button type="submit" style={{padding:'8px 15px', background:'var(--c-accent)', border:'none', borderRadius:'4px', color:'#000'}}>Сохранить</button>
-              <button type="button" onClick={() => setEditingUser(null)} className="glass" style={{padding:'8px 15px'}}>Отмена</button>
+            <form onSubmit={(e) => handleUpdateUser(e, u.id)} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+              <input className="glass" value={editUname} onChange={e=>setEditUname(e.target.value)} style={{flex:'1 1 180px', padding:'8px'}} required />
+              <input className="glass" type="password" placeholder="Новый пароль" value={editPass} onChange={e=>setEditPass(e.target.value)} style={{flex:'1 1 180px', padding:'8px'}} />
+              <select className="glass" value={editRole} onChange={e=>setEditRole(e.target.value)} style={{flex:'1 1 120px', padding:'8px'}}> <option value="Inspector">Инспектор</option> <option value="Admin">Админ</option> </select>
+              <button type="submit" style={{flex:'1 1 100px', padding:'8px 15px', background:'var(--c-accent)', border:'none', borderRadius:'4px', color:'#000'}}>Сохранить</button>
+              <button type="button" onClick={() => setEditingUser(null)} className="glass" style={{flex:'1 1 100px', padding:'8px 15px'}}>Отмена</button>
             </form>
           ) : (
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -313,7 +301,7 @@ const LotManagement = () => {
     <div style={{ maxWidth: '800px', padding: '20px' }}>
       <div className="glass-panel" style={{ padding: '25px', marginBottom: '25px' }}>
         <h3>{editingLot ? 'Редактировать Лот' : 'Новый Лот / Заказ'}</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: editingLot ? '1fr 1fr 1fr auto' : '1fr 1fr auto', gap: '15px', marginTop: '15px' }}>
+        <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: editingLot ? '1fr 1fr 1fr auto' : '1fr 1fr auto', gap: '15px', marginTop: '15px' }}>
           <input className="glass" placeholder="Название лота" value={editingLot ? editingLot.name : name} onChange={e => editingLot ? setEditingLot({...editingLot, name: e.target.value}) : setName(e.target.value)} style={{padding:'10px'}} />
           <select className="glass" value={editingLot ? (editingLot.tv_model_id || '') : selectedModelId} onChange={e => { const val = e.target.value === '' ? '' : Number(e.target.value); editingLot ? setEditingLot({...editingLot, tv_model_id: val}) : setSelectedModelId(val); }} style={{ padding: '10px' }}>
             <option value="">Не выбрана</option>
@@ -384,6 +372,152 @@ const LotManagement = () => {
   );
 };
 
+const BreaksManagement = () => {
+  const { showToast, showConfirm } = useDataStore();
+  const [breaks, setBreaks] = useState<any[]>([]);
+  const [name, setName] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [editingBreak, setEditingBreak] = useState<any>(null);
+
+  useEffect(() => {
+    fetchBreaks();
+  }, []);
+
+  const fetchBreaks = async () => {
+    try {
+      const data = await api.get('/breaks');
+      setBreaks(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !startTime || !endTime) {
+      return showToast('Заполните все поля', 'warning');
+    }
+    try {
+      await api.post('/breaks', { name, start_time: startTime, end_time: endTime });
+      showToast('Перерыв успешно добавлен');
+      setName('');
+      setStartTime('');
+      setEndTime('');
+      fetchBreaks();
+    } catch (err) {
+      showToast('Ошибка при создании', 'error');
+    }
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBreak.name || !editingBreak.start_time || !editingBreak.end_time) {
+      return showToast('Заполните все поля', 'warning');
+    }
+    try {
+      await api.put(`/breaks/${editingBreak.id}`, {
+        name: editingBreak.name,
+        start_time: editingBreak.start_time,
+        end_time: editingBreak.end_time
+      });
+      showToast('Перерыв обновлен');
+      setEditingBreak(null);
+      fetchBreaks();
+    } catch (err) {
+      showToast('Ошибка при обновлении', 'error');
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    showConfirm('Вы уверены, что хотите удалить этот перерыв?', async () => {
+      try {
+        await api.delete(`/breaks/${id}`);
+        showToast('Перерыв удален');
+        fetchBreaks();
+      } catch (err) {
+        showToast('Ошибка при удалении', 'error');
+      }
+    }, undefined, 'danger');
+  };
+
+  return (
+    <div style={{ maxWidth: '800px' }}>
+      <div className="glass-panel" style={{ padding: '25px', marginBottom: '25px' }}>
+        <h3>{editingBreak ? 'Редактировать перерыв / обед' : 'Новый перерыв / обед'}</h3>
+        <form onSubmit={editingBreak ? handleUpdate : handleCreate} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px', alignItems: 'flex-end' }}>
+          <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>Название</label>
+            <input 
+              className="glass" 
+              placeholder="Например, Обед" 
+              value={editingBreak ? editingBreak.name : name} 
+              onChange={e => editingBreak ? setEditingBreak({ ...editingBreak, name: e.target.value }) : setName(e.target.value)} 
+              style={{ padding: '10px' }} 
+              required
+            />
+          </div>
+          <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>Начало</label>
+            <input 
+              type="time"
+              className="glass" 
+              value={editingBreak ? editingBreak.start_time : startTime} 
+              onChange={e => editingBreak ? setEditingBreak({ ...editingBreak, start_time: e.target.value }) : setStartTime(e.target.value)} 
+              style={{ padding: '10px', colorScheme: 'dark' }} 
+              required
+            />
+          </div>
+          <div style={{ flex: '1 1 120px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>Окончание</label>
+            <input 
+              type="time"
+              className="glass" 
+              value={editingBreak ? editingBreak.end_time : endTime} 
+              onChange={e => editingBreak ? setEditingBreak({ ...editingBreak, end_time: e.target.value }) : setEndTime(e.target.value)} 
+              style={{ padding: '10px', colorScheme: 'dark' }} 
+              required
+            />
+          </div>
+          <div style={{ flex: '1 1 150px', display: 'flex', gap: '10px' }}>
+            <button type="submit" style={{ flex: 1, padding: '10px 20px', background: 'var(--c-accent)', border: 'none', borderRadius: '4px', color: '#000', fontWeight: 'bold', cursor: 'pointer' }}>
+              {editingBreak ? 'Сохранить' : 'Создать'}
+            </button>
+            {editingBreak && (
+              <button type="button" onClick={() => setEditingBreak(null)} className="glass" style={{ flex: 1, padding: '10px 20px', border: '1px solid var(--c-border)', cursor: 'pointer' }}>
+                Отмена
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+        {breaks.map(b => (
+          <div key={b.id} className="glass-panel" style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <span style={{ fontSize: '20px' }}>⏱️</span>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <strong>{b.name}</strong>
+                <span style={{ fontSize: '13px', color: 'var(--c-text-muted)', marginTop: '2px' }}>
+                  Интервал: {b.start_time} — {b.end_time}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <button onClick={() => setEditingBreak(b)} style={{ color: 'var(--c-accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Изменить</button>
+              <button onClick={() => handleDelete(b.id)} style={{ color: 'var(--c-danger)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Удалить</button>
+            </div>
+          </div>
+        ))}
+        {breaks.length === 0 && (
+          <p style={{ color: 'var(--c-text-muted)', textAlign: 'center', marginTop: '20px' }}>Нет запланированных перерывов</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const MasterDataManagement = () => {
   const { suppliers, addSupplier, deleteSupplier, updateSupplier, fetchArticles, addArticle, deleteArticle, updateArticle, importArticles } = useDataStore();
   const [viewingSupId, setViewingSupId] = useState<number | null>(null);
@@ -410,7 +544,7 @@ const MasterDataManagement = () => {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '30px', height: '100%' }}>
+    <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '30px' }}>
        <div className="glass-panel" style={{ padding: '25px', display:'flex', flexDirection:'column' }}>
           <h3>Поставщики</h3>
           <input className="glass" placeholder="Поиск..." value={search} onChange={e=>setSearch(e.target.value)} style={{width:'100%', padding:'10px', marginBottom:'10px'}} />
@@ -477,39 +611,7 @@ const DetailsCell = ({ details }: { details: any }) => {
   );
 };
 
-const AuditLogTable = ({ auditLogs }: { auditLogs: any[] }) => (
-  <div className="glass-panel" style={{ padding: '25px' }}>
-    <h3 style={{ marginBottom: '20px' }}>История изменений</h3>
-    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-      <thead>
-        <tr style={{ borderBottom: '1px solid var(--c-border)', color: 'var(--c-text-secondary)', fontSize: '0.9rem' }}>
-          <th style={{ padding: '10px' }}>Время</th>
-          <th style={{ padding: '10px' }}>Сотрудник</th>
-          <th style={{ padding: '10px' }}>Действие</th>
-          <th style={{ padding: '10px' }}>Подробности</th>
-        </tr>
-      </thead>
-      <tbody>
-        {auditLogs.map(log => {
-          const isDelete = log.action.includes('DELETE');
-          const isUpdate = log.action.includes('UPDATE');
-          const rowBg = isDelete ? 'rgba(255, 51, 102, 0.05)' : (isUpdate ? 'rgba(255, 204, 0, 0.05)' : 'transparent');
-          
-          return (
-            <tr key={log.id} style={{ borderBottom: '1px solid var(--c-border)', fontSize: '0.85rem', background: rowBg }}>
-              <td style={{ padding: '10px', whiteSpace: 'nowrap' }}>{new Date(log.timestamp.includes('Z') ? log.timestamp : log.timestamp + 'Z').toLocaleString()}</td>
-              <td style={{ padding: '10px', whiteSpace: 'nowrap' }}>{log.username || 'System'}</td>
-              <td style={{ padding: '10px', color: isDelete ? 'var(--c-danger)' : (isUpdate ? 'var(--c-warning)' : 'var(--c-accent)'), fontWeight: isDelete || isUpdate ? 'bold' : 'normal' }}>{log.action}</td>
-              <td style={{ padding: '10px' }}>
-                <DetailsCell details={log.details} />
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
-);
+
 
 const defaultShift = {
   ratio_produced: 280,
@@ -552,7 +654,7 @@ const TvSettingsManagement = () => {
       <div className="glass-panel" style={{ padding: '25px' }}>
         <h3 style={{ marginTop: 0, marginBottom: '20px' }}>Настройка плана (MES Integration)</h3>
         
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', padding: '15px', background: 'var(--c-bg-surface-elevated)', borderRadius: '8px', border: '1px solid var(--c-accent-muted)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '25px', padding: '15px', background: 'var(--c-bg-surface-elevated)', borderRadius: '8px', border: '1px solid var(--c-accent-muted)' }}>
           <div>
             <label style={{ fontSize: '12px', color: 'var(--c-text-muted)', display: 'block', marginBottom: '5px' }}>Базовый выпуск (шт)</label>
             <input type="number" className="glass" value={localShiftConfig.ratio_produced} onChange={e => setLocalShiftConfig({...localShiftConfig, ratio_produced: Number(e.target.value)})} style={{ width: '120px', padding: '8px', border: '1px solid var(--c-accent)' }} />
@@ -582,7 +684,7 @@ const TvSettingsManagement = () => {
         <button onClick={saveShiftConfig} style={{ marginTop: '25px', padding: '12px 30px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>СОХРАНИТЬ ВСЕ НАСТРОЙКИ ПЛАНА</button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+      <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
         <div className="glass-panel" style={{ padding: '25px', display: 'flex', flexDirection: 'column' }}>
           <h3>Модели</h3>
           <div className="glass" style={{ padding: '15px', borderRadius: '8px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -768,7 +870,7 @@ const LabelSettingsManagement = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
       <div className="glass-panel" style={{ padding: '25px' }}>
         <h3 style={{ marginBottom: '20px' }}>Глобальные длины штрихкодов</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+        <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '11px', color: 'var(--c-text-muted)', marginBottom: '5px' }}>SN Default Length</label>
             <input className="glass" type="number" value={settings.label_sn_len} onChange={e => updateSettings({ label_sn_len: e.target.value })} style={{ width: '100%', padding: '10px' }} />
@@ -793,7 +895,7 @@ const LabelSettingsManagement = () => {
 
         {localConfig && (
           <div className="animate-fade-in">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px', padding: '15px', background: 'var(--c-bg-surface-elevated)', borderRadius: '8px' }}>
+            <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px', padding: '15px', background: 'var(--c-bg-surface-elevated)', borderRadius: '8px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: 'var(--c-text-muted)', marginBottom: '5px' }}>SN Length (Model)</label>
                 <input className="glass" type="number" placeholder="Глобально" value={localConfig.label_sn_len} onChange={e => setLocalConfig({ ...localConfig, label_sn_len: e.target.value })} style={{ width: '100%', padding: '8px' }} />
@@ -808,7 +910,7 @@ const LabelSettingsManagement = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+            <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
               <div>
                 {renderFixEditor('sn', 'SN')}
                 {renderParsingEditor('sn')}
@@ -933,12 +1035,12 @@ const ComponentsSettingsManagement = () => {
 
         {selectedModelId && (
           <>
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', alignItems: 'flex-end' }}>
-              <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '25px', alignItems: 'flex-end' }}>
+              <div style={{ flex: '1 1 150px' }}>
                 <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--c-text-muted)', marginBottom: '5px' }}>Артикул</label>
                 <input className="glass" placeholder="Напр. 1.01.123" value={article} onChange={e => setArticle(e.target.value)} style={{ padding: '10px', width: '100%' }} />
               </div>
-              <div style={{ flex: 2 }}>
+              <div style={{ flex: '1 1 250px' }}>
                 <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--c-text-muted)', marginBottom: '5px' }}>Наименование</label>
                 <input className="glass" placeholder="Напр. Main Board" value={name} onChange={e => setName(e.target.value)} style={{ padding: '10px', width: '100%' }} />
               </div>
@@ -949,12 +1051,12 @@ const ComponentsSettingsManagement = () => {
                   setArticle('');
                   setName('');
                 }} 
-                style={{ padding: '10px 30px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', height: '40px' }}
+                style={{ flex: '1 1 120px', padding: '10px 30px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', height: '40px' }}
               >
                 Добавить
               </button>
               
-              <div style={{ position: 'relative' }}>
+              <div style={{ flex: '1 1 150px', position: 'relative' }}>
                 <input type="file" accept=".xlsx, .xls" onChange={handleExcelImport} style={{ display: 'none' }} id="excel-import" />
                 <label 
                   htmlFor="excel-import" 
@@ -970,29 +1072,31 @@ const ComponentsSettingsManagement = () => {
               </div>
             </div>
 
-            <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--c-border)', color: 'var(--c-text-secondary)', fontSize: '0.9rem' }}>
-                  <th style={{ padding: '12px' }}>Артикул</th>
-                  <th style={{ padding: '12px' }}>Наименование</th>
-                  <th style={{ padding: '12px', textAlign: 'center', width: '80px' }}>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {componentsMaster.map(comp => (
-                  <tr key={comp.id} style={{ borderBottom: '1px solid var(--c-border)', fontSize: '0.9rem' }}>
-                    <td style={{ padding: '12px', fontWeight: 'bold' }}>{comp.article}</td>
-                    <td style={{ padding: '12px' }}>{comp.name}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      <button onClick={() => { showConfirm('Удалить этот компонент?', () => deleteComponentMaster(comp.id), undefined, 'danger'); }} style={{ color: 'var(--c-danger)', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
-                    </td>
+            <div className="table-mobile-responsive">
+              <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--c-border)', color: 'var(--c-text-secondary)', fontSize: '0.9rem' }}>
+                    <th style={{ padding: '12px' }}>Артикул</th>
+                    <th style={{ padding: '12px' }}>Наименование</th>
+                    <th style={{ padding: '12px', textAlign: 'center', width: '80px' }}>Действия</th>
                   </tr>
-                ))}
-                {componentsMaster.length === 0 && (
-                  <tr><td colSpan={3} style={{ padding: '30px', textAlign: 'center', color: 'var(--c-text-muted)' }}>Для этой модели пока нет комплектующих.</td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {componentsMaster.map(comp => (
+                    <tr key={comp.id} style={{ borderBottom: '1px solid var(--c-border)', fontSize: '0.9rem' }}>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{comp.article}</td>
+                      <td style={{ padding: '12px' }}>{comp.name}</td>
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <button onClick={() => { showConfirm('Удалить этот компонент?', () => deleteComponentMaster(comp.id), undefined, 'danger'); }} style={{ color: 'var(--c-danger)', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {componentsMaster.length === 0 && (
+                    <tr><td colSpan={3} style={{ padding: '30px', textAlign: 'center', color: 'var(--c-text-muted)' }}>Для этой модели пока нет комплектующих.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
         
@@ -1098,7 +1202,7 @@ const PalletSettingsManagement = () => {
 
         {localConfig && (
           <div className="animate-fade-in">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px', padding: '15px', background: 'var(--c-bg-surface-elevated)', borderRadius: '8px' }}>
+            <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px', padding: '15px', background: 'var(--c-bg-surface-elevated)', borderRadius: '8px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: 'var(--c-accent)', marginBottom: '5px', fontWeight: 'bold' }}>PALLET Length (Model)</label>
                 <input className="glass" type="number" placeholder="Длина штрихкода паллеты" value={localConfig.pallet_barcode_len} onChange={e => setLocalConfig({ ...localConfig, pallet_barcode_len: e.target.value })} style={{ width: '100%', padding: '8px', borderColor: 'var(--c-accent)' }} />
@@ -1113,7 +1217,7 @@ const PalletSettingsManagement = () => {
             
             <div className="glass-panel" style={{ padding: '20px', marginBottom: '25px', background: 'rgba(255,255,255,0.03)' }}>
               <h4 style={{ fontSize: '0.9rem', color: 'var(--c-accent)', marginBottom: '15px' }}>Парсинг штрихкода (Извлечение данных)</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+              <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                 <div style={{ background: 'var(--c-bg-base)', padding: '10px', borderRadius: '4px' }}>
                   <label style={{ display: 'block', fontSize: '11px', marginBottom: '8px' }}>Модель: Начало (позиция)</label>
                   <input className="glass" type="number" value={localConfig.pallet_parsing_config?.model_start ?? 0} onChange={e => setLocalConfig({...localConfig, pallet_parsing_config: {...localConfig.pallet_parsing_config, model_start: Number(e.target.value)}})} style={{ width: '100%', padding: '8px' }} />
