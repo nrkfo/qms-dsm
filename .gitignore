@@ -8,3 +8,5 @@ frontend.log
 
 # Database
 backend/database.sqlite
+backend/backups/
+temp_aql/

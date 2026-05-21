@@ -1,54 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Calculator, Info, CheckCircle, AlertTriangle } from 'lucide-react';
-
-// ISO 2859-1 Sample Size Code Letters
-const CODE_LETTERS: any = [
-  { min: 2, max: 8, levels: { s1: 'A', s2: 'A', s3: 'A', s4: 'A', i: 'A', ii: 'A', iii: 'B' } },
-  { min: 9, max: 15, levels: { s1: 'A', s2: 'A', s3: 'A', s4: 'A', i: 'A', ii: 'B', iii: 'C' } },
-  { min: 16, max: 25, levels: { s1: 'A', s2: 'A', s3: 'B', s4: 'B', i: 'B', ii: 'C', iii: 'D' } },
-  { min: 26, max: 50, levels: { s1: 'A', s2: 'B', s3: 'B', s4: 'C', i: 'C', ii: 'D', iii: 'E' } },
-  { min: 51, max: 90, levels: { s1: 'B', s2: 'B', s3: 'C', s4: 'C', i: 'C', ii: 'E', iii: 'F' } },
-  { min: 91, max: 150, levels: { s1: 'B', s2: 'C', s3: 'C', s4: 'D', i: 'D', ii: 'F', iii: 'G' } },
-  { min: 151, max: 280, levels: { s1: 'B', s2: 'C', s3: 'D', s4: 'E', i: 'E', ii: 'G', iii: 'H' } },
-  { min: 281, max: 500, levels: { s1: 'B', s2: 'C', s3: 'D', s4: 'E', i: 'F', ii: 'H', iii: 'J' } },
-  { min: 501, max: 1200, levels: { s1: 'C', s2: 'C', s3: 'E', s4: 'F', i: 'G', ii: 'J', iii: 'K' } },
-  { min: 1201, max: 3200, levels: { s1: 'C', s2: 'D', s3: 'E', s4: 'G', i: 'H', ii: 'K', iii: 'L' } },
-  { min: 3201, max: 10000, levels: { s1: 'C', s2: 'D', s3: 'F', s4: 'H', i: 'J', ii: 'L', iii: 'M' } },
-  { min: 10001, max: 35000, levels: { s1: 'C', s2: 'D', s3: 'G', s4: 'J', i: 'K', ii: 'M', iii: 'N' } },
-  { min: 35001, max: 150000, levels: { s1: 'D', s2: 'E', s3: 'G', s4: 'K', i: 'L', ii: 'N', iii: 'P' } },
-  { min: 150001, max: 500000, levels: { s1: 'D', s2: 'E', s3: 'H', s4: 'L', i: 'M', ii: 'P', iii: 'Q' } },
-  { min: 500001, max: Infinity, levels: { s1: 'D', s2: 'E', s3: 'H', s4: 'M', i: 'N', ii: 'Q', iii: 'R' } },
-];
-
-const SAMPLE_SIZES: any = {
-  A: 2, B: 3, C: 5, D: 8, E: 13, F: 20, G: 32, H: 50, J: 80, K: 125, L: 200, M: 315, N: 500, P: 800, Q: 1250, R: 2000
-};
-
-// Simplified AQL Table (Normal Inspection, Single Sampling)
-// Structure: [CodeLetter]: { [AQL]: [Ac, Re] }
-const AQL_TABLE: any = {
-  A: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [0,1], 1.0: [0,1], 1.5: [0,1], 2.5: [0,1], 4.0: [0,1], 6.5: [0,1] },
-  B: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [0,1], 1.0: [0,1], 1.5: [0,1], 2.5: [0,1], 4.0: [0,1], 6.5: [0,1] },
-  C: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [0,1], 1.0: [0,1], 1.5: [0,1], 2.5: [0,1], 4.0: [1,2], 6.5: [1,2] },
-  D: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [0,1], 1.0: [0,1], 1.5: [0,1], 2.5: [1,2], 4.0: [1,2], 6.5: [2,3] },
-  E: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [0,1], 1.0: [0,1], 1.5: [1,2], 2.5: [1,2], 4.0: [2,3], 6.5: [3,4] },
-  F: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [0,1], 1.0: [1,2], 1.5: [1,2], 2.5: [2,3], 4.0: [3,4], 6.5: [5,6] },
-  G: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [0,1], 0.65: [1,2], 1.0: [1,2], 1.5: [2,3], 2.5: [3,4], 4.0: [5,6], 6.5: [7,8] },
-  H: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [0,1], 0.40: [1,2], 0.65: [1,2], 1.0: [2,3], 1.5: [3,4], 2.5: [5,6], 4.0: [7,8], 6.5: [10,11] },
-  J: { 0.065: [0,1], 0.10: [0,1], 0.15: [0,1], 0.25: [1,2], 0.40: [1,2], 0.65: [2,3], 1.0: [3,4], 1.5: [5,6], 2.5: [7,8], 4.0: [10,11], 6.5: [14,15] },
-  K: { 0.065: [0,1], 0.10: [0,1], 0.15: [1,2], 0.25: [1,2], 0.40: [2,3], 0.65: [3,4], 1.0: [5,6], 1.5: [7,8], 2.5: [10,11], 4.0: [14,15], 6.5: [21,22] },
-  L: { 0.065: [0,1], 0.10: [1,2], 0.15: [1,2], 0.25: [2,3], 0.40: [3,4], 0.65: [5,6], 1.0: [7,8], 1.5: [10,11], 2.5: [14,15], 4.0: [21,22], 6.5: [21,22] },
-  M: { 0.065: [1,2], 0.10: [1,2], 0.15: [2,3], 0.25: [3,4], 0.40: [5,6], 0.65: [7,8], 1.0: [10,11], 1.5: [14,15], 2.5: [21,22], 4.0: [21,22], 6.5: [21,22] },
-  N: { 0.065: [1,2], 0.10: [2,3], 0.15: [3,4], 0.25: [5,6], 0.40: [7,8], 0.65: [10,11], 1.0: [14,15], 1.5: [21,22], 2.5: [21,22], 4.0: [21,22], 6.5: [21,22] },
-  P: { 0.065: [2,3], 0.10: [3,4], 0.15: [5,6], 0.25: [7,8], 0.40: [10,11], 0.65: [14,15], 1.0: [21,22], 1.5: [21,22], 2.5: [21,22], 4.0: [21,22], 6.5: [21,22] },
-  Q: { 0.065: [3,4], 0.10: [5,6], 0.15: [7,8], 0.25: [10,11], 0.40: [14,15], 0.65: [21,22], 1.0: [21,22], 1.5: [21,22], 2.5: [21,22], 4.0: [21,22], 6.5: [21,22] },
-  R: { 0.065: [5,6], 0.10: [7,8], 0.15: [10,11], 0.25: [14,15], 0.40: [21,22], 0.65: [21,22], 1.0: [21,22], 1.5: [21,22], 2.5: [21,22], 4.0: [21,22], 6.5: [21,22] },
-};
+import { getLetterFromTable1, getAQLPlanWithArrows } from '../utils/aql';
 
 export const AqlCalculator = () => {
   const [lotSize, setLotSize] = useState<number | ''>(1000);
   const [level, setLevel] = useState<string>('ii');
-  const [aql, setAql] = useState<number>(1.0);
+  const [aql, setAql] = useState<string>('1.0');
   
   const [result, setResult] = useState<any>(null);
 
@@ -62,18 +19,19 @@ export const AqlCalculator = () => {
       return;
     }
 
-    const range = CODE_LETTERS.find((r: any) => lotSize >= r.min && lotSize <= r.max);
-    if (!range) return;
+    const letter = getLetterFromTable1(Number(lotSize), level.toUpperCase());
+    const plan = getAQLPlanWithArrows(letter, aql);
 
-    const letter = range.levels[level];
-    const sampleSize = SAMPLE_SIZES[letter];
-    const limits = AQL_TABLE[letter][aql];
+    if (!plan) {
+      setResult(null);
+      return;
+    }
 
     setResult({
-      letter,
-      sampleSize,
-      ac: limits[0],
-      re: limits[1]
+      letter: plan.letter,
+      sampleSize: plan.size,
+      ac: plan.ac,
+      re: plan.re
     });
   };
 
@@ -125,10 +83,10 @@ export const AqlCalculator = () => {
           <div>
             <label style={{ display: 'block', fontSize: '13px', color: 'var(--c-text-muted)', marginBottom: '8px' }}>Уровень AQL (Acceptance Quality Limit)</label>
             <select 
-              className="glass" value={aql} onChange={e => setAql(Number(e.target.value))}
+              className="glass" value={aql} onChange={e => setAql(e.target.value)}
               style={{ width: '100%', padding: '12px', background: 'var(--c-bg-surface)', color: 'var(--c-text-primary)', fontSize: '1rem' }}
             >
-              {[0.065, 0.10, 0.15, 0.25, 0.40, 0.65, 1.0, 1.5, 2.5, 4.0, 6.5].map(v => (
+              {['0.065', '0.1', '0.15', '0.25', '0.4', '0.65', '1.0', '1.5', '2.5', '4.0', '6.5'].map(v => (
                 <option key={v} value={v}>{v}%</option>
               ))}
             </select>

@@ -176,6 +176,12 @@ const checkModulePermission = (req: Request, res: Response, next: NextFunction) 
     if (permissions.includes(module)) {
       return next();
     }
+    
+    // Allow read-only (GET) access to dashboard users so they can see all card details
+    if (req.method === 'GET' && permissions.includes('dashboard')) {
+      return next();
+    }
+    
     return res.status(403).json({ error: 'У вас нет доступа к этому модулю.' });
   });
 };
@@ -1682,6 +1688,61 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
 });
 
 // --- MAINTENANCE JOB (Retention & Backups) ---
+const runDatabaseBackup = async () => {
+  console.log('[Backup Job] Starting scheduled database backup...');
+  try {
+    const backupsDir = path.resolve(__dirname, '../backups');
+    if (!fs.existsSync(backupsDir)) {
+      fs.mkdirSync(backupsDir, { recursive: true });
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const backupFile = `backup_${todayStr}.sqlite`;
+    const backupPath = path.join(backupsDir, backupFile);
+
+    // If file already exists, delete first
+    if (fs.existsSync(backupPath)) {
+      fs.unlinkSync(backupPath);
+    }
+
+    db.run(`VACUUM INTO ?`, [backupPath], (err) => {
+      if (err) {
+        console.error('[Backup Job] Database backup failed (VACUUM INTO):', err.message);
+      } else {
+        console.log(`[Backup Job] Database backup successfully created: ${backupFile}`);
+        
+        // Retention rotation logic: keep only the 14 latest backups
+        try {
+          const files = fs.readdirSync(backupsDir);
+          const backupFiles = files
+            .filter(f => f.startsWith('backup_') && f.endsWith('.sqlite'))
+            .map(f => {
+              const fullPath = path.join(backupsDir, f);
+              const stat = fs.statSync(fullPath);
+              return { name: f, path: fullPath, mtime: stat.mtimeMs };
+            });
+
+          // Sort by modification time ascending (oldest first)
+          backupFiles.sort((a, b) => a.mtime - b.mtime);
+
+          // If we have more than 14, delete the oldest ones
+          if (backupFiles.length > 14) {
+            const filesToDelete = backupFiles.slice(0, backupFiles.length - 14);
+            filesToDelete.forEach(file => {
+              fs.unlinkSync(file.path);
+              console.log(`[Backup Job] Retention policy: deleted old backup file: ${file.name}`);
+            });
+          }
+        } catch (rotationErr: any) {
+          console.error('[Backup Job] Failed to rotate old backups:', rotationErr.message);
+        }
+      }
+    });
+  } catch (err: any) {
+    console.error('[Backup Job] Scheduled backup job encountered an error:', err.message);
+  }
+};
+
 const runMaintenance = async () => {
   console.log('Running system maintenance...');
   const retentionDays = parseInt(await getSetting('data_retention_days') || '90');
@@ -1709,74 +1770,120 @@ const runMaintenance = async () => {
     if (!err && this.changes > 0) console.log(`[Retention] Pruned ${this.changes} audit logs older than 30 days.`);
   });
 
-  // 2. Scheduled Backup logic can be integrated with a real cron or setInterval
-  // For this environment, we simulate a check every hour
+  // 2. Database Backup
+  await runDatabaseBackup();
 };
 
-// Check every hour if it's time for maintenance
+const autoCloseShift = async () => {
+  console.log('[Auto-Close Shift] Starting automated shift completion...');
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // 1. Fetch settings
+    let mesUrl = await getSetting('mes_dashboard_url') || 'http://192.168.210.210:8000/tablo/lines/1/dashboard/';
+    if (mesUrl && !mesUrl.startsWith('http')) mesUrl = 'http://' + mesUrl;
+    
+    const shiftConfigStr = await getSetting('oqa_shift_config');
+    let shiftConfig: any = {};
+    try {
+      if (shiftConfigStr) shiftConfig = JSON.parse(shiftConfigStr);
+    } catch (e) {}
+
+    // 2. Fetch and parse MES Fact
+    let factVal = 0;
+    try {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      const response = await requestWithRetry(mesUrl, { timeout: 5000, retries: 2 });
+      const html = await response.text();
+      
+      // Parse JSON from initialDashboardData
+      const jsonMatch = html.match(/initialDashboardData\s*=\s*JSON\.parse\(\s*'([\s\S]*?)'\s*\)/);
+      if (jsonMatch && jsonMatch[1]) {
+        try {
+          const unescaped = jsonMatch[1].replace(/\\u([0-9a-fA-F]{4})/g, (match: string, grp: string) => String.fromCharCode(parseInt(grp, 16)));
+          const data = JSON.parse(unescaped);
+          const fact = data.metrics?.curr_device_count;
+          if (typeof fact === 'number') {
+            factVal = fact;
+          }
+        } catch (e) {
+          console.error('[Auto-Close Shift] Failed to parse MES JSON:', e);
+        }
+      }
+      
+      if (factVal === 0) {
+        const labelIndex = html.indexOf('ФАКТ (ШТ)');
+        if (labelIndex !== -1) {
+          const contentBefore = html.substring(0, labelIndex);
+          const matches = [...contentBefore.matchAll(/>(\d{1,5})</g)];
+          if (matches.length > 0) {
+            const val = parseInt(matches[matches.length - 1][1]);
+            if (val > 0) factVal = val;
+          }
+        }
+      }
+      
+      if (factVal === 0) {
+        const fallbackMatch = html.match(/(\d{1,5})\s*ФАКТ\s*\(ШТ\)/i) || 
+                              html.match(/ФАКТ\s*\(ШТ\)[\s\S]*?>(\d{1,5})</i);
+        if (fallbackMatch && fallbackMatch[1]) {
+          factVal = parseInt(fallbackMatch[1]);
+        }
+      }
+    } catch (err: any) {
+      console.error('[Auto-Close Shift] Failed to fetch MES Fact via proxy, checking DB fallback:', err.message);
+    }
+
+    // 3. Fallback to existing saved fact if live fetch yields 0 or fails
+    if (factVal === 0) {
+      const dbFact = await new Promise<any>((resolve) => {
+        db.get('SELECT mes_fact FROM daily_kpi_facts WHERE date = ?', [today], (err, row) => resolve(row));
+      });
+      if (dbFact && typeof dbFact.mes_fact === 'number') {
+        factVal = dbFact.mes_fact;
+      }
+    }
+
+    // 4. Calculate AQL Plan
+    const ratio = (shiftConfig.ratio_checked || 13) / (shiftConfig.ratio_produced || 280);
+    const planVal = Math.round(factVal * ratio);
+
+    // 5. Save/Replace daily_kpi_facts
+    await new Promise<void>((resolve, reject) => {
+      db.run(
+        'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan) VALUES (?, ?, ?)',
+        [today, factVal, planVal],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+
+    console.log(`[Auto-Close Shift] Success: date=${today}, mes_fact=${factVal}, aql_plan=${planVal}`);
+    logAudit(0, 'AUTO_SAVE_KPI_FACTS', { date: today, mes_fact: factVal, aql_plan: planVal });
+    broadcast({ type: 'DATA_UPDATED', module: 'kpi_facts' });
+
+  } catch (e: any) {
+    console.error('[Auto-Close Shift] Error occurred during shift auto-completion:', e.message);
+  }
+};
+
+// Check every minute if it's time for maintenance or auto-closing shifts
 setInterval(() => {
   const now = new Date();
   const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  
+  // Check maintenance/backup schedule
   getSetting('backup_schedule').then(sched => {
-    if (time === sched) runMaintenance();
+    if (sched && time === sched) runMaintenance();
+  });
+
+  // Check shift auto-close schedule
+  getSetting('auto_close_shift_time').then(closeTime => {
+    if (closeTime && time === closeTime) autoCloseShift();
   });
 }, 60000);
-
-// Nightly automated SQLite backup cron job (every day at 20:00)
-cron.schedule('0 20 * * *', () => {
-  console.log('[Backup Cron] Starting daily scheduled database backup...');
-  try {
-    const backupsDir = path.resolve(__dirname, '../backups');
-    if (!fs.existsSync(backupsDir)) {
-      fs.mkdirSync(backupsDir, { recursive: true });
-    }
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const backupFile = `backup_${todayStr}.sqlite`;
-    const backupPath = path.join(backupsDir, backupFile);
-
-    // If file already exists (e.g. from manual trigger or container restart), delete first
-    if (fs.existsSync(backupPath)) {
-      fs.unlinkSync(backupPath);
-    }
-
-    db.run(`VACUUM INTO ?`, [backupPath], (err) => {
-      if (err) {
-        console.error('[Backup Cron] Database backup failed (VACUUM INTO):', err.message);
-      } else {
-        console.log(`[Backup Cron] Database backup successfully created: ${backupFile}`);
-        
-        // Retention rotation logic: keep only the 14 latest backups
-        try {
-          const files = fs.readdirSync(backupsDir);
-          const backupFiles = files
-            .filter(f => f.startsWith('backup_') && f.endsWith('.sqlite'))
-            .map(f => {
-              const fullPath = path.join(backupsDir, f);
-              const stat = fs.statSync(fullPath);
-              return { name: f, path: fullPath, mtime: stat.mtimeMs };
-            });
-
-          // Sort by modification time ascending (oldest first)
-          backupFiles.sort((a, b) => a.mtime - b.mtime);
-
-          // If we have more than 14, delete the oldest ones
-          if (backupFiles.length > 14) {
-            const filesToDelete = backupFiles.slice(0, backupFiles.length - 14);
-            filesToDelete.forEach(file => {
-              fs.unlinkSync(file.path);
-              console.log(`[Backup Cron] Retention policy: deleted old backup file: ${file.name}`);
-            });
-          }
-        } catch (rotationErr: any) {
-          console.error('[Backup Cron] Failed to rotate old backups:', rotationErr.message);
-        }
-      }
-    });
-  } catch (err: any) {
-    console.error('[Backup Cron] Scheduled backup job encountered an error:', err.message);
-  }
-});
 
 // Run initial audit log pruning on startup
 db.serialize(() => {

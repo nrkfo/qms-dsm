@@ -62,7 +62,32 @@ export const PatrolCheck = () => {
   const loadData = async () => {
     setLoading(true);
     const logs = await fetchLogs('oqa_patrol');
-    setRecords(logs.map(l => ({ 
+    
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
+
+    const todayLogs = logs.filter((l: any) => {
+      if (l.timestamp) {
+        const d = new Date(l.timestamp);
+        return d.getFullYear() === todayYear &&
+               d.getMonth() === todayMonth &&
+               d.getDate() === todayDate;
+      }
+      if (l.date) {
+        const parts = l.date.split('-');
+        if (parts.length === 3) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          return y === todayYear && m === todayMonth && d === todayDate;
+        }
+      }
+      return false;
+    });
+
+    setRecords(todayLogs.map(l => ({ 
       id: l.id, 
       timestamp: l.timestamp,
       user_id: l.user_id,
@@ -120,7 +145,7 @@ export const PatrolCheck = () => {
   };
 
   const columns = [
-    { key: 'timestamp', label: 'Время', render: (val: string) => new Date(val).toLocaleTimeString() },
+    { key: 'timestamp', label: 'Время', render: (val: string) => val ? new Date(val).toLocaleTimeString() : '—' },
     { key: 'model', label: 'Модель' },
     { key: 'otkNum', label: 'ОТК №' },
     { 

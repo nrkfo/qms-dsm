@@ -167,6 +167,23 @@ const Admin = () => {
                 <div><label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Время бэкапа (ЧЧ:ММ)</label><input className="glass" type="text" placeholder="03:00" value={localSettings.backup_schedule || ''} onChange={e=>setLocalSettings({...localSettings, backup_schedule: e.target.value})} style={{ width: '100%', padding: '12px' }} /></div>
               </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div>
+                  <label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Автозавершение смены (ЧЧ:ММ)</label>
+                  <input 
+                    className="glass" 
+                    type="text" 
+                    placeholder="17:00 (оставьте пустым для отключения)" 
+                    value={localSettings.auto_close_shift_time || ''} 
+                    onChange={e=>setLocalSettings({...localSettings, auto_close_shift_time: e.target.value})} 
+                    style={{ width: '100%', padding: '12px' }} 
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '10px', fontSize: '11px', color: 'var(--c-text-muted)', fontStyle: 'italic' }}>
+                  * Смена завершается автоматически в указанное время: данные MES фиксируются в базе. Оставьте пустым, чтобы завершать только вручную.
+                </div>
+              </div>
+
 
 
               <h4 style={{ margin: '10px 0 0 0', color: 'var(--c-accent)' }}>Внешний доступ (API / MES)</h4>
