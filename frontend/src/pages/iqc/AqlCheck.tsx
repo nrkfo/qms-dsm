@@ -42,6 +42,7 @@ export const AqlCheck = () => {
     fetchSuppliers();
     fetchLots();
     fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export const AqlCheck = () => {
     }
     setSelectedArticleId('none');
     setArticle('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSupplierId]);
 
   const loadData = async () => {

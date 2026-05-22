@@ -205,7 +205,20 @@ app.get('/api/events', (req, res) => {
   const newClient = { id: clientId, res };
   clients.push(newClient);
 
+  // Send initial comment to keep client connection warm
+  res.write(': ok\n\n');
+
+  // Send a keep-alive heartbeat comment every 20 seconds to prevent connection drops/timeouts
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': keep-alive\n\n');
+    } catch (e) {
+      // client connection might have closed
+    }
+  }, 20000);
+
   req.on('close', () => {
+    clearInterval(heartbeat);
     clients = clients.filter(c => c.id !== clientId);
   });
 });
@@ -1273,13 +1286,14 @@ app.post('/api/mes/proxy', authenticateToken, async (req, res) => {
 
     res.json({ html: text });
   } catch (e: any) {
+    console.warn(`[MES Proxy] Error occurred for ${url}: ${e.message}. Attempting cache fallback...`);
+    const cached = mesCache.get(url);
+    if (cached) {
+      console.log(`[MES Proxy] Serving cached response for ${url} (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
+      return res.json({ html: cached.html, cached: true });
+    }
+
     if (e instanceof TimeoutError) {
-      console.warn(`[MES Proxy] Timeout occurred for ${url}. Attempting cache fallback...`);
-      const cached = mesCache.get(url);
-      if (cached) {
-        console.log(`[MES Proxy] Serving cached response for ${url} (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
-        return res.json({ html: cached.html, cached: true });
-      }
       return res.status(503).json({ error: 'MES Service Unavailable (Timeout)', isTimeout: true });
     }
 

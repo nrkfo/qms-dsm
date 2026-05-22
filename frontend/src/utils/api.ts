@@ -5,9 +5,9 @@ const BASE_URL = '/api';
 async function request(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem('dsm_qms_token');
   
-  const headers: any = {
+  const headers: Record<string, string> = {
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    ...options.headers,
+    ...options.headers as Record<string, string>,
   };
 
   if (!options.headers || !('Content-Type' in options.headers)) {
@@ -37,7 +37,7 @@ async function request(endpoint: string, options: RequestInit = {}) {
 
 export const api = {
   get: (endpoint: string) => request(endpoint, { method: 'GET' }),
-  post: (endpoint: string, body: any) => {
+  post: (endpoint: string, body: unknown) => {
     const isFormData = body instanceof FormData;
     return request(endpoint, { 
       method: 'POST', 
@@ -45,9 +45,9 @@ export const api = {
       headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
     });
   },
-  postBlob: (endpoint: string, body: any): Promise<Blob> => {
+  postBlob: (endpoint: string, body: unknown): Promise<Blob> => {
     const token = localStorage.getItem('dsm_qms_token');
-    const headers: any = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     };
@@ -62,7 +62,7 @@ export const api = {
       return res.blob();
     });
   },
-  put: (endpoint: string, body: any) => {
+  put: (endpoint: string, body: unknown) => {
     const isFormData = body instanceof FormData;
     return request(endpoint, { 
       method: 'PUT', 

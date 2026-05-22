@@ -70,13 +70,6 @@ export const KpiDashboard = () => {
 
   useEffect(() => {
     fetchMesFact(dateFilter);
-    const interval = setInterval(() => {
-      fetchMesFact(dateFilter);
-      fetchKpiData();
-      fetchGlobalMetrics();
-      setLastUpdate(new Date());
-    }, 10000);
-    return () => clearInterval(interval);
   }, [dateFilter]);
 
   useEffect(() => {
@@ -213,10 +206,10 @@ export const KpiDashboard = () => {
           const netDiffMs = Math.max(0, rawDiffMs - breakOverlapMs);
           const diff = netDiffMs / (1000 * 60);
           
+          lastInterval = diff; // Обновляем всегда, чтобы видеть реальное последнее время
           if (diff < 60) { 
             totalInterval += diff; 
             intervalCount++; 
-            lastInterval = diff;
           }
         }
         const avgLeadTime = intervalCount > 0 ? totalInterval / intervalCount : 0;
@@ -427,7 +420,7 @@ export const KpiDashboard = () => {
                         </span>
                       </div>
                       <div style={{ height: '6px', background: 'var(--c-bg-base)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${Math.min(100, (insp.totalChecked / (currentAqlPlan || 1)) * 100)}%`, height: '100%', background: 'var(--c-accent)', transition: 'width 1s ease' }}></div>
+                        <div style={{ width: `${Math.min(100, personalTarget > 0 ? (insp.totalChecked / personalTarget) * 100 : 0)}%`, height: '100%', background: compliance >= 100 ? 'var(--c-success)' : 'var(--c-accent)', transition: 'width 1s ease' }}></div>
                       </div>
                     </div>
                     {insp.avgLeadTime > insp.leadTimeTarget && <span title="Превышение среднего времени"><AlertTriangle size={18} color="var(--c-danger)" /></span>}
@@ -565,8 +558,8 @@ export const KpiDashboard = () => {
                 padding: '12px',
                 borderRadius: '8px',
                 border: passwordError ? '1px solid var(--c-danger)' : '1px solid var(--c-border)',
-                background: 'rgba(255, 255, 255, 0.05)',
-                color: '#fff',
+                background: 'var(--c-bg-surface-elevated)',
+                color: 'var(--c-text-primary)',
                 marginBottom: '15px',
                 fontSize: '0.95rem',
                 outline: 'none',

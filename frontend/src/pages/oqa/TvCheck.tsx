@@ -82,6 +82,7 @@ export const TvCheck = () => {
   const [editDefects, setEditDefects] = useState<string[]>([]);
   const [editTests, setEditTests] = useState<string[]>([]);
   const [editComment, setEditComment] = useState('');
+  const [editInspector, setEditInspector] = useState('');
 
 
 
@@ -127,6 +128,7 @@ export const TvCheck = () => {
 
       setEditTests(testsFromComment);
       setEditComment(manualComment);
+      setEditInspector(record.inspector || '');
       setIsPassModalOpen(false);
     } catch (e: any) {
       showToast(e.message || 'Неверный пароль', 'error');
@@ -166,12 +168,16 @@ export const TvCheck = () => {
         if (enTest && enTest.toLowerCase() !== finalEditTests.toLowerCase()) finalEditTests = `${finalEditTests} / ${enTest}`;
       }
 
-      const updatedData = {
+      const updatedData: any = {
         ...rest,
         defects: finalEditDefects,
         tests: finalEditTests,
         comments: [editComment].filter(Boolean).join('; ')
       };
+
+      if (user?.role === 'Admin') {
+        updatedData.inspector = editInspector;
+      }
 
       await updateLog('oqa_tv', recordId, updatedData, newStatus);
 
@@ -428,9 +434,14 @@ export const TvCheck = () => {
   const defectPercent = totalChecked > 0 ? ((defectsCount / totalChecked) * 100).toFixed(1) : '0.0';
 
   const plan = getAqlPlan(mesFact || 0, shiftConfig);
-  const isLagging = totalChecked < plan;
-
-
+  const progressPercent = plan > 0 ? (totalChecked / plan) * 100 : 0;
+  
+  let progressColor = 'var(--c-danger)';
+  if (plan === 0 || progressPercent >= 100) {
+    progressColor = 'var(--c-success)';
+  } else if (progressPercent >= 75) {
+    progressColor = 'var(--c-warning)';
+  }
 
   return (
     <div className="responsive-flex-container">
@@ -644,17 +655,17 @@ export const TvCheck = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', width: '150px', gap: '5px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
-                <span style={{ color: isLagging ? 'var(--c-danger)' : 'var(--c-success)', fontWeight: 'bold' }}>
+                <span style={{ color: progressColor, fontWeight: 'bold' }}>
                   {totalChecked} / {plan}
                 </span>
-                <span style={{ color: 'var(--c-text-muted)' }}>{plan > 0 ? Math.min(100, Math.round((totalChecked / plan) * 100)) : 0}%</span>
+                <span style={{ color: 'var(--c-text-muted)' }}>{Math.min(100, Math.round(progressPercent))}%</span>
               </div>
               <div style={{ width: '100%', height: '8px', background: 'var(--c-bg-base)', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{
-                  width: `${plan > 0 ? Math.min(100, (totalChecked / plan) * 100) : 0}%`,
+                  width: `${Math.min(100, progressPercent)}%`,
                   height: '100%',
-                  background: isLagging ? 'var(--c-danger)' : 'var(--c-success)',
-                  transition: 'width 0.5s ease-in-out'
+                  background: progressColor,
+                  transition: 'width 0.5s ease-in-out, background 0.5s ease'
                 }} />
               </div>
             </div>
@@ -734,6 +745,21 @@ export const TvCheck = () => {
 
             {/* Scrollable Body */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {user?.role === 'Admin' && (
+                <div>
+                  <label style={{ fontSize: '12px', color: 'var(--c-text-secondary)', marginBottom: '10px', display: 'block', fontWeight: 'bold' }}>НОМЕР ОТК (ТОЛЬКО ДЛЯ АДМИНА)</label>
+                  <select 
+                    className="glass" 
+                    value={editInspector} 
+                    onChange={e => setEditInspector(e.target.value)} 
+                    style={{ width: '100%', padding: '10px', border: '1px solid var(--c-border)', borderRadius: 'var(--radius-sm)', background: 'var(--c-bg-surface-elevated)', color: 'var(--c-text-primary)', outline: 'none' }}
+                  >
+                    {Array.from({ length: 15 }, (_, i) => i + 1).map(num => (
+                      <option key={num} value={num.toString()}>{num}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--c-text-secondary)', marginBottom: '10px', display: 'block', fontWeight: 'bold' }}>ДЕФЕКТЫ</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>

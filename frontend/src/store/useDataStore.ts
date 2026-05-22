@@ -448,7 +448,7 @@ export const useDataStore = create<DataState>((set, get) => {
               const config = JSON.parse(get().settings.oqa_shift_config);
               const ratio = (config.ratio_checked || 13) / (config.ratio_produced || 280);
               planVal = Math.round(factVal * ratio);
-            } catch (e) {}
+            } catch { /* ignored */ }
           }
           
           await api.post('/kpi/facts', { date: today, mes_fact: factVal, aql_plan: planVal });
@@ -471,7 +471,7 @@ export const useDataStore = create<DataState>((set, get) => {
           } else {
             set({ mesFact: 0 });
           }
-        } catch (dbErr) {
+        } catch {
           set({ mesFact: 0 });
         }
       } finally {

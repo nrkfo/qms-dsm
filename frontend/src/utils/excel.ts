@@ -3,14 +3,14 @@ import XLSX from 'xlsx-js-style';
 /**
  * Calculates column widths based on content
  */
-export const getColumnWidths = (data: any[]) => {
+export const getColumnWidths = (data: Record<string, unknown>[]) => {
   if (!data || data.length === 0) return [];
   
   const keys = Object.keys(data[0]);
   return keys.map(key => {
     let maxLen = key.toString().length;
     data.forEach(row => {
-      const val = row[key] ? row[key].toString() : '';
+      const val = row[key] ? String(row[key]) : '';
       if (val.length > maxLen) maxLen = val.length;
     });
     // Add a bit of padding
@@ -21,7 +21,7 @@ export const getColumnWidths = (data: any[]) => {
 /**
  * Export to Excel with auto-fitted columns and borders
  */
-export const exportToExcel = (data: any[], fileName: string, sheetName: string) => {
+export const exportToExcel = (data: Record<string, unknown>[], fileName: string, sheetName: string) => {
   const ws = XLSX.utils.json_to_sheet(data);
   
   // Set column widths

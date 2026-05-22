@@ -25,7 +25,7 @@ const DEFAULT_CHECKPOINTS = [
 ];
 
 export const PatrolCheck = () => {
-  const { fetchLogs, saveLog, activeLot, tvModels, fetchTvModels, settings, fetchSettings, showToast } = useDataStore();
+  const { fetchLogs, saveLog, updateLog, activeLot, tvModels, fetchTvModels, settings, fetchSettings, showToast } = useDataStore();
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'form' | 'history'>('form');
@@ -39,15 +39,25 @@ export const PatrolCheck = () => {
   const [otkNum, setOtkNum] = useState('');
   const [checks, setChecks] = useState<Record<string, 'OK' | 'NG'>>({});
   const [comment, setComment] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  // Password Modal State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [pendingEditRecord, setPendingEditRecord] = useState<any>(null);
 
   useEffect(() => {
     setChecks(checkpoints.reduce((acc: any, cp: string) => ({ ...acc, [cp]: 'OK' }), {}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.oqa_patrol_checkpoints]);
 
   useEffect(() => {
     fetchTvModels();
     fetchSettings();
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLot]);
 
   useEffect(() => {
@@ -104,6 +114,46 @@ export const PatrolCheck = () => {
     }));
   };
 
+  const handleEditClick = (row: any) => {
+    setPendingEditRecord(row);
+    setPasswordInput('');
+    setPasswordError('');
+    setShowPasswordModal(true);
+  };
+
+  const handleVerifyEdit = async () => {
+    setIsVerifying(true);
+    setPasswordError('');
+    try {
+      // Import and use api directly or make sure it's available. Actually we need to import api.
+      const { api } = await import('../../utils/api');
+      await api.post('/auth/verify', { password: passwordInput });
+      setShowPasswordModal(false);
+      setPasswordInput('');
+      
+      const r = pendingEditRecord;
+      setEditingId(r.id);
+      setModel(r.model || '');
+      setOtkNum(r.otkNum || '');
+      setComment(r.comment || '');
+      
+      const newChecks = checkpoints.reduce((acc: any, cp: string) => ({ ...acc, [cp]: 'OK' }), {});
+      if (r.checks) {
+        Object.keys(r.checks).forEach(k => {
+          if (newChecks[k] !== undefined) {
+             newChecks[k] = r.checks[k];
+          }
+        });
+      }
+      setChecks(newChecks);
+      setActiveTab('form');
+    } catch {
+      setPasswordError('Неверный пароль. Пожалуйста, попробуйте еще раз.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!activeLot) return showToast('Выберите текущий лот в боковом меню!', 'warning');
     if (!model) return showToast('Введите модель ТВ!', 'warning');
@@ -134,8 +184,15 @@ export const PatrolCheck = () => {
       comment: finalComment
     };
 
-    await saveLog('oqa_patrol', data, hasNG ? 'NG' : 'OK');
-    showToast('Запись сохранена');
+    if (editingId) {
+      await updateLog('oqa_patrol', editingId, data, hasNG ? 'NG' : 'OK');
+      showToast('Запись обновлена');
+      setEditingId(null);
+    } else {
+      await saveLog('oqa_patrol', data, hasNG ? 'NG' : 'OK');
+      showToast('Запись сохранена');
+    }
+    
     setModel('');
     setOtkNum('');
     setChecks(checkpoints.reduce((acc: any, cp: string) => ({ ...acc, [cp]: 'OK' }), {}));
@@ -212,10 +269,34 @@ export const PatrolCheck = () => {
         <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '20px', flex: 1 }}>
           {/* Main Checklist */}
           <div className="glass-panel" style={{ padding: '20px', overflowY: 'auto', borderRadius: 'var(--radius-lg)' }}>
-            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <CheckCircle2 size={20} color="var(--c-accent)" /> 
-              Контрольные точки
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <CheckCircle2 size={20} color="var(--c-accent)" /> 
+                Контрольные точки
+              </h3>
+              {editingId && (
+                <button 
+                  onClick={() => {
+                    setEditingId(null);
+                    setModel('');
+                    setOtkNum('');
+                    setComment('');
+                    setChecks(checkpoints.reduce((acc: any, cp: string) => ({ ...acc, [cp]: 'OK' }), {}));
+                  }}
+                  style={{
+                    padding: '4px 10px',
+                    background: 'transparent',
+                    border: '1px solid var(--c-danger)',
+                    color: 'var(--c-danger)',
+                    borderRadius: '4px',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Отменить ред.
+                </button>
+              )}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
               {checkpoints.map((cp: string) => (
                 <div 
@@ -311,11 +392,11 @@ export const PatrolCheck = () => {
                <button 
                 onClick={handleSave}
                 style={{ 
-                  width: '100%', padding: '15px', background: 'var(--c-accent)', border: 'none', borderRadius: '8px', 
+                  width: '100%', padding: '15px', background: editingId ? 'var(--c-warning)' : 'var(--c-accent)', border: 'none', borderRadius: '8px', 
                   color: '#000', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                 }}
                >
-                 <Save size={18} /> Сохранить обход
+                 <Save size={18} /> {editingId ? 'Обновить обход' : 'Сохранить обход'}
                </button>
             </div>
           </div>
@@ -328,7 +409,116 @@ export const PatrolCheck = () => {
              data={records} 
              loading={loading} 
              hideAdd hideExport
+             onEdit={handleEditClick}
            />
+        </div>
+      )}
+
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          animation: 'fade-in 0.2s ease'
+        }}>
+          <div className="glass-panel animate-scale-in" style={{
+            width: '400px',
+            padding: '30px',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--c-accent-muted)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              🔒 Доступ к редактированию
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--c-text-muted)', marginBottom: '20px' }}>
+              Пожалуйста, введите ваш пароль, чтобы изменить запись обхода.
+            </p>
+            
+            <input 
+              type="password"
+              placeholder="Введите ваш пароль"
+              value={passwordInput}
+              onChange={(e) => {
+                setPasswordInput(e.target.value);
+                setPasswordError('');
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleVerifyEdit();
+              }}
+              disabled={isVerifying}
+              className="glass"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: passwordError ? '1px solid var(--c-danger)' : '1px solid var(--c-border)',
+                background: 'var(--c-bg-surface-elevated)',
+                color: 'var(--c-text-primary)',
+                marginBottom: '15px',
+                fontSize: '0.95rem',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+              autoFocus
+            />
+
+            {passwordError && (
+              <div style={{ color: 'var(--c-danger)', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold' }}>
+                ⚠️ {passwordError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordInput('');
+                  setPasswordError('');
+                }}
+                disabled={isVerifying}
+                style={{
+                  padding: '10px 18px',
+                  background: 'transparent',
+                  border: '1px solid var(--c-border)',
+                  borderRadius: '6px',
+                  color: 'var(--c-text-muted)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600
+                }}
+              >
+                Отмена
+              </button>
+              <button 
+                onClick={handleVerifyEdit}
+                disabled={isVerifying || !passwordInput}
+                style={{
+                  padding: '10px 18px',
+                  background: 'var(--c-accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {isVerifying ? 'Проверка...' : 'Подтвердить'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

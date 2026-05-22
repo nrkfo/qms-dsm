@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { Download, X } from 'lucide-react';
@@ -19,8 +20,6 @@ interface DsmTableProps {
   onDelete?: (id: number) => void;
   onEdit?: (row: any) => void;
 }
-
-import { ModalPortal } from './ModalPortal';
 
 export const DsmTable: React.FC<DsmTableProps> = ({ title, columns, data, hideAdd, hideExport, loading, onDelete, onEdit }) => {
   const { activeLot } = useDataStore();

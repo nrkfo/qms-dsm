@@ -4,11 +4,12 @@ import { formatDate } from '../../utils/date';
 import { playSound } from '../../utils/audio';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDataStore } from '../../store/useDataStore';
+import { Trash2 } from 'lucide-react';
 
 export const LabelsCheck = () => {
   const { 
     activeLot, lastLabelCheckTimestamp, setLastLabelCheckTimestamp, 
-    fetchLogs, fetchAllLogs, saveLog, 
+    fetchLogs, fetchAllLogs, saveLog, deleteLog,
     settings, fetchSettings,
     tvModels, fetchTvModels,
     showToast, showConfirm
@@ -25,6 +26,13 @@ export const LabelsCheck = () => {
 
   const [timeLeftStr, setTimeLeftStr] = useState('00:00:00');
   const [isAlarm, setIsAlarm] = useState(false);
+
+  // Password Modal State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -97,6 +105,34 @@ export const LabelsCheck = () => {
   //   logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   // }, [logs]);
 
+  const handleDeleteClick = (id: number) => {
+    setPendingDeleteId(id);
+    setPasswordInput('');
+    setPasswordError('');
+    setShowPasswordModal(true);
+  };
+
+  const handleVerifyDelete = async () => {
+    setIsVerifying(true);
+    setPasswordError('');
+    try {
+      const { api } = await import('../../utils/api');
+      await api.post('/auth/verify', { password: passwordInput });
+      setShowPasswordModal(false);
+      setPasswordInput('');
+      
+      if (pendingDeleteId) {
+        await deleteLog('oqa_labels', pendingDeleteId);
+        showToast('Запись удалена', 'success');
+        loadData();
+      }
+    } catch (e: any) {
+      setPasswordError('Неверный пароль. Пожалуйста, попробуйте еще раз.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const handleValidate = async () => {
     if (!activeLot) return showToast('Выберите лот!', 'warning');
     if (!sn && !mn && !ean) return;
@@ -116,7 +152,7 @@ export const LabelsCheck = () => {
     }
 
     const timeStr = new Date().toLocaleTimeString('ru-RU');
-    let errors: string[] = [];
+    const errors: string[] = [];
 
     const snLenRaw = model?.label_sn_len ?? Number(settings.label_sn_len);
     const snLen = (snLenRaw === null || snLenRaw === '') ? null : Number(snLenRaw);
@@ -157,8 +193,8 @@ export const LabelsCheck = () => {
     checkFixes(model?.label_ean_fix, ean, 'EAN');
 
     // Dynamic Parsing
-    let snDetails: any = {};
-    let mnDetails: any = {};
+    const snDetails: any = {};
+    const mnDetails: any = {};
     try {
       const parseCfg = JSON.parse(model?.label_parsing_config || '{"sn":[], "mn":[]}');
       if (sn && parseCfg.sn) {
@@ -322,8 +358,18 @@ export const LabelsCheck = () => {
               logs.map(log => (
                 <div key={log.id} className="animate-fade-in" style={{ background: 'var(--c-bg-surface-elevated)', border: '1px solid var(--c-border)', borderRadius: '10px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', transition: 'transform 0.2s', cursor: 'default' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', background: log.status === 'OK' ? 'var(--c-success-muted)' : 'var(--c-danger-muted)', color: log.status === 'OK' ? 'var(--c-success)' : 'var(--c-danger)' }}>{log.status}</span>
-                    <span style={{ color: 'var(--c-text-muted)', fontSize: '11px' }}>{log.time}</span>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <span style={{ padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', background: log.status === 'OK' ? 'var(--c-success-muted)' : 'var(--c-danger-muted)', color: log.status === 'OK' ? 'var(--c-success)' : 'var(--c-danger)' }}>{log.status}</span>
+                      <span style={{ color: 'var(--c-text-muted)', fontSize: '11px' }}>{log.time}</span>
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteClick(log.id)} 
+                      className="hover-scale"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--c-danger)', opacity: 0.7, display: 'flex', alignItems: 'center' }}
+                      title="Удалить запись"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -379,6 +425,114 @@ export const LabelsCheck = () => {
           </div>
         </div>
       </div>
+
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          animation: 'fade-in 0.2s ease'
+        }}>
+          <div className="glass-panel animate-scale-in" style={{
+            width: '400px',
+            padding: '30px',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--c-accent-muted)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              🔒 Доступ к удалению
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--c-text-muted)', marginBottom: '20px' }}>
+              Пожалуйста, введите ваш пароль, чтобы удалить эту запись. Действие необратимо.
+            </p>
+            
+            <input 
+              type="password"
+              placeholder="Введите ваш пароль"
+              value={passwordInput}
+              onChange={(e) => {
+                setPasswordInput(e.target.value);
+                setPasswordError('');
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleVerifyDelete();
+              }}
+              disabled={isVerifying}
+              className="glass"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: passwordError ? '1px solid var(--c-danger)' : '1px solid var(--c-border)',
+                background: 'var(--c-bg-surface-elevated)',
+                color: 'var(--c-text-primary)',
+                marginBottom: '15px',
+                fontSize: '0.95rem',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+              autoFocus
+            />
+
+            {passwordError && (
+              <div style={{ color: 'var(--c-danger)', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold' }}>
+                ⚠️ {passwordError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordInput('');
+                  setPasswordError('');
+                }}
+                disabled={isVerifying}
+                style={{
+                  padding: '10px 18px',
+                  background: 'transparent',
+                  border: '1px solid var(--c-border)',
+                  borderRadius: '6px',
+                  color: 'var(--c-text-muted)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600
+                }}
+              >
+                Отмена
+              </button>
+              <button 
+                onClick={handleVerifyDelete}
+                disabled={isVerifying || !passwordInput}
+                style={{
+                  padding: '10px 18px',
+                  background: 'var(--c-danger)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {isVerifying ? 'Удаление...' : 'Удалить запись'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -175,7 +175,7 @@ export const EpsCheck = () => {
       </div>
 
       <div className="responsive-flex-content table-mobile-responsive" style={{ flex: 1 }}>
-        <DsmTable title="История замеров EPS" columns={columns} data={records} loading={loading} hideAdd onDelete={handleDelete} onEdit={handleEdit} />
+        <DsmTable title="История замеров EPS" columns={columns} data={records} loading={loading} hideAdd hideExport onDelete={handleDelete} onEdit={handleEdit} />
       </div>
 
       {editingRecord && (
