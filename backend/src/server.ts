@@ -611,7 +611,8 @@ app.get('/api/metrics', authenticateToken, async (req, res) => {
         SELECT 
           '${mod}' as module_id,
           COUNT(CASE WHEN status IN ('OK', 'Accept') THEN 1 END) as total_passed,
-          COUNT(CASE WHEN status IN ('NG', 'Reject') THEN 1 END) as total_failed
+          COUNT(CASE WHEN status IN ('NG', 'Reject') THEN 1 END) as total_failed,
+          GROUP_CONCAT(CASE WHEN status IN ('NG', 'Reject') THEN data END, '||') as defects_data
         FROM ${mod}_logs
         WHERE 1=1
       `;
@@ -644,7 +645,36 @@ app.get('/api/metrics', authenticateToken, async (req, res) => {
       });
     })));
 
-    res.json(results);
+    const processedResults = results.map(row => {
+      const topDefects: Record<string, number> = {};
+      if (row.defects_data) {
+        const dataArr = row.defects_data.split('||');
+        dataArr.forEach((d: string) => {
+          if (!d) return;
+          try {
+            const parsed = JSON.parse(d);
+            let defectStr = parsed.defect;
+            if (!defectStr || defectStr === 'OK') {
+              defectStr = parsed.comment || 'Прочие';
+            }
+            if (defectStr && defectStr !== 'OK' && defectStr !== '-') {
+              topDefects[defectStr] = (topDefects[defectStr] || 0) + 1;
+            }
+          } catch(e) {}
+        });
+      }
+      return {
+        module_id: row.module_id,
+        total_passed: row.total_passed,
+        total_failed: row.total_failed,
+        top_defects: Object.entries(topDefects)
+          .map(([name, count]) => ({ name, count: count as number }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5)
+      };
+    });
+
+    res.json(processedResults);
   } catch (err: any) {
     console.error('Metrics aggregation error:', err);
     res.status(500).json({ error: err.message });
@@ -1495,20 +1525,36 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
       return res.status(400).json({ error: 'report_data and records are required' });
     }
 
-    // Create a new Excel workbook
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Panels Check');
 
-    // Define column widths in characters (to ensure a nice look)
-    worksheet.columns = [
-      { key: 'partCode', width: 22 },
-      { key: 'openCell', width: 20 },
-      { key: 'partName', width: 30 },
-      { key: 'qty', width: 10 },
-      { key: 'defect', width: 25 },
-      { key: 'status', width: 12 },
-      { key: 'comment', width: 35 }
+    // Find maximum number of photos across all records
+    let maxPhotos = 1;
+    if (Array.isArray(records)) {
+      for (const r of records) {
+        if (r.photos && Array.isArray(r.photos) && r.photos.length > maxPhotos) {
+          maxPhotos = r.photos.length;
+        }
+      }
+    }
+    if (maxPhotos > 5) maxPhotos = 5;
+
+    // Define columns
+    const columns = [
+      { key: 'partName', width: 25 },
+      { key: 'partCode', width: 25 },
+      { key: 'openCell', width: 25 },
+      { key: 'qty', width: 15 },
+      { key: 'defect', width: 30 },
+      { key: 'repair', width: 20 },
+      { key: 'responsibility', width: 35 },
+      { key: 'process', width: 20 },
+      { key: 'comment', width: 30 }
     ];
+    for (let i = 0; i < maxPhotos; i++) {
+      columns.push({ key: `photo${i}`, width: 42 }); // width 42 is ~280px
+    }
+    worksheet.columns = columns;
 
     const thinBorder = {
       top: { style: 'thin' as const, color: { argb: 'FF000000' } },
@@ -1545,24 +1591,22 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
 
     // Block 1: General Info Table
     const genInfoRows = [
-      ['отчёт составил (а) /revised:', report_data.inspector],
-      ['Номер лота/Lot Nr:', report_data.lotNr],
+      ['отчет составил (я) / revised:', report_data.inspector],
+      ['Номер лота/Lot Nr.:', report_data.lotNr],
       ['Заказчик/Customer:', report_data.customer],
       ['Вид продукции/Type:', report_data.type],
       ['Бренд/Trade Mark:', report_data.tradeMark],
       ['Модель/Model name:', report_data.modelName],
-      ['Assembly Procedures started', report_data.assemblyStarted],
-      ['Assembly Procedures finished', report_data.assemblyFinished]
+      ['Assembly Procedures - started:', report_data.assemblyStarted],
+      ['Assembly Procedures - finished:', report_data.assemblyFinished]
     ];
 
-    let rowNum = 2;
+    let rowNum = 1;
     for (const row of genInfoRows) {
-      worksheet.getRow(rowNum).height = 20;
-      drawCell(`A${rowNum}`, row[0], { fillColor: '#E6E6E6', align: 'right', bold: true });
-      drawCell(`B${rowNum}`, row[1], { fillColor: '#FFFFFF', align: 'left' });
-      // Merge B to D for value to give it a neat appearance
+      worksheet.getRow(rowNum).height = 18;
+      drawCell(`A${rowNum}`, row[0], { fillColor: '#C0C0C0', align: 'right', border: true });
+      drawCell(`B${rowNum}`, row[1], { fillColor: '#C0C0C0', align: 'left', border: true });
       worksheet.mergeCells(`B${rowNum}:D${rowNum}`);
-      // Fill cell borders for merged cells
       worksheet.getCell(`C${rowNum}`).border = thinBorder;
       worksheet.getCell(`D${rowNum}`).border = thinBorder;
       rowNum++;
@@ -1571,95 +1615,130 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
     // Block 2: Quantitative indicators table
     rowNum += 1;
     const quantRows = [
-      ['Количество в ЛОТе', 'LOT Q-ty', report_data.lotQty],
-      ['Кол- во Проверенной Продукции', 'Ready Goods q-ty', report_data.readyQty],
-      ['К-во дефектов от поставщика', 'Number of defective KITs issued from supplier', report_data.defectsQty]
+      ['Количество в ЛОТе', 'LOT Qty', report_data.lotQty],
+      ['Кол - во проверенной продукции', 'Ready check qty', report_data.readyQty],
+      ['Вид дефектов от поставщика', 'Number of defective KITs issued from supplier', report_data.defectsQty]
     ];
 
     for (let i = 0; i < quantRows.length; i++) {
-      worksheet.getRow(rowNum).height = 20;
+      worksheet.getRow(rowNum).height = 30; // Increased height for wrapping
       const row = quantRows[i];
       let valColor = '#000000';
       let valBg = '#FFFFFF';
+      let isBold = false;
       
       if (i === 0) {
-        valColor = '#FF8C00';
+        valColor = '#FF8C00'; // Orange text for lot qty
+        valBg = '#E6E6E6';
+        isBold = true; // Make LOT Qty bold
       } else if (i === 1) {
-        valBg = '#D2D2D2';
+        valBg = '#D2D2D2'; // Gray background for checked qty
       } else if (i === 2) {
-        if (Number(report_data.defectsQty) > 0) {
-          valBg = '#FF9696';
-        }
+        valBg = '#FF9696'; // Red background for defects
       }
 
-      drawCell(`A${rowNum}`, row[0], { border: true });
-      drawCell(`B${rowNum}`, row[1], { border: true });
-      drawCell(`C${rowNum}`, row[2], { fillColor: valBg, textColor: valColor, align: 'center', bold: true, border: true });
+      drawCell(`A${rowNum}`, row[0], { border: true, align: 'left' });
+      drawCell(`B${rowNum}`, row[1], { border: true, align: 'left' });
+      drawCell(`C${rowNum}`, row[2], { fillColor: valBg, textColor: valColor, align: 'center', border: true, bold: isBold });
+      worksheet.mergeCells(`C${rowNum}:D${rowNum}`);
+      worksheet.getCell(`D${rowNum}`).border = thinBorder;
       rowNum++;
     }
 
     // Block 3: Defects List Table Headers
     rowNum += 2;
-    const headers = ['PART CODE', 'OPEN CELL', 'NAME', 'Qty', 'DEFECT', 'STATUS', 'COMMENT'];
-    worksheet.getRow(rowNum).height = 25;
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const headers = [
+      'PART NAME',
+      'PART CODE',
+      'PART CODE OPEN CELL',
+      'Количество Qty',
+      'Характер дефекта Defect Definition',
+      'Ремонт Repaired Y/N',
+      'Происхождение дефекта/Responsibility of defect',
+      'Обнаружено Process',
+      'Comment',
+      'Photo'
+    ];
+    worksheet.getRow(rowNum).height = 50; // Taller row for wrapped text
+    
+    // Create column letters dynamically based on maxPhotos
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+    for (let i = 0; i < maxPhotos; i++) {
+      cols.push(String.fromCharCode(74 + i)); // 74 is 'J'
+    }
+
     for (let i = 0; i < headers.length; i++) {
-      drawCell(`${cols[i]}${rowNum}`, headers[i], {
-        fillColor: '#C8C8C8',
-        align: 'center',
-        bold: true,
-        border: true
-      });
+      if (i === 9) { // Photo header
+        drawCell(`${cols[i]}${rowNum}`, headers[i], {
+          fillColor: '#FFFFFF',
+          align: 'center',
+          bold: true,
+          border: true
+        });
+        if (maxPhotos > 1) {
+          worksheet.mergeCells(`${cols[i]}${rowNum}:${cols[cols.length-1]}${rowNum}`);
+          for (let k = i + 1; k < cols.length; k++) {
+            worksheet.getCell(`${cols[k]}${rowNum}`).border = thinBorder;
+          }
+        }
+      } else {
+        drawCell(`${cols[i]}${rowNum}`, headers[i], {
+          fillColor: '#FFFFFF',
+          align: 'center',
+          bold: true,
+          border: true
+        });
+      }
     }
     rowNum++;
 
     // Data rows
     for (const record of records) {
-      worksheet.getRow(rowNum).height = 22;
-      const isDefect = record.status === 'NG' || record.defect !== 'OK';
-      const rowBg = isDefect ? '#FFC8C8' : undefined;
+      const hasPhotos = record.photos && Array.isArray(record.photos) && record.photos.length > 0;
+      worksheet.getRow(rowNum).height = hasPhotos ? 220 : 40; // Increased height for 2x photos (280px ~ 210 points)
+      
+      const isDefect = record.status === 'NG' || (record.defect && record.defect !== 'OK');
+      const rowBg = isDefect ? '#FF9696' : undefined;
 
       const rowValues = [
+        record.partName || 'Panel Xiaomi',
         record.partCode,
         record.openCell,
-        record.partName,
         Number(record.qty || 1),
-        record.defect,
-        record.status,
-        record.comment || '-'
+        record.defect === 'OK' ? '' : record.defect,
+        record.repair || '-',
+        record.responsibility || '-',
+        record.process || 'IQC',
+        record.comment || '',
+        '' // Photo column placeholder
       ];
 
-      for (let i = 0; i < rowValues.length; i++) {
+      for (let i = 0; i < 9; i++) { // Render text columns up to index 8
         drawCell(`${cols[i]}${rowNum}`, rowValues[i], {
-          fillColor: rowBg,
-          align: (i === 3 || i === 5) ? 'center' : 'left',
-          border: true
+          align: 'center',
+          border: true,
+          fillColor: rowBg
         });
       }
-      rowNum++;
 
-      const hasPhotos = record.photos && Array.isArray(record.photos) && record.photos.length > 0;
-      if (hasPhotos) {
-        // Create photo row
-        const photoRow = rowNum;
-        worksheet.getRow(photoRow).height = 75;
-        
-        // Merge cells A through G
-        worksheet.mergeCells(`A${photoRow}:G${photoRow}`);
-        
-        // Apply styling/border to all cells in merged range to keep grid neat
-        for (const col of cols) {
-          worksheet.getCell(`${col}${photoRow}`).border = thinBorder;
-          if (rowBg) {
-            worksheet.getCell(`${col}${photoRow}`).fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'FF' + rowBg.replace('#', '') }
-            };
-          }
+      // Merge and outline the Photo columns
+      if (maxPhotos > 1) {
+        worksheet.mergeCells(`${cols[9]}${rowNum}:${cols[cols.length-1]}${rowNum}`);
+      }
+      for (let k = 9; k < cols.length; k++) {
+        const cell = worksheet.getCell(`${cols[k]}${rowNum}`);
+        cell.border = thinBorder;
+        if (rowBg) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF' + rowBg.replace('#', '') }
+          };
         }
+      }
 
-        const photos = record.photos.slice(0, 5);
+      if (hasPhotos) {
+        const photos = record.photos.slice(0, maxPhotos);
         for (let i = 0; i < photos.length; i++) {
           try {
             const p = photos[i];
@@ -1671,17 +1750,17 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
               extension: 'png'
             });
 
-            // Anchor image side-by-side using float column offsets in the merged cell
+            // Anchor image in the dynamically merged Photo columns
             worksheet.addImage(imageId, {
-              tl: { col: i + 0.15, row: photoRow - 1 + 0.1 },
-              ext: { width: 85, height: 85 }
+              tl: { col: 9 + i + 0.05, row: rowNum - 1 + 0.04 },
+              ext: { width: 270, height: 270 } // Fits perfectly inside 220pt row / 42char col
             });
           } catch (e: any) {
             console.error('[Excel Generator] Image error:', e.message);
           }
         }
-        rowNum++;
       }
+      rowNum++;
     }
 
     // Set response headers and send Excel binary

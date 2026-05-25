@@ -3,6 +3,11 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { api } from '../utils/api';
 import { ChevronLeft, Tv, CheckCircle, TrendingUp, Zap, Layers } from 'lucide-react';
+import { DsmTable } from '../components/ui/DsmTable';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell, AreaChart, Area
+} from 'recharts';
 
 const getPhotosArray = (val: any): string[] => {
   if (!val) return [];
@@ -267,6 +272,97 @@ export const Dashboard = () => {
     );
   };
 
+  const generateColumns = () => {
+    if (!moduleLogs || moduleLogs.length === 0) return [];
+    
+    // Extract unique keys from data
+    const dataKeys = new Set<string>();
+    moduleLogs.forEach(log => {
+      Object.keys(log.data || {}).forEach(k => {
+        if (k !== 'photos' && k !== 'previewPhotos') dataKeys.add(k);
+      });
+    });
+
+    const translations: Record<string, string> = {
+      supplier: 'Поставщик',
+      article: 'Артикул',
+      prodDate: 'Дата произв.',
+      measDate: 'Дата замера',
+      weight: 'Вес',
+      dims: 'Размеры',
+      humidity: 'Влажность',
+      qty: 'Кол-во',
+      defect: 'Дефект',
+      partName: 'Наименование',
+      partCode: 'Парт-код',
+      openCell: 'Open Cell',
+      repair: 'Ремонт',
+      responsibility: 'Виновник',
+      comment: 'Комментарий',
+      model: 'Модель',
+      serial: 'Серийный №',
+      mac: 'MAC',
+      inspector: 'Инспектор',
+      shift: 'Смена',
+      otk: 'ОТК',
+      process: 'Процесс',
+      size: 'Размер',
+      type: 'Тип',
+      modelName: 'Модель',
+      time: 'Время',
+      date: 'Дата'
+    };
+
+    const cols: any[] = [
+      { key: 'timestamp', label: 'Время', render: (val: any) => val ? new Date(val).toLocaleTimeString() : '-' },
+      { key: 'status', label: 'Статус', render: (val: any) => (
+         <div style={{ 
+           padding: '4px 8px', borderRadius: '4px', textAlign: 'center', fontSize: '0.8rem', fontWeight: 'bold',
+           background: val === 'OK' || val === 'Accept' ? 'var(--c-success-muted)' : 'var(--c-danger-muted)',
+           color: val === 'OK' || val === 'Accept' ? 'var(--c-success)' : 'var(--c-danger)'
+         }}>{val}</div>
+      )}
+    ];
+
+    dataKeys.forEach(k => {
+      cols.push({
+        key: k,
+        label: translations[k] || k,
+        render: (_: any, row: any) => formatValue(row.data?.[k])
+      });
+    });
+
+    // Photos column
+    const hasPhotos = moduleLogs.some(log => getPhotosArray(log.data?.photos).length > 0 || getPhotosArray(log.data?.previewPhotos).length > 0);
+    if (hasPhotos) {
+      cols.push({
+        key: 'photos',
+        label: 'Фото',
+        render: (_: any, row: any) => {
+          const p1 = getPhotosArray(row.data?.photos);
+          const p2 = getPhotosArray(row.data?.previewPhotos);
+          const allP = [...p1, ...p2];
+          if (allP.length === 0) return '-';
+          return (
+            <button
+              onClick={(e) => { e.stopPropagation(); setPhotoViewerImages(allP); setActivePhotoIdx(0); }}
+              className="hover-scale"
+              style={{
+                background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)',
+                color: '#60a5fa', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '4px'
+              }}
+            >
+              📸 {allP.length}
+            </button>
+          );
+        }
+      });
+    }
+
+    return cols;
+  };
+
   return (
     <div className="animate-fade-in">
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -325,6 +421,148 @@ export const Dashboard = () => {
       <div>
         {!selectedModule ? (
           <>
+            {/* Charts Section */}
+            {metrics.length > 0 && (
+              <div style={{ marginBottom: '40px' }} className="animate-fade-in">
+                <h3 style={{ margin: '0 0 20px 0', color: 'var(--c-text-primary)' }}>Сводная аналитика (KPI)</h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
+                  {/* Module breakdown - Bar Chart */}
+                  <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+                     <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Статистика проверок по модулям</h4>
+                     <div style={{ width: '100%', height: 350 }}>
+                       <ResponsiveContainer>
+                         <BarChart 
+                           data={ALL_MODULES.map(m => {
+                             const met = getModuleMetric(m.id);
+                             return { name: m.title.split(' ').slice(0, 2).join(' '), OK: met.total_passed, NG: met.total_failed, Total: met.total_passed + met.total_failed };
+                           }).filter(m => m.Total > 0)} 
+                           margin={{ top: 10, right: 10, left: 40, bottom: 80 }}
+                         >
+                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                           <XAxis dataKey="name" stroke="var(--c-text-muted)" fontSize={11} angle={-45} textAnchor="end" interval={0} />
+                           <YAxis stroke="var(--c-text-muted)" fontSize={12} />
+                           <RechartsTooltip 
+                             contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)' }}
+                             itemStyle={{ color: 'var(--c-text-primary)' }}
+                           />
+                           <Legend wrapperStyle={{ bottom: 0 }} />
+                           <Bar dataKey="OK" name="Годно (OK)" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
+                           <Bar dataKey="NG" name="Брак (NG)" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                         </BarChart>
+                       </ResponsiveContainer>
+                     </div>
+                  </div>
+
+                  {/* Quality ratio - Pie Chart */}
+                  <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+                     <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Общий уровень качества (Доля брака)</h4>
+                     <div style={{ width: '100%', height: 300, position: 'relative' }}>
+                       <ResponsiveContainer>
+                         <PieChart>
+                           <Pie
+                             data={[
+                               { name: 'Годно (OK)', value: ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_passed, 0), color: '#10B981' },
+                               { name: 'Брак (NG)', value: ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_failed, 0), color: '#EF4444' }
+                             ]}
+                             cx="50%"
+                             cy="50%"
+                             innerRadius={80}
+                             outerRadius={110}
+                             paddingAngle={5}
+                             dataKey="value"
+                             stroke="none"
+                           >
+                             {[
+                               { name: 'Годно (OK)', value: ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_passed, 0), color: '#10B981' },
+                               { name: 'Брак (NG)', value: ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_failed, 0), color: '#EF4444' }
+                             ].map((entry, index) => (
+                               <Cell key={`cell-${index}`} fill={entry.color} />
+                             ))}
+                           </Pie>
+                           <RechartsTooltip 
+                             contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
+                             itemStyle={{ color: 'var(--c-text-primary)' }}
+                           />
+                           <Legend verticalAlign="bottom" height={36} />
+                         </PieChart>
+                       </ResponsiveContainer>
+                       
+                       {/* Center text for Donut */}
+                       <div style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--c-text-primary)' }}>
+                            {ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_passed + getModuleMetric(m.id).total_failed, 0)}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>Всего проверено</div>
+                       </div>
+                     </div>
+                  </div>
+
+                  {/* Workload by module - Pie Chart */}
+                  <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+                     <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Распределение нагрузки (Проверки)</h4>
+                     <div style={{ width: '100%', height: 300, position: 'relative' }}>
+                       <ResponsiveContainer>
+                         <PieChart>
+                           <Pie
+                             data={ALL_MODULES.map(m => {
+                               const met = getModuleMetric(m.id);
+                               return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
+                             }).filter(m => m.value > 0)}
+                             cx="50%"
+                             cy="50%"
+                             innerRadius={50}
+                             outerRadius={100}
+                             paddingAngle={2}
+                             dataKey="value"
+                             stroke="none"
+                           >
+                             {ALL_MODULES.map((m, index) => {
+                               const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
+                               return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                             })}
+                           </Pie>
+                           <RechartsTooltip 
+                             contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
+                           />
+                         </PieChart>
+                       </ResponsiveContainer>
+                     </div>
+                  </div>
+                  
+                  {/* Defect volume trend */}
+                  <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+                     <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Объем брака (NG) по участкам</h4>
+                     <div style={{ width: '100%', height: 350 }}>
+                       <ResponsiveContainer>
+                         <AreaChart 
+                           data={ALL_MODULES.map(m => {
+                             const met = getModuleMetric(m.id);
+                             return { name: m.title.split(' ').slice(0, 2).join(' '), NG: met.total_failed, Total: met.total_passed + met.total_failed };
+                           }).filter(m => m.Total > 0)} 
+                           margin={{ top: 10, right: 10, left: 40, bottom: 80 }}
+                         >
+                           <defs>
+                             <linearGradient id="colorNG" x1="0" y1="0" x2="0" y2="1">
+                               <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8}/>
+                               <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                             </linearGradient>
+                           </defs>
+                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                           <XAxis dataKey="name" stroke="var(--c-text-muted)" fontSize={11} angle={-45} textAnchor="end" interval={0} />
+                           <YAxis stroke="var(--c-text-muted)" fontSize={12} />
+                           <RechartsTooltip 
+                             contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)' }}
+                           />
+                           <Area type="monotone" dataKey="NG" name="Количество брака" stroke="#EF4444" fillOpacity={1} fill="url(#colorNG)" />
+                         </AreaChart>
+                       </ResponsiveContainer>
+                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <h3 style={{ margin: '0 0 15px 0', color: 'var(--c-text-primary)' }}>OQA</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
               {ALL_MODULES.filter(m => m.id.startsWith('oqa_')).map(renderModuleCard)}
@@ -362,62 +600,18 @@ export const Dashboard = () => {
             
             <div style={{ padding: '20px', maxHeight: '500px', overflowY: 'auto' }}>
               {logsLoading && moduleLogs.length === 0 ? <div style={{ textAlign: 'center', padding: '40px' }}><div className="spinner"></div> Загрузка...</div> : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {moduleLogs.length === 0 ? <div style={{ padding: '40px', textAlign: 'center', color: 'var(--c-text-muted)' }}>Записей не найдено</div> : moduleLogs.map(log => (
-                    <div key={log.id} className="glass-panel" style={{ padding: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', flex: 1 }}>
-                          <div style={{ minWidth: '80px', fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '-'}</div>
-                          <div style={{ 
-                             padding: '4px 10px', 
-                             borderRadius: '4px', 
-                             fontSize: '0.75rem', 
-                             fontWeight: 'bold',
-                             background: log.status === 'OK' || log.status === 'Accept' ? 'var(--c-success-muted)' : 'var(--c-danger-muted)',
-                             color: log.status === 'OK' || log.status === 'Accept' ? 'var(--c-success)' : 'var(--c-danger)'
-                          }}>
-                             {log.status}
-                          </div>
-                           <div style={{ fontSize: '0.85rem', flex: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '5px 15px' }}>
-                              {Object.entries(log.data || {}).map(([k, v]) => {
-                                if (k === 'photos' || k === 'previewPhotos') {
-                                  const photos = getPhotosArray(v);
-                                  if (photos.length === 0) return null;
-                                  return (
-                                    <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                      <strong style={{ color: 'var(--c-text-secondary)' }}>Фото:</strong>
-                                      <button
-                                        onClick={() => {
-                                          setPhotoViewerImages(photos);
-                                          setActivePhotoIdx(0);
-                                        }}
-                                        className="hover-scale"
-                                        style={{
-                                          background: 'rgba(59, 130, 246, 0.15)',
-                                          border: '1px solid rgba(59, 130, 246, 0.3)',
-                                          color: '#60a5fa',
-                                          padding: '2px 8px',
-                                          borderRadius: '4px',
-                                          fontSize: '0.75rem',
-                                          cursor: 'pointer',
-                                          display: 'inline-flex',
-                                          alignItems: 'center',
-                                          gap: '4px',
-                                          fontWeight: 'bold'
-                                        }}
-                                      >
-                                        📸 {photos.length} фото (посмотреть)
-                                      </button>
-                                    </span>
-                                  );
-                                }
-                                return (
-                                  <span key={k}><strong style={{ color: 'var(--c-text-secondary)' }}>{k}:</strong> {formatValue(v)}</span>
-                                );
-                              })}
-                           </div>
-                       </div>
-                    </div>
-                  ))}
+                <div className="table-mobile-responsive">
+                  {moduleLogs.length === 0 ? (
+                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--c-text-muted)' }}>Записей не найдено</div>
+                  ) : (
+                    <DsmTable 
+                      title=""
+                      columns={generateColumns()}
+                      data={moduleLogs}
+                      hideAdd
+                      hideExport
+                    />
+                  )}
                 </div>
               )}
             </div>

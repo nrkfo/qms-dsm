@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from 'react';
 import { playSound } from '../../utils/audio';
 import { DsmTable } from '../../components/ui/DsmTable';
@@ -10,7 +12,7 @@ import { compressImage, compressImageMax } from '../../utils/image';
 import { ModalPortal } from '../../components/ui/ModalPortal';
 import { useAuthStore } from '../../store/useAuthStore';
 import { api, translateToEnglish } from '../../utils/api';
-import { FileDown, Image as ImageIcon, X, Loader2 } from 'lucide-react';
+import { FileDown, Image as ImageIcon, X, Loader2, Download } from 'lucide-react';
 
 export const PanelsCheck = () => {
   const { fetchLogs, fetchAllLogs, saveLog, updateLog, deleteLog, activeLot, settings, fetchSettings, showToast, showConfirm } = useDataStore();
@@ -22,9 +24,7 @@ export const PanelsCheck = () => {
   const [editFiles, setEditFiles] = useState<File[]>([]);
   
 
-  
   const [showExportModal, setShowExportModal] = useState(false);
-  const [exportType, setExportType] = useState<'pdf' | 'excel'>('pdf');
   const [exportData, setExportData] = useState({
     inspector: '',
     customer: 'Xiaomi',
@@ -33,7 +33,7 @@ export const PanelsCheck = () => {
     modelName: '-',
     startDate: '',
     endDate: '',
-    lotQty: 7000,
+    lotQty: 1000,
   });
 
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
@@ -48,7 +48,7 @@ export const PanelsCheck = () => {
   const [partName, setPartName] = useState('Panel Xiaomi');
   const [qty, setQty] = useState<number>(1);
   const [defect, setDefect] = useState('OK');
-  const [repair, setRepair] = useState('Нет');
+  const [repair, setRepair] = useState('-');
   const [responsibility, setResponsibility] = useState('');
   const [process, setProcess] = useState('IQC');
   const [comment, setComment] = useState('');
@@ -82,7 +82,7 @@ export const PanelsCheck = () => {
           ...prev,
           startDate: start,
           endDate: end,
-          modelName: records[0]?.name || '-'
+          modelName: records[0]?.model || records[0]?.name || '-'
         }));
       }
     }
@@ -92,6 +92,7 @@ export const PanelsCheck = () => {
     loadData();
     fetchSettings();
     setTimeout(() => partCodeRef.current?.focus(), 50);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLot]);
 
   const loadData = async () => {
@@ -205,6 +206,7 @@ export const PanelsCheck = () => {
       }, 150);
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openCell]);
 
   const handleAdd = async () => {
@@ -371,78 +373,10 @@ export const PanelsCheck = () => {
     }
   };
 
-  const exportPDF = async () => {
-    if (!activeLot) return showToast('Сначала выберите Лот для экспорта!', 'error');
-    try {
-      const logs = await fetchLogs('iqc_panels');
-      if (logs.length === 0) return showToast('Нет данных для экспорта в этом Лоте', 'error');
-      setExportType('pdf');
-      setShowExportModal(true);
-    } catch (e) {
-      console.error('Error fetching logs:', e);
-    }
-  };
-
   const exportExcel = async () => {
     if (!activeLot) return showToast('Сначала выберите Лот для экспорта!', 'error');
-    try {
-      const logs = await fetchLogs('iqc_panels');
-      if (logs.length === 0) return showToast('Нет данных для экспорта в этом Лоте', 'error');
-      setExportType('excel');
-      setShowExportModal(true);
-    } catch (e) {
-      console.error('Error fetching logs:', e);
-    }
-  };
-
-  const generatePDFWithData = async () => {
-    if (!activeLot) return;
-    try {
-      const logs = await fetchLogs('iqc_panels');
-      const records = logs.map(l => ({ id: l.id, ...l.data, status: l.status }));
-
-      if (records.length === 0) return showToast('Нет данных для экспорта в этом Лоте', 'error');
-
-      const defectsQty = records.filter(r => r.status === 'NG' || r.defect !== 'OK').length;
-      
-      const report_data = {
-        inspector: exportData.inspector,
-        lotNr: activeLot.name,
-        customer: exportData.customer,
-        type: exportData.type,
-        tradeMark: exportData.tradeMark,
-        modelName: exportData.modelName,
-        assemblyStarted: formatDate(exportData.startDate),
-        assemblyFinished: formatDate(exportData.endDate),
-        lotQty: exportData.lotQty,
-        readyQty: records.length,
-        defectsQty: defectsQty
-      };
-
-      // Request PDF stream from backend
-      const blob = await api.postBlob('/reports/panels-pdf', {
-        report_data,
-        records
-      });
-
-      const safeLotName = (activeLot.name || 'Unknown').replace(/[/\\?%*:|"<>]/g, '-');
-      const lotName = `_Lot_${safeLotName}`;
-      const fileName = `Panels_Check${lotName}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      setShowExportModal(false);
-    } catch (e) {
-      console.error('PDF Export failed:', e);
-      showToast(`Ошибка при создании PDF: ${e instanceof Error ? e.message : String(e)}`, 'error');
-    }
+    if (records.length === 0) return showToast('Нет данных для экспорта в этом Лоте', 'error');
+    setShowExportModal(true);
   };
 
   const generateExcelWithData = async () => {
@@ -487,7 +421,6 @@ export const PanelsCheck = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-
       setShowExportModal(false);
     } catch (e) {
       console.error('Excel Export failed:', e);
@@ -542,11 +475,8 @@ export const PanelsCheck = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={exportExcel} className="glass" style={{ padding: '8px 15px', color: 'var(--c-accent)', border: '1px solid var(--c-accent)', borderRadius: '4px' }}>
-            Экспорт Excel
-          </button>
-          <button onClick={exportPDF} className="glass" style={{ padding: '8px 15px', color: 'var(--c-text-primary)', border: '1px solid var(--c-border)', borderRadius: '4px' }}>
-            Экспорт PDF
+          <button onClick={exportExcel} className="glass" style={{ padding: '8px 15px', color: 'var(--c-accent)', border: '1px solid var(--c-accent)', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+            <Download size={16} /> Выгрузить Excel
           </button>
         </div>
       </div>
@@ -612,13 +542,26 @@ export const PanelsCheck = () => {
                 <div><label style={{ fontSize: '12px' }}>PART CODE</label><input className="glass" value={editingRecord.partCode} onChange={e => setEditingRecord({...editingRecord, partCode: e.target.value})} style={{ width: '100%', padding: '10px' }} /></div>
                 <div><label style={{ fontSize: '12px' }}>OPEN CELL</label><input className="glass" value={editingRecord.openCell} onChange={e => setEditingRecord({...editingRecord, openCell: e.target.value})} style={{ width: '100%', padding: '10px' }} /></div>
               </div>
-              <div>
-                <label style={{ fontSize: '12px' }}>Defect Definition</label>
-                <select className="glass" value={editingRecord.defect} onChange={e => setEditingRecord({...editingRecord, defect: e.target.value})} style={{ width: '100%', padding: '10px' }}>
-                  {defectOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div>
+                  <label style={{ fontSize: '12px' }}>Defect Definition</label>
+                  <select className="glass" value={editingRecord.defect} onChange={e => setEditingRecord({...editingRecord, defect: e.target.value})} style={{ width: '100%', padding: '10px' }}>
+                    {defectOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px' }}>Ремонт Repaired Y/N</label>
+                  <select className="glass" value={editingRecord.repair || '-'} onChange={e => setEditingRecord({...editingRecord, repair: e.target.value})} style={{ width: '100%', padding: '10px' }}>
+                    <option value="-">-</option>
+                    <option value="Y">Y</option>
+                    <option value="N">N</option>
+                  </select>
+                </div>
               </div>
-              <div><label style={{ fontSize: '12px' }}>Comment</label><textarea placeholder="Комментарий (Русский/Eng)..." className="glass" value={editingRecord.comment} onChange={e => setEditingRecord({...editingRecord, comment: e.target.value})} style={{ width: '100%', padding: '10px', height: '60px' }} /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div><label style={{ fontSize: '12px' }}>Происхождение дефекта</label><input className="glass" value={editingRecord.responsibility || ''} onChange={e => setEditingRecord({...editingRecord, responsibility: e.target.value})} style={{ width: '100%', padding: '10px' }} /></div>
+                <div><label style={{ fontSize: '12px' }}>Comment</label><textarea placeholder="Комментарий (Русский/Eng)..." className="glass" value={editingRecord.comment} onChange={e => setEditingRecord({...editingRecord, comment: e.target.value})} style={{ width: '100%', padding: '10px', height: '40px' }} /></div>
+              </div>
               
               <div>
                 <label style={{ fontSize: '12px', display: 'block', marginBottom: '10px' }}>
@@ -694,12 +637,13 @@ export const PanelsCheck = () => {
       </ModalPortal>
     )}
 
+
       {/* Export Modal */}
       {showExportModal && (
         <ModalPortal>
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
           <div className="glass-panel animate-scale-in" style={{ width: '500px', padding: '30px', background: 'var(--c-bg-surface-elevated)' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '20px', color: 'var(--c-accent)' }}>{exportType === 'pdf' ? 'Настройки экспорта PDF' : 'Настройки экспорта Excel'}</h3>
+            <h3 style={{ marginTop: 0, marginBottom: '20px', color: 'var(--c-accent)' }}>Настройки экспорта Excel</h3>
             <div style={{ display: 'grid', gap: '15px' }}>
               <div><label style={{ fontSize: '12px' }}>Отчёт составил (а) /revised</label><input className="glass" value={exportData.inspector} onChange={e => setExportData({...exportData, inspector: e.target.value})} style={{ width: '100%', padding: '10px' }} /></div>
               
@@ -717,14 +661,17 @@ export const PanelsCheck = () => {
                 <div><label style={{ fontSize: '12px' }}>Assembly started</label><input type="date" className="glass" value={exportData.startDate} onChange={e => setExportData({...exportData, startDate: e.target.value})} style={{ width: '100%', padding: '10px' }} /></div>
                 <div><label style={{ fontSize: '12px' }}>Assembly finished</label><input type="date" className="glass" value={exportData.endDate} onChange={e => setExportData({...exportData, endDate: e.target.value})} style={{ width: '100%', padding: '10px' }} /></div>
               </div>
-              <div><label style={{ fontSize: '12px' }}>Количество в ЛОТе / LOT Q-ty</label><input type="number" className="glass" value={exportData.lotQty} onChange={e => setExportData({...exportData, lotQty: Number(e.target.value)})} style={{ width: '100%', padding: '10px' }} /></div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                <div><label style={{ fontSize: '12px' }}>Кол-во в ЛОТе / LOT Qty</label><input type="number" className="glass" value={exportData.lotQty} onChange={e => setExportData({...exportData, lotQty: Number(e.target.value)})} style={{ width: '100%', padding: '10px' }} /></div>
+              </div>
               
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button 
-                  onClick={exportType === 'pdf' ? generatePDFWithData : generateExcelWithData} 
+                  onClick={generateExcelWithData} 
                   style={{ flex: 2, padding: '12px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
                 >
-                  {exportType === 'pdf' ? 'СГЕНЕРИРОВАТЬ PDF' : 'СГЕНЕРИРОВАТЬ EXCEL'}
+                  СГЕНЕРИРОВАТЬ EXCEL
                 </button>
                 <button onClick={() => setShowExportModal(false)} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>ОТМЕНА</button>
               </div>
@@ -733,7 +680,6 @@ export const PanelsCheck = () => {
         </div>
       </ModalPortal>
     )}
-
 
       {/* Password Modal */}
       {isPassModalOpen && (
