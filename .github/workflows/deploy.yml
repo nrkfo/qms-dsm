@@ -1,0 +1,18 @@
+name: Deploy QMS-DSM to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Self-Hosted Server
+    runs-on: self-hosted
+
+    steps:
+      - name: Execute local deployment script
+        run: |
+          # Запускаем скрипт деплоя на сервере
+          # Путь должен указывать на скрипт внутри рабочей папки вашего проекта
+          /home/nur/"Рабочий стол"/qms-dsm/deploy.sh
