@@ -71,24 +71,6 @@ export const Dashboard = () => {
     setModuleLogs([]);
   }, [selectedModule]);
 
-  // Automatic polling for metrics every 10 seconds
-  useEffect(() => {
-    const pollInterval = setInterval(() => {
-      fetchMetrics();
-      if (selectedModule) {
-        fetchModuleLogs(selectedModule);
-      }
-      setIsUpdating(true);
-      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
-      updatePulseRef.current = setTimeout(() => setIsUpdating(false), 1500);
-    }, 10000);
-
-    return () => {
-      clearInterval(pollInterval);
-      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
-    };
-  }, [selectedModule, dateFilter, activeLot?.id]);
-
   // Real-time updates via SSE
   useEffect(() => {
     let eventSource: EventSource | null = null;
@@ -122,6 +104,10 @@ export const Dashboard = () => {
                 fetchModuleLogs(selectedModule);
               }
               
+              setIsUpdating(true);
+              if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
+              updatePulseRef.current = setTimeout(() => setIsUpdating(false), 1500);
+
               // Trigger immediate SSE-based card flash!
               if (data.module && data.module !== 'lots') {
                 const flashType = (data.status === 'OK' || data.status === 'Accept') ? 'ok' : 'ng';
@@ -169,6 +155,7 @@ export const Dashboard = () => {
         eventSource.close();
       }
       clearTimeout(reconnectTimeout);
+      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
     };
   }, [selectedModule, dateFilter, activeLot?.id]); // Reconnect when filters change to ensure we have the latest fetch functions in closure
 
