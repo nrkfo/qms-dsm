@@ -51,8 +51,6 @@ export const Dashboard = () => {
 
   const [photoViewerImages, setPhotoViewerImages] = useState<string[] | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
-  const [flashingModules, setFlashingModules] = useState<Record<string, 'ok' | 'ng' | 'info'>>({});
-  const prevMetricsRef = useRef<any[]>([]);
 
   useEffect(() => {
     fetchLots();
@@ -70,24 +68,6 @@ export const Dashboard = () => {
   useEffect(() => {
     setModuleLogs([]);
   }, [selectedModule]);
-
-  // Automatic polling for metrics every 10 seconds
-  useEffect(() => {
-    const pollInterval = setInterval(() => {
-      fetchMetrics();
-      if (selectedModule) {
-        fetchModuleLogs(selectedModule);
-      }
-      setIsUpdating(true);
-      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
-      updatePulseRef.current = setTimeout(() => setIsUpdating(false), 1500);
-    }, 10000);
-
-    return () => {
-      clearInterval(pollInterval);
-      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
-    };
-  }, [selectedModule, dateFilter, activeLot?.id]);
 
   // Real-time updates via SSE
   useEffect(() => {
@@ -122,20 +102,9 @@ export const Dashboard = () => {
                 fetchModuleLogs(selectedModule);
               }
               
-              // Trigger immediate SSE-based card flash!
-              if (data.module && data.module !== 'lots') {
-                const flashType = (data.status === 'OK' || data.status === 'Accept') ? 'ok' : 'ng';
-                setFlashingModules(prev => ({ ...prev, [data.module]: flashType }));
-                setTimeout(() => {
-                  if (isMounted) {
-                    setFlashingModules(prev => {
-                      const updated = { ...prev };
-                      delete updated[data.module];
-                      return updated;
-                    });
-                  }
-                }, 1500);
-              }
+              setIsUpdating(true);
+              if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
+              updatePulseRef.current = setTimeout(() => setIsUpdating(false), 1500);
 
               // Also refresh lots if they were updated
               if (data.module === 'lots') {
@@ -169,48 +138,11 @@ export const Dashboard = () => {
         eventSource.close();
       }
       clearTimeout(reconnectTimeout);
+      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
     };
   }, [selectedModule, dateFilter, activeLot?.id]); // Reconnect when filters change to ensure we have the latest fetch functions in closure
 
-  // Trigger card flash when metrics increase via background polling/refresh
-  useEffect(() => {
-    if (prevMetricsRef.current && prevMetricsRef.current.length > 0 && metrics.length > 0) {
-      const newFlashes: Record<string, 'ok' | 'ng' | 'info'> = {};
-      let hasChanges = false;
-      
-      metrics.forEach(newM => {
-        const oldM = prevMetricsRef.current.find(o => o.module_id === newM.module_id);
-        if (oldM) {
-          const newPassed = Number(newM.total_passed || 0);
-          const oldPassed = Number(oldM.total_passed || 0);
-          const newFailed = Number(newM.total_failed || 0);
-          const oldFailed = Number(oldM.total_failed || 0);
-          
-          if (newFailed > oldFailed) {
-            newFlashes[newM.module_id] = 'ng';
-            hasChanges = true;
-          } else if (newPassed > oldPassed) {
-            newFlashes[newM.module_id] = 'ok';
-            hasChanges = true;
-          }
-        }
-      });
-      
-      if (hasChanges) {
-        setFlashingModules(prev => ({ ...prev, ...newFlashes }));
-        Object.keys(newFlashes).forEach(modId => {
-          setTimeout(() => {
-            setFlashingModules(prev => {
-              const updated = { ...prev };
-              delete updated[modId];
-              return updated;
-            });
-          }, 1500);
-        });
-      }
-    }
-    prevMetricsRef.current = metrics;
-  }, [metrics]);
+
 
   const fetchMetrics = async () => {
     try {
@@ -253,12 +185,11 @@ export const Dashboard = () => {
   const renderModuleCard = (m: any) => {
     const met = getModuleMetric(m.id);
     const total = met.total_passed + met.total_failed;
-    const flashClass = flashingModules[m.id] ? ` flash-${flashingModules[m.id]}` : '';
     return (
       <div 
         key={m.id} 
         onClick={() => setSelectedModule(m.id)}
-        className={`glass-panel hover-scale${flashClass}`} 
+        className={`glass-panel hover-scale`} 
         style={{ padding: '20px', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--c-accent)', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.3s, border-color 0.3s' }}
       >
         <h4 style={{ margin: '0 0 10px 0', color: 'var(--c-accent)', fontSize: '0.9rem' }}>{m.title}</h4>
@@ -447,8 +378,8 @@ export const Dashboard = () => {
                              itemStyle={{ color: 'var(--c-text-primary)' }}
                            />
                            <Legend wrapperStyle={{ bottom: 0 }} />
-                           <Bar dataKey="OK" name="Годно (OK)" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
-                           <Bar dataKey="NG" name="Брак (NG)" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                           <Bar dataKey="OK" name="Годно (OK)" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} isAnimationActive={false} />
+                           <Bar dataKey="NG" name="Брак (NG)" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} isAnimationActive={false} />
                          </BarChart>
                        </ResponsiveContainer>
                      </div>
@@ -472,6 +403,7 @@ export const Dashboard = () => {
                              paddingAngle={5}
                              dataKey="value"
                              stroke="none"
+                             isAnimationActive={false}
                            >
                              {[
                                { name: 'Годно (OK)', value: ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_passed, 0), color: '#10B981' },
@@ -516,6 +448,7 @@ export const Dashboard = () => {
                              paddingAngle={2}
                              dataKey="value"
                              stroke="none"
+                             isAnimationActive={false}
                            >
                              {ALL_MODULES.map((m, index) => {
                                const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
@@ -554,7 +487,7 @@ export const Dashboard = () => {
                            <RechartsTooltip 
                              contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)' }}
                            />
-                           <Area type="monotone" dataKey="NG" name="Количество брака" stroke="#EF4444" fillOpacity={1} fill="url(#colorNG)" />
+                           <Area type="monotone" dataKey="NG" name="Количество брака" stroke="#EF4444" fillOpacity={1} fill="url(#colorNG)" isAnimationActive={false} />
                          </AreaChart>
                        </ResponsiveContainer>
                      </div>
