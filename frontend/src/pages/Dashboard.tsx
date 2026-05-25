@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { api } from '../utils/api';
-import { ChevronLeft, Tv, CheckCircle, TrendingUp, Zap, Layers } from 'lucide-react';
+import { ChevronLeft, Tv, CheckCircle, TrendingUp, Layers } from 'lucide-react';
 import { DsmTable } from '../components/ui/DsmTable';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
@@ -46,8 +46,6 @@ export const Dashboard = () => {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [moduleLogs, setModuleLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const updatePulseRef = useRef<any>(null);
 
   const [photoViewerImages, setPhotoViewerImages] = useState<string[] | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
@@ -102,10 +100,6 @@ export const Dashboard = () => {
                 fetchModuleLogs(selectedModule);
               }
               
-              setIsUpdating(true);
-              if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
-              updatePulseRef.current = setTimeout(() => setIsUpdating(false), 1500);
-
               // Also refresh lots if they were updated
               if (data.module === 'lots') {
                 fetchLots();
@@ -138,7 +132,6 @@ export const Dashboard = () => {
         eventSource.close();
       }
       clearTimeout(reconnectTimeout);
-      if (updatePulseRef.current) clearTimeout(updatePulseRef.current);
     };
   }, [selectedModule, dateFilter, activeLot?.id]); // Reconnect when filters change to ensure we have the latest fetch functions in closure
 
@@ -300,17 +293,9 @@ export const Dashboard = () => {
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
             Дашборд качества
-            {isUpdating && <Zap size={18} color="var(--c-warning)" className="animate-pulse" />}
           </h1>
           <p style={{ color: 'var(--c-text-secondary)' }}>Сводная статистика: {activeLot ? `Лот ${activeLot.name}` : 'Все лоты'}</p>
         </div>
-        <button 
-          onClick={() => { fetchMetrics(); if (selectedModule) fetchModuleLogs(selectedModule); }} 
-          className="glass hover-scale" 
-          style={{ padding: '10px 20px', border: '1px solid var(--c-accent)', color: 'var(--c-accent)', borderRadius: '6px', fontWeight: 'bold' }}
-        >
-          🔄 Обновить данные
-        </button>
       </div>
 
 
