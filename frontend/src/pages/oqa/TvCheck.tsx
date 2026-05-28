@@ -447,7 +447,7 @@ export const TvCheck = () => {
     <div className="responsive-flex-container">
 
       {/* Top Header */}
-      <div className="glass-panel" style={{ borderBottom: '1px solid var(--c-border)', padding: '10px 15px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px', fontSize: '14px', borderRadius: '0' }}>
+      <div className="glass-panel responsive-header" style={{ borderBottom: '1px solid var(--c-border)', padding: '10px 15px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px', fontSize: '14px', borderRadius: '0' }}>
         <strong style={{ color: 'var(--c-accent)' }}>Выборочный контроль ГП</strong>
         <div style={{
           backgroundColor: 'var(--c-accent-muted)',

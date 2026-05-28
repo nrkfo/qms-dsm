@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { api } from '../utils/api';
-import { ChevronLeft, Tv, CheckCircle, TrendingUp, Zap, Layers } from 'lucide-react';
+import { ChevronLeft, Tv, CheckCircle, TrendingUp, Layers } from 'lucide-react';
 import { DsmTable } from '../components/ui/DsmTable';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
@@ -46,8 +46,6 @@ export const Dashboard = () => {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [moduleLogs, setModuleLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const updatePulseRef = useRef<any>(null);
 
   const [photoViewerImages, setPhotoViewerImages] = useState<string[] | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
@@ -136,7 +134,6 @@ export const Dashboard = () => {
                   }
                 }, 1500);
               }
-
               // Also refresh lots if they were updated
               if (data.module === 'lots') {
                 fetchLots();
@@ -369,17 +366,9 @@ export const Dashboard = () => {
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
             Дашборд качества
-            {isUpdating && <Zap size={18} color="var(--c-warning)" className="animate-pulse" />}
           </h1>
           <p style={{ color: 'var(--c-text-secondary)' }}>Сводная статистика: {activeLot ? `Лот ${activeLot.name}` : 'Все лоты'}</p>
         </div>
-        <button 
-          onClick={() => { fetchMetrics(); if (selectedModule) fetchModuleLogs(selectedModule); }} 
-          className="glass hover-scale" 
-          style={{ padding: '10px 20px', border: '1px solid var(--c-accent)', color: 'var(--c-accent)', borderRadius: '6px', fontWeight: 'bold' }}
-        >
-          🔄 Обновить данные
-        </button>
       </div>
 
 
@@ -426,12 +415,12 @@ export const Dashboard = () => {
               <div style={{ marginBottom: '40px' }} className="animate-fade-in">
                 <h3 style={{ margin: '0 0 20px 0', color: 'var(--c-text-primary)' }}>Сводная аналитика (KPI)</h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
+                <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px' }}>
                   {/* Module breakdown - Bar Chart */}
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Статистика проверок по модулям</h4>
                      <div style={{ width: '100%', height: 350 }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <BarChart 
                            data={ALL_MODULES.map(m => {
                              const met = getModuleMetric(m.id);
@@ -458,7 +447,7 @@ export const Dashboard = () => {
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Общий уровень качества (Доля брака)</h4>
                      <div style={{ width: '100%', height: 300, position: 'relative' }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <PieChart>
                            <Pie
                              data={[
@@ -502,7 +491,7 @@ export const Dashboard = () => {
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Распределение нагрузки (Проверки)</h4>
                      <div style={{ width: '100%', height: 300, position: 'relative' }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <PieChart>
                            <Pie
                              data={ALL_MODULES.map(m => {
@@ -534,7 +523,7 @@ export const Dashboard = () => {
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Объем брака (NG) по участкам</h4>
                      <div style={{ width: '100%', height: 350 }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <AreaChart 
                            data={ALL_MODULES.map(m => {
                              const met = getModuleMetric(m.id);

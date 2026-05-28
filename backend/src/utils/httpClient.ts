@@ -1,3 +1,7 @@
+import { setupLogger } from './logger';
+
+const logger = setupLogger('HTTP-Клиент');
+
 export class TimeoutError extends Error {
   constructor(message = 'Request timed out') {
     super(message);
@@ -58,16 +62,22 @@ export async function requestWithRetry(url: string, options: HttpClientOptions =
       if (attempt < retries) {
         attempt++;
         const delayTime = backoffMs * Math.pow(2, attempt - 1);
-        console.warn(`[HTTP Client] Attempt ${attempt} failed (${isAbort ? 'Timeout' : err.message}). Retrying in ${delayTime}ms...`);
+        logger.warn(
+          `Попытка HTTP-запроса ${attempt} к ${url} завершилась ошибкой (${isAbort ? 'Превышено время ожидания (Timeout)' : err.message}). Повторная попытка через ${delayTime}мс...`
+        );
         await delay(delayTime);
         continue;
       }
 
       if (isAbort) {
-        throw new TimeoutError(`Request to ${url} timed out after ${timeout}ms`);
+        const timeoutErr = new TimeoutError(`Превышено время ожидания ответа от ${url} после ${timeout}мс (AbortController)`);
+        logger.error(`Сбой запроса к MES: превышен лимит времени ожидания ${timeout}мс`, timeoutErr);
+        throw timeoutErr;
       }
 
+      logger.error(`Сетевой сбой при отправке HTTP-запроса к ${url} (попытки исчерпаны)`, err);
       throw err;
     }
   }
 }
+

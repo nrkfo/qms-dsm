@@ -1,17 +1,26 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
+import { setupLogger } from './utils/logger';
+
+const logger = setupLogger('БазаДанных');
 
 const dbPath = path.resolve(__dirname, '../database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('Error opening database', err);
+    logger.critical('Ошибка при открытии SQLite базы данных! База заблокирована (SQLITE_BUSY / locked) или отсутствует доступ.', err);
   } else {
-    console.log('Connected to the SQLite database.');
+    logger.info('Успешное подключение к базе данных SQLite.');
     
     // Enable performance optimizations and foreign keys
-    db.run('PRAGMA journal_mode = WAL;');
-    db.run('PRAGMA synchronous = NORMAL;');
-    db.run('PRAGMA foreign_keys = ON;');
+    db.run('PRAGMA journal_mode = WAL;', (err) => {
+      if (err) logger.error('Ошибка при установке PRAGMA journal_mode = WAL!', err);
+    });
+    db.run('PRAGMA synchronous = NORMAL;', (err) => {
+      if (err) logger.error('Ошибка при установке PRAGMA synchronous = NORMAL!', err);
+    });
+    db.run('PRAGMA foreign_keys = ON;', (err) => {
+      if (err) logger.error('Ошибка при установке PRAGMA foreign_keys = ON (ограничения внешних ключей)!', err);
+    });
     
     // Create initial tables
     db.serialize(() => {
@@ -35,15 +44,16 @@ const db = new sqlite3.Database(dbPath, (err) => {
       
       // Migration: Add tv_model_id to existing lots table if missing
       db.all(`PRAGMA table_info(lots)`, (err, rows: any[]) => {
-        if (err) return console.error('Error checking lots schema', err);
+        if (err) return logger.error('Ошибка при проверке схемы таблицы lots (PRAGMA table_info)!', err);
         const hasColumn = rows.some(r => r.name === 'tv_model_id');
         if (!hasColumn) {
           db.run(`ALTER TABLE lots ADD COLUMN tv_model_id INTEGER`, (err) => {
-            if (err) console.error('Error adding tv_model_id to lots', err.message);
-            else console.log('Successfully added tv_model_id to lots');
+            if (err) logger.error('Ошибка при миграции схемы: не удалось добавить tv_model_id в lots!', err);
+            else logger.info('Успешно выполнена миграция схемы: добавлена колонка tv_model_id в таблицу lots.');
           });
         }
       });
+
 
 
 
@@ -177,14 +187,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
       )`);
 
 
-      // Audit logs table
-      db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        user_id INTEGER,
-        action TEXT,
-        details TEXT
-      )`);
+      // Audit logs disabled
 
       // TV Models table
       db.run(`CREATE TABLE IF NOT EXISTS tv_models (

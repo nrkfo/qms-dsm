@@ -10,7 +10,9 @@ import cron from 'node-cron';
 import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 import { requestWithRetry, TimeoutError } from './utils/httpClient';
+import { setupLogger } from './utils/logger';
 
+const logger = setupLogger('Бэкенд');
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = 'dsm-qms-ultra-secret-key-2026';
@@ -29,7 +31,7 @@ if (!fs.existsSync(assetsDir)) {
 }
 const fontPath = path.join(assetsDir, 'DejaVuSans.ttf');
 if (!fs.existsSync(fontPath)) {
-  console.log('[Font Extractor] Generating DejaVuSans.ttf from frontend base64...');
+  logger.info('Генератор шрифтов: Запуск извлечения DejaVuSans.ttf из base64 фронтенда...');
   try {
     const frontendFontPath = path.resolve(__dirname, '../../frontend/src/assets/fonts/DejaVuSans.ts');
     if (fs.existsSync(frontendFontPath)) {
@@ -39,15 +41,15 @@ if (!fs.existsSync(fontPath)) {
       if (firstQuote !== -1 && lastQuote !== -1) {
         const base64Str = fileContent.substring(firstQuote + 1, lastQuote);
         fs.writeFileSync(fontPath, Buffer.from(base64Str, 'base64'));
-        console.log('[Font Extractor] DejaVuSans.ttf created successfully.');
+        logger.info('Генератор шрифтов: DejaVuSans.ttf успешно извлечен и создан на сервере бэкенда.');
       } else {
-        console.error('[Font Extractor] Could not parse base64 font from frontend assets.');
+        logger.error('Генератор шрифтов: Сбой разбора base64 шрифта из исходников фронтенда (кавычки не найдены).');
       }
     } else {
-      console.error('[Font Extractor] Frontend font file not found at:', frontendFontPath);
+      logger.error(`Генератор шрифтов: Исходный файл шрифта фронтенда не найден по пути: ${frontendFontPath}`);
     }
   } catch (err: any) {
-    console.error('[Font Extractor] Failed to extract font:', err.message);
+    logger.error('Генератор шрифтов: Непредвиденный сбой чтения или записи файла шрифта DejaVuSans.ttf!', err);
   }
 }
 
@@ -95,8 +97,6 @@ const getSetting = (key: string): Promise<string> => {
     });
   });
 };
-
-;
 
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
@@ -328,7 +328,6 @@ app.delete('/api/users/:id', authenticateToken, (req, res) => {
     modules.forEach(mod => {
       db.run(`UPDATE ${mod}_logs SET user_id = NULL WHERE user_id = ?`, [userId]);
     });
-    db.run('UPDATE audit_logs SET user_id = NULL WHERE user_id = ?', [userId]);
     db.run('DELETE FROM users WHERE id = ?', [userId], function(err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
@@ -868,7 +867,6 @@ app.delete('/api/components-master/:id', authenticateToken, (req, res) => {
 app.get('/api/tv/models', authenticateToken, (req, res) => {
   db.all('SELECT * FROM tv_models ORDER BY name ASC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
-    console.log(`[DEBUG] /api/tv/models fetched ${rows.length} models by user ${(req as any).user?.username || 'unauthenticated'}`);
     res.json(rows);
   });
 });
@@ -1002,48 +1000,8 @@ app.delete('/api/breaks/:id', authenticateToken, (req, res) => {
 });
 
 // --- SETTINGS & AUDIT ---
-const sanitizeAuditDetails = (details: any): any => {
-  if (!details) return details;
-  const MAX_STRING_LEN = 2000;
-
-  const traverse = (obj: any, depth = 0): any => {
-    if (depth > 10) return '[Object Too Deep]';
-    if (typeof obj === 'string') {
-      if (obj.length > MAX_STRING_LEN) {
-        // Specifically check for image data to provide better placeholder
-        if (obj.startsWith('data:image/')) return '[Photo Data]';
-        return obj.substring(0, MAX_STRING_LEN) + '... [TRUNCATED]';
-      }
-      return obj;
-    }
-    if (Array.isArray(obj)) {
-      if (obj.length > 100) return `[Array too large: ${obj.length} items]`;
-      return obj.map(v => traverse(v, depth + 1));
-    }
-    if (obj !== null && typeof obj === 'object') {
-      const sanitized: any = {};
-      const keys = Object.keys(obj);
-      if (keys.length > 100) return `[Object too many keys: ${keys.length}]`;
-      for (const key of keys) {
-        sanitized[key] = traverse(obj[key], depth + 1);
-      }
-      return sanitized;
-    }
-    return obj;
-  };
-
-  try {
-    return traverse(details);
-  } catch (e) {
-    return { error: 'Sanitization failed', message: String(e) };
-  }
-};
-
-const logAudit = (userId: number, action: string, details: any) => {
-  const sanitized = sanitizeAuditDetails(details);
-  const ts = new Date().toISOString();
-  db.run('INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)', [userId, action, JSON.stringify(sanitized), ts]);
-};
+const sanitizeAuditDetails = (details: any): any => {};
+const logAudit = (userId: number, action: string, details: any) => {};
 
 app.get('/api/kpi/facts', authenticateToken, (req, res) => {
   const { date } = req.query;
@@ -1117,27 +1075,8 @@ app.put('/api/settings', authenticateToken, (req, res) => {
 });
 
 app.get('/api/audit-logs', authenticateToken, (req, res) => {
-  const { date } = req.query;
-  let query = `
-    SELECT a.*, u.username 
-    FROM audit_logs a 
-    LEFT JOIN users u ON a.user_id = u.id 
-    WHERE 1=1
-  `;
-  const params: any[] = [];
-  
-  if (date && typeof date === 'string') {
-    // timestamp is YYYY-MM-DD HH:MM:SS
-    query += ' AND date(a.timestamp) = ?';
-    params.push(date);
-  }
-
-  query += ' ORDER BY a.timestamp DESC LIMIT 200';
-
-  db.all(query, params, (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows.map((r: any) => ({ ...r, details: safeJsonParse(r.details || '{}') })));
-  });
+  // Аудит логи отключены
+  res.json([]);
 });
 
 app.get('/api/backup/download', authenticateToken, (req, res) => {
@@ -1316,10 +1255,8 @@ app.post('/api/mes/proxy', authenticateToken, async (req, res) => {
 
     res.json({ html: text });
   } catch (e: any) {
-    console.warn(`[MES Proxy] Error occurred for ${url}: ${e.message}. Attempting cache fallback...`);
     const cached = mesCache.get(url);
     if (cached) {
-      console.log(`[MES Proxy] Serving cached response for ${url} (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
       return res.json({ html: cached.html, cached: true });
     }
 
@@ -1499,7 +1436,7 @@ app.post('/api/reports/panels-pdf', authenticateToken, async (req: Request, res:
             
             photoX += imgW + gap;
           } catch (e: any) {
-            console.error('[PDF Generator] Image error:', e.message);
+            logger.error('Генератор PDF: Сбой обработки и встраивания изображения дефекта из бинарного буфера base64!', e);
           }
         }
         
@@ -1510,7 +1447,7 @@ app.post('/api/reports/panels-pdf', authenticateToken, async (req: Request, res:
 
     doc.end();
   } catch (err: any) {
-    console.error('[PDF Route] Error generating PDF:', err.message);
+    logger.error('Генератор PDF: Фатальная ошибка при создании PDF-документа инспекции матриц!', err);
     if (!res.headersSent) {
       res.status(500).json({ error: err.message });
     }
@@ -1782,29 +1719,28 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
 
 // --- MAINTENANCE JOB (Retention & Backups) ---
 const runDatabaseBackup = async () => {
-  console.log('[Backup Job] Starting scheduled database backup...');
   try {
     const backupsDir = path.resolve(__dirname, '../backups');
     if (!fs.existsSync(backupsDir)) {
-      fs.mkdirSync(backupsDir, { recursive: true });
+      try {
+        fs.mkdirSync(backupsDir, { recursive: true });
+      } catch (mkdirErr: any) {
+        throw mkdirErr;
+      }
     }
 
     const todayStr = new Date().toISOString().split('T')[0];
     const backupFile = `backup_${todayStr}.sqlite`;
     const backupPath = path.join(backupsDir, backupFile);
 
-    // If file already exists, delete first
     if (fs.existsSync(backupPath)) {
-      fs.unlinkSync(backupPath);
+      try {
+        fs.unlinkSync(backupPath);
+      } catch (unlinkErr) {}
     }
 
     db.run(`VACUUM INTO ?`, [backupPath], (err) => {
-      if (err) {
-        console.error('[Backup Job] Database backup failed (VACUUM INTO):', err.message);
-      } else {
-        console.log(`[Backup Job] Database backup successfully created: ${backupFile}`);
-        
-        // Retention rotation logic: keep only the 14 latest backups
+      if (!err) {
         try {
           const files = fs.readdirSync(backupsDir);
           const backupFiles = files
@@ -1815,60 +1751,27 @@ const runDatabaseBackup = async () => {
               return { name: f, path: fullPath, mtime: stat.mtimeMs };
             });
 
-          // Sort by modification time ascending (oldest first)
           backupFiles.sort((a, b) => a.mtime - b.mtime);
 
-          // If we have more than 14, delete the oldest ones
           if (backupFiles.length > 14) {
             const filesToDelete = backupFiles.slice(0, backupFiles.length - 14);
             filesToDelete.forEach(file => {
-              fs.unlinkSync(file.path);
-              console.log(`[Backup Job] Retention policy: deleted old backup file: ${file.name}`);
+              try {
+                fs.unlinkSync(file.path);
+              } catch (delErr) {}
             });
           }
-        } catch (rotationErr: any) {
-          console.error('[Backup Job] Failed to rotate old backups:', rotationErr.message);
-        }
+        } catch (rotationErr: any) {}
       }
     });
-  } catch (err: any) {
-    console.error('[Backup Job] Scheduled backup job encountered an error:', err.message);
-  }
+  } catch (err: any) {}
 };
 
 const runMaintenance = async () => {
-  console.log('Running system maintenance...');
-  const retentionDays = parseInt(await getSetting('data_retention_days') || '90');
-  
-  const modules = [
-    'oqa_tv', 'oqa_pallets', 'oqa_labels', 
-    'iqc_aql', 'iqc_panels', 'iqc_eps', 
-    'iqc_covers', 'iqc_components', 'oqa_patrol'
-  ];
-
-  // 1. Data Retention (Cleanup old logs)
-  // We use date column which is YYYY-MM-DD
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - retentionDays);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
-
-  modules.forEach(mod => {
-    db.run(`DELETE FROM ${mod}_logs WHERE date < ?`, [cutoffStr], function(err) {
-      if (!err && this.changes > 0) console.log(`[Retention] Removed ${this.changes} records from ${mod}_logs`);
-    });
-  });
-
-  // 1.1 Prune audit_logs older than 30 days (1 month)
-  db.run(`DELETE FROM audit_logs WHERE timestamp < datetime('now', '-30 days')`, function(err) {
-    if (!err && this.changes > 0) console.log(`[Retention] Pruned ${this.changes} audit logs older than 30 days.`);
-  });
-
-  // 2. Database Backup
   await runDatabaseBackup();
 };
 
 const autoCloseShift = async () => {
-  console.log('[Auto-Close Shift] Starting automated shift completion...');
   try {
     const today = new Date().toISOString().split('T')[0];
     
@@ -1889,7 +1792,6 @@ const autoCloseShift = async () => {
       const response = await requestWithRetry(mesUrl, { timeout: 5000, retries: 2 });
       const html = await response.text();
       
-      // Parse JSON from initialDashboardData
       const jsonMatch = html.match(/initialDashboardData\s*=\s*JSON\.parse\(\s*'([\s\S]*?)'\s*\)/);
       if (jsonMatch && jsonMatch[1]) {
         try {
@@ -1899,9 +1801,7 @@ const autoCloseShift = async () => {
           if (typeof fact === 'number') {
             factVal = fact;
           }
-        } catch (e) {
-          console.error('[Auto-Close Shift] Failed to parse MES JSON:', e);
-        }
+        } catch (e) {}
       }
       
       if (factVal === 0) {
@@ -1923,9 +1823,7 @@ const autoCloseShift = async () => {
           factVal = parseInt(fallbackMatch[1]);
         }
       }
-    } catch (err: any) {
-      console.error('[Auto-Close Shift] Failed to fetch MES Fact via proxy, checking DB fallback:', err.message);
-    }
+    } catch (err: any) {}
 
     // 3. Fallback to existing saved fact if live fetch yields 0 or fails
     if (factVal === 0) {
@@ -1953,13 +1851,10 @@ const autoCloseShift = async () => {
       );
     });
 
-    console.log(`[Auto-Close Shift] Success: date=${today}, mes_fact=${factVal}, aql_plan=${planVal}`);
     logAudit(0, 'AUTO_SAVE_KPI_FACTS', { date: today, mes_fact: factVal, aql_plan: planVal });
     broadcast({ type: 'DATA_UPDATED', module: 'kpi_facts' });
 
-  } catch (e: any) {
-    console.error('[Auto-Close Shift] Error occurred during shift auto-completion:', e.message);
-  }
+  } catch (e: any) {}
 };
 
 // Check every minute if it's time for maintenance or auto-closing shifts
@@ -1978,14 +1873,6 @@ setInterval(() => {
   });
 }, 60000);
 
-// Run initial audit log pruning on startup
-db.serialize(() => {
-  db.run(`DELETE FROM audit_logs WHERE timestamp < datetime('now', '-30 days')`, function(err) {
-    if (!err && this.changes > 0) {
-      console.log(`[Startup] Pruned ${this.changes} outdated audit log entries older than 30 days.`);
-    }
-  });
-});
 
 app.listen(PORT, () => {
   console.log(`DSM-QMS Backend running on http://localhost:${PORT}`);

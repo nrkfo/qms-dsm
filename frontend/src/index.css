@@ -103,6 +103,7 @@ body {
   border: 1px solid var(--c-border);
   box-shadow: var(--shadow-elevation);
   color: var(--c-text-primary);
+  min-width: 0; /* Prevents overflow in flexbox and grid containers */
 }
 
 /* Typography Utilities */
@@ -463,6 +464,75 @@ button {
     height: auto !important;
     width: 100% !important;
     overflow: visible !important;
+  }
+
+  /* Global centering and responsiveness for modals and overlays on mobile */
+  div[style*="position: fixed"],
+  div[style*="position:fixed"],
+  .modal-portal-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 15px !important;
+    box-sizing: border-box !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  /* Force centered glass-panels and modal structures to be fully responsive on mobile */
+  .modal-portal-wrapper .glass-panel,
+  div[style*="position: fixed"] .glass-panel,
+  div[style*="position:fixed"] .glass-panel,
+  div[style*="position: fixed"] > div[style*="width"],
+  div[style*="position:fixed"] > div[style*="width"] {
+    width: 100% !important;
+    max-width: 480px !important;
+    min-width: 0 !important;
+    margin: auto !important;
+    padding: 20px !important;
+    height: auto !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Ensure deep elements do not overflow their responsive parent */
+  .glass-panel > div {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Centered vertical grid for headers on mobile to prevent horizontal overflows */
+  .responsive-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 15px !important;
+  }
+
+  .responsive-header > div,
+  .responsive-header > label,
+  .responsive-header > strong {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    gap: 10px !important;
+  }
+
+  .responsive-header input,
+  .responsive-header select {
+    flex: 1 !important;
+    max-width: 220px !important;
+    font-size: 14px !important;
+    padding: 6px !important;
   }
 }
 
