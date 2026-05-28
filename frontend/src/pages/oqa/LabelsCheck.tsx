@@ -340,7 +340,7 @@ export const LabelsCheck = () => {
 
       {/* Main Content Area */}
       <div className="split-layout-content">
-        <div className="glass-panel" style={{ padding: '15px 25px', borderBottom: '1px solid var(--c-border)', borderRadius: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--c-bg-surface-glass)' }}>
+        <div className="glass-panel responsive-header" style={{ padding: '15px 25px', borderBottom: '1px solid var(--c-border)', borderRadius: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--c-bg-surface-glass)' }}>
           <strong style={{ color: 'var(--c-text-secondary)' }}>Проверка этикеток [ЛОТ: <span style={{ color: 'var(--c-accent)' }}>{activeLot?.name || 'Не выбран'}</span>]</strong>
           {model && <span style={{ fontSize: '12px', background: 'var(--c-accent-muted)', color: 'var(--c-accent)', padding: '4px 8px', borderRadius: '4px' }}>{model.name}</span>}
         </div>

@@ -5,11 +5,10 @@ import { playSound } from '../../utils/audio';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDataStore } from '../../store/useDataStore';
 import { api, translateToEnglish } from '../../utils/api';
-import { Search, FileSpreadsheet, Trash2, Settings, Tv } from 'lucide-react';
+import { Search, FileSpreadsheet, Trash2, Tv } from 'lucide-react';
 
 export const PalletsCheck = () => {
-  const { user } = useAuthStore();
-  const { activeLot, fetchLogs, fetchAllLogs, saveLog, updateLog, deleteLog, tvModels, fetchTvModels, showToast, showConfirm } = useDataStore();
+  const { activeLot, fetchLogs, saveLog, updateLog, deleteLog, tvModels, fetchTvModels, showToast, showConfirm } = useDataStore();
   
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +28,7 @@ export const PalletsCheck = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const editNoteRef = useRef<HTMLTextAreaElement>(null);
   const passInputRef = useRef<HTMLInputElement>(null);
+  const processingRef = useRef<boolean>(false);
 
   useEffect(() => {
     loadData();
@@ -109,6 +109,7 @@ export const PalletsCheck = () => {
   }, [scanInput]);
 
   const processScan = async (barcode: string) => {
+    if (processingRef.current) return;
     if (!activeLot) {
       showToast('Выберите лот!', 'warning');
       setScanInput('');
@@ -125,114 +126,119 @@ export const PalletsCheck = () => {
       return;
     }
     
-    const identifyModel = (bc: string) => {
-      const b = bc.trim().toUpperCase();
-      for (const m of tvModels) {
-        if (m.pallet_keyword && b.includes(m.pallet_keyword.toUpperCase())) {
-          return m;
+    processingRef.current = true;
+    try {
+      const identifyModel = (bc: string) => {
+        const b = bc.trim().toUpperCase();
+        for (const m of tvModels) {
+          if (m.pallet_keyword && b.includes(m.pallet_keyword.toUpperCase())) {
+            return m;
+          }
+        }
+        return null;
+      };
+
+      const expectedModel = tvModels.find(m => m.id === activeLot?.tv_model_id);
+      const scannedModel = identifyModel(barcode);
+      
+      let status = 'OK';
+      let note = '';
+
+      // 1. Model Identification & Validation
+      if (expectedModel && scannedModel) {
+        if (scannedModel.id !== expectedModel.id) {
+          status = 'NG';
+          const mismatchNote = `Несоответствие модели: ${scannedModel.name} (ожидалось ${expectedModel.name})`;
+          note = note ? `${note} | ${mismatchNote}` : mismatchNote;
+        }
+      } else if (expectedModel && !scannedModel && barcode.length > 5) {
+        status = 'NG';
+        const notFoundNote = `Модель не распознана по ключу паллеты`;
+        note = note ? `${note} | ${notFoundNote}` : notFoundNote;
+      }
+
+      if (expectedModel) {
+        // 2. Length Check
+        if (expectedModel.pallet_barcode_len && barcode.length !== expectedModel.pallet_barcode_len) {
+          status = 'NG';
+          const lenNote = `Ошибка длины: ${barcode.length} (нужно ${expectedModel.pallet_barcode_len})`;
+          note = note ? `${note} | ${lenNote}` : lenNote;
+        }
+
+        // 3. Prefix / Rules Check
+        try {
+          const rules = JSON.parse(expectedModel.pallet_barcode_fix || '[]');
+          for (const rule of rules) {
+            const mType = rule.matchType || 'contains';
+            let isValid = false;
+            
+            if (mType === 'contains') isValid = barcode.includes(rule.value);
+            else if (mType === 'startsWith') isValid = barcode.startsWith(rule.value);
+            else if (mType === 'endsWith') isValid = barcode.endsWith(rule.value);
+            else if (mType === 'exact') isValid = barcode === rule.value;
+            else if (mType === 'regex') {
+              try { isValid = new RegExp(rule.value).test(barcode); } catch { isValid = false; }
+            }
+
+            if (!isValid) {
+              status = 'NG';
+              const ruleExpl = rule.explanation || `Не соответствует правилу [${mType}] "${rule.value}"`;
+              note = note ? `${note} | ${ruleExpl}` : ruleExpl;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse pallet rules', e);
         }
       }
-      return null;
-    };
 
-
-
-    const expectedModel = tvModels.find(m => m.id === activeLot?.tv_model_id);
-    const scannedModel = identifyModel(barcode);
-    
-    let status = 'OK';
-    let note = '';
-
-    // 1. Model Identification & Validation
-    if (expectedModel && scannedModel) {
-      if (scannedModel.id !== expectedModel.id) {
-        status = 'NG';
-        const mismatchNote = `Несоответствие модели: ${scannedModel.name} (ожидалось ${expectedModel.name})`;
-        note = note ? `${note} | ${mismatchNote}` : mismatchNote;
-      }
-    } else if (expectedModel && !scannedModel && barcode.length > 5) {
-      status = 'NG';
-      const notFoundNote = `Модель не распознана по ключу паллеты`;
-      note = note ? `${note} | ${notFoundNote}` : notFoundNote;
-    }
-
-    if (expectedModel) {
-      // 2. Length Check
-      if (expectedModel.pallet_barcode_len && barcode.length !== expectedModel.pallet_barcode_len) {
-        status = 'NG';
-        const lenNote = `Ошибка длины: ${barcode.length} (нужно ${expectedModel.pallet_barcode_len})`;
-        note = note ? `${note} | ${lenNote}` : lenNote;
-      }
-
-      // 3. Prefix / Rules Check
+      // Parsing logic for specific format (Dynamic from Settings)
+      let extractedModelCode = '-';
+      let extractedSN = '-';
+      
       try {
-        const rules = JSON.parse(expectedModel.pallet_barcode_fix || '[]');
-        for (const rule of rules) {
-          const mType = rule.matchType || 'contains';
-          let isValid = false;
-          
-          if (mType === 'contains') isValid = barcode.includes(rule.value);
-          else if (mType === 'startsWith') isValid = barcode.startsWith(rule.value);
-          else if (mType === 'endsWith') isValid = barcode.endsWith(rule.value);
-          else if (mType === 'exact') isValid = barcode === rule.value;
-          else if (mType === 'regex') {
-            try { isValid = new RegExp(rule.value).test(barcode); } catch(e) { isValid = false; }
-          }
-
-          if (!isValid) {
-            status = 'NG';
-            const ruleExpl = rule.explanation || `Не соответствует правилу [${mType}] "${rule.value}"`;
-            note = note ? `${note} | ${ruleExpl}` : ruleExpl;
-          }
+        const parseCfg = JSON.parse(expectedModel?.pallet_parsing_config || '{"model_start":0, "model_len":13, "sn_start":13, "sn_len":6}');
+        if (barcode.length >= (expectedModel?.pallet_barcode_len || 26)) {
+          extractedModelCode = barcode.substring(parseCfg.model_start, parseCfg.model_start + parseCfg.model_len);
+          extractedSN = barcode.substring(parseCfg.sn_start, parseCfg.sn_start + parseCfg.sn_len);
         }
       } catch (e) {
-        console.error('Failed to parse pallet rules', e);
+        console.error('Parsing failed', e);
       }
-    }
 
-    // Parsing logic for specific format (Dynamic from Settings)
-    let extractedModelCode = '-';
-    let extractedSN = '-';
-    
-    try {
-      const parseCfg = JSON.parse(expectedModel?.pallet_parsing_config || '{"model_start":0, "model_len":13, "sn_start":13, "sn_len":6}');
-      if (barcode.length >= (expectedModel?.pallet_barcode_len || 26)) {
-        extractedModelCode = barcode.substring(parseCfg.model_start, parseCfg.model_start + parseCfg.model_len);
-        extractedSN = barcode.substring(parseCfg.sn_start, parseCfg.sn_start + parseCfg.sn_len);
+      let finalNote = note;
+      if (note.trim()) {
+        const en = await translateToEnglish(note.trim());
+        if (en && en.toLowerCase() !== note.trim().toLowerCase()) {
+          finalNote = `${note.trim()} / ${en}`;
+        }
       }
+
+      const data = {
+        barcode: barcode,
+        date: new Date().toLocaleString('ru-RU'),
+        model: expectedModel?.name || 'Unknown',
+        scannedModel: scannedModel?.name || 'Не распознана',
+        extractedModelCode: extractedModelCode,
+        extractedSN: extractedSN,
+        note: finalNote,
+        isScanError: status === 'NG'
+      };
+
+      await saveLog('oqa_pallets', data, status);
+      playSound(status === 'OK' ? 'ok' : 'ng');
+      
+      if (status === 'NG') {
+        setTimeout(() => showToast(`ВНИМАНИЕ: Ошибка сканирования!\n${note}`, 'error'), 100);
+      }
+
+      setScanInput('');
+      await loadData();
     } catch (e) {
-      console.error('Parsing failed', e);
+      console.error(e);
+    } finally {
+      processingRef.current = false;
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
-
-    let finalNote = note;
-    if (note.trim()) {
-      const en = await translateToEnglish(note.trim());
-      if (en && en.toLowerCase() !== note.trim().toLowerCase()) {
-        finalNote = `${note.trim()} / ${en}`;
-      }
-    }
-
-    const data = {
-      barcode: barcode,
-      date: new Date().toLocaleString('ru-RU'),
-      model: expectedModel?.name || 'Unknown',
-      scannedModel: scannedModel?.name || 'Не распознана',
-      extractedModelCode: extractedModelCode,
-      extractedSN: extractedSN,
-      note: finalNote,
-      isScanError: status === 'NG'
-    };
-
-    await saveLog('oqa_pallets', data, status);
-    playSound(status === 'OK' ? 'ok' : 'ng');
-    
-    if (status === 'NG') {
-      setTimeout(() => showToast(`ВНИМАНИЕ: Ошибка сканирования!\n${note}`, 'error'), 100);
-    }
-
-    setScanInput('');
-    loadData();
-    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
   const handleScanSubmit = (e: React.FormEvent) => {
@@ -242,7 +248,8 @@ export const PalletsCheck = () => {
 
   const handleUpdate = async () => {
     if (!editingRecord) return;
-    const { id, status: oldStatus, ...data } = editingRecord;
+    const { id, ...data } = editingRecord;
+    delete data.status;
     let finalNote = editNote;
     if (editNote.trim()) {
       const en = await translateToEnglish(editNote.trim());
@@ -282,7 +289,7 @@ export const PalletsCheck = () => {
             await deleteLog('oqa_pallets', recordId);
             showToast('Запись удалена');
             loadData();
-          } catch (e) {
+          } catch {
             showToast('Ошибка при удалении', 'error');
           }
         }, undefined, 'danger');
@@ -330,7 +337,7 @@ export const PalletsCheck = () => {
   return (
     <div className="animate-fade-in responsive-flex-container">
       
-      <div className="glass-panel" style={{ padding: '15px 20px', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', borderRadius: 0, borderBottom: '1px solid var(--c-border)' }}>
+      <div className="glass-panel responsive-header" style={{ padding: '15px 20px', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', borderRadius: 0, borderBottom: '1px solid var(--c-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '18px', fontWeight: 'bold' }}>
           <div>📦 <span style={{ color: 'var(--c-text-secondary)' }}>ЛОТ:</span> <span style={{ color: 'var(--c-accent)' }}>{activeLot?.name || 'Не выбран'}</span></div>
           {activeLot && (

@@ -342,12 +342,12 @@ export const Dashboard = () => {
               <div style={{ marginBottom: '40px' }} className="animate-fade-in">
                 <h3 style={{ margin: '0 0 20px 0', color: 'var(--c-text-primary)' }}>Сводная аналитика (KPI)</h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
+                <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px' }}>
                   {/* Module breakdown - Bar Chart */}
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Статистика проверок по модулям</h4>
                      <div style={{ width: '100%', height: 350 }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <BarChart 
                            data={ALL_MODULES.map(m => {
                              const met = getModuleMetric(m.id);
@@ -374,7 +374,7 @@ export const Dashboard = () => {
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Общий уровень качества (Доля брака)</h4>
                      <div style={{ width: '100%', height: 300, position: 'relative' }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <PieChart>
                            <Pie
                              data={[
@@ -419,7 +419,7 @@ export const Dashboard = () => {
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Распределение нагрузки (Проверки)</h4>
                      <div style={{ width: '100%', height: 300, position: 'relative' }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <PieChart>
                            <Pie
                              data={ALL_MODULES.map(m => {
@@ -452,7 +452,7 @@ export const Dashboard = () => {
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
                      <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Объем брака (NG) по участкам</h4>
                      <div style={{ width: '100%', height: 350 }}>
-                       <ResponsiveContainer>
+                       <ResponsiveContainer width="100%" height="100%">
                          <AreaChart 
                            data={ALL_MODULES.map(m => {
                              const met = getModuleMetric(m.id);
