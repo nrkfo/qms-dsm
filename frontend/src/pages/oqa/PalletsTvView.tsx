@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDataStore } from '../../store/useDataStore';
-import { CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Package, CheckCircle2, XCircle, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export const PalletsTvView = () => {
   const { activeLot, fetchLogs, fetchTvModels } = useDataStore();

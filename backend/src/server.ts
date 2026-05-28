@@ -6,6 +6,7 @@ import db from './db';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
+import cron from 'node-cron';
 import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 import { requestWithRetry, TimeoutError } from './utils/httpClient';
@@ -79,18 +80,13 @@ const VALID_MODULES = [
 let clients: any[] = [];
 
 const broadcast = (data: any) => {
-  const deadClients: number[] = [];
   clients.forEach(c => {
     try {
       c.res.write(`data: ${JSON.stringify(data)}\n\n`);
     } catch (e) {
-      console.error('SSE broadcast failed for a client, removing...');
-      deadClients.push(c.id);
+      console.error('SSE broadcast failed for a client');
     }
   });
-  if (deadClients.length > 0) {
-    clients = clients.filter(c => !deadClients.includes(c.id));
-  }
 };
 
 // --- HELPERS ---
@@ -217,8 +213,7 @@ app.get('/api/events', (req, res) => {
     try {
       res.write(': keep-alive\n\n');
     } catch (e) {
-      clearInterval(heartbeat);
-      clients = clients.filter(c => c.id !== clientId);
+      // client connection might have closed
     }
   }, 20000);
 

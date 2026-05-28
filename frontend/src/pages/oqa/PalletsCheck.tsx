@@ -257,9 +257,9 @@ export const PalletsCheck = () => {
         finalNote = `${editNote.trim()} / ${en}`;
       }
     }
-    const updatedData = { ...data, note: finalNote };
+    const updatedData: any = { ...data, note: finalNote };
     if (editStatus === 'NG' || editStatus === 'OK') {
-      delete (updatedData as any).isScanError;
+      updatedData.isScanError = editStatus === 'NG';
     }
     await updateLog('oqa_pallets', id, updatedData, editStatus);
     setEditingRecord(null);
