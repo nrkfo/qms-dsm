@@ -1,4 +1,4 @@
-# QMS-DSM (Quality Management System - Digital Shop-floor Management)
+# QMS-DSM Quality Management System
 
 Система для контроля качества и управления процессом инспекции на производстве.
 
