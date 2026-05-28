@@ -234,7 +234,7 @@ export const PatrolCheck = () => {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="responsive-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h2 style={{ margin: 0 }}>Журнал обхода (Patrol Log)</h2>
           <p style={{ color: 'var(--c-text-muted)', fontSize: '0.9rem' }}>Контроль технологической дисциплины на линии</p>

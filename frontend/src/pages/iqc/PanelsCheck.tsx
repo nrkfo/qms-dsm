@@ -456,7 +456,7 @@ export const PanelsCheck = () => {
     <div className="animate-fade-in responsive-flex-container" style={{ paddingBottom: '30px' }}>
       
       {/* Header Info */}
-      <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="glass-panel responsive-header" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: 0, color: 'var(--c-accent)' }}>Инспекция матриц (Auto-Scan)</h3>
           <span style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>Лот: {activeLot?.name || 'Не выбран'}</span>

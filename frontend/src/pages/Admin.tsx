@@ -151,9 +151,8 @@ const Admin = () => {
             <div className="glass-panel" style={{ padding: '30px', maxWidth: '800px' }}>
             <h3 style={{ marginBottom: '25px' }}>Системные настройки и уведомления</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
                 <div><label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Лимит проверки этикеток (мс)</label><input className="glass" type="number" value={localSettings.label_timer_limit || ''} onChange={e=>setLocalSettings({...localSettings, label_timer_limit: e.target.value})} style={{ width: '100%', padding: '12px' }} /></div>
-                <div><label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Хранение данных (дней)</label><input className="glass" type="number" value={localSettings.data_retention_days || ''} onChange={e=>setLocalSettings({...localSettings, data_retention_days: e.target.value})} style={{ width: '100%', padding: '12px' }} /></div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>

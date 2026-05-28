@@ -44,18 +44,25 @@ chmod +x install.sh
 sudo systemctl status qms-backend
 ```
 
-Перезапустить бэкенд:
+Перезапустить бэкенд (нужно после любых изменений в коде):
 ```bash
 sudo systemctl restart qms-backend
 ```
 
 Просмотр логов бэкенда:
+Внимание: Бэкенд работает как нативный Linux-сервис, а не через Docker!
+Все логи пишутся напрямую в файл `backend.log` в корне проекта.
+Смотреть логи в реальном времени:
 ```bash
 tail -f backend.log
 ```
+Посмотреть последние 100 строк логов:
+```bash
+tail -n 100 backend.log
+```
 
 ### Фронтенд (Nginx)
-Проверить статус контейнера Nginx:
+Проверить статус контейнера Nginx (единственное, что работает в Docker):
 ```bash
 sudo docker ps | grep qms-nginx
 ```
@@ -70,28 +77,4 @@ sudo docker restart qms-nginx
 sudo docker stop qms-nginx
 ```
 
----
 
-## 📜 Просмотр логов аудита в терминале (Audit Logs CLI)
-
-Для просмотра истории системных изменений и слежения за логами аудита в реальном времени используйте встроенную утилиту из корневой папки проекта:
-
-* **Слежение за изменениями в реальном времени (аналог tail -f)**:
-  ```bash
-  node show-audit-logs.js -f
-  ```
-
-* **Просмотр истории последних N записей**:
-  ```bash
-  node show-audit-logs.js -n 50
-  ```
-
-* **Фильтрация логов по ключевому слову действия (например, UPDATE или DELETE)**:
-  ```bash
-  node show-audit-logs.js --action UPDATE
-  ```
-
-* **Справка по доступным командам**:
-  ```bash
-  node show-audit-logs.js --help
-  ```

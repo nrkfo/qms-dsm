@@ -226,7 +226,7 @@ export const AqlCheck = () => {
 
   return (
     <div className="animate-fade-in responsive-flex-container">
-      <div className="glass-panel" style={{ padding: '20px', borderRadius: 0, borderBottom: '1px solid var(--c-border)', flexShrink: 0 }}>
+      <div className="glass-panel responsive-header" style={{ padding: '20px', borderRadius: 0, borderBottom: '1px solid var(--c-border)', flexShrink: 0 }}>
         <h2 style={{ marginTop: 0, color: 'var(--c-accent)', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'10px'}}>
             <div>Журнал входного контроля AQL (ISO 2859-1)</div>
