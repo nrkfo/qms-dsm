@@ -66,7 +66,7 @@ export const TvCheck = () => {
   const [filterDateFrom, setFilterDateFrom] = useState(new Date().toISOString().split('T')[0]);
   const [onlyNg, setOnlyNg] = useState(false);
   const [searchMn, setSearchMn] = useState('');
-  const [qcNumber, setQcNumber] = useState('');
+  const [qcNumber, setQcNumber] = useState('1');
 
   // Form State
   const [mnBox, setMnBox] = useState('');
@@ -297,11 +297,6 @@ export const TvCheck = () => {
     setIsAdding(true);
     try {
       setValidationError('');
-      if (!qcNumber) {
-        setValidationError('⚠️ Выберите номер ОТК!');
-        setTimeout(() => mnBoxRef.current?.focus(), 50);
-        return;
-      }
       if (mnBox.trim().toUpperCase() !== mnTv.trim().toUpperCase()) {
         setValidationError('❌ MN Коробки и MN ТВ не совпадают!');
         setMnBox('');
@@ -381,7 +376,6 @@ export const TvCheck = () => {
       setExtraTests([]);
       setComment('');
       setValidationError('');
-      setQcNumber('');
       setTimeout(() => mnBoxRef.current?.focus(), 50);
       loadData();
     } catch (err: any) {
@@ -502,7 +496,6 @@ export const TvCheck = () => {
               />
               <input placeholder="МN ТВ..." className="glass" value={mnTv} onChange={e => setMnTv(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '15px', border: '1px solid var(--c-border)', borderRadius: 'var(--radius-sm)', fontSize: '14px', color: 'var(--c-text-primary)' }} />
               <select className="glass" value={qcNumber} onChange={e => setQcNumber(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid var(--c-border)', borderRadius: 'var(--radius-sm)', background: 'var(--c-bg-surface)', fontSize: '14px', color: 'var(--c-accent)' }}>
-                <option value="" disabled>Выберите ОТК...</option>
                 {Array.from({ length: 15 }, (_, i) => i + 1).map(num => (
                   <option key={num} value={num.toString()}>{num}</option>
                 ))}
