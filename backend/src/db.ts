@@ -183,8 +183,19 @@ const db = new sqlite3.Database(dbPath, (err) => {
       db.run(`CREATE TABLE IF NOT EXISTS daily_kpi_facts (
         date TEXT PRIMARY KEY,
         mes_fact INTEGER DEFAULT 0,
-        aql_plan INTEGER DEFAULT 0
+        aql_plan INTEGER DEFAULT 0,
+        closed_at TEXT
       )`);
+      db.all(`PRAGMA table_info(daily_kpi_facts)`, (err, rows: any[]) => {
+        if (err || !rows) return;
+        const hasClosedAt = rows.some(r => r.name === 'closed_at');
+        if (!hasClosedAt) {
+          db.run(`ALTER TABLE daily_kpi_facts ADD COLUMN closed_at TEXT`, (err) => {
+            if (err) console.error('[Migration] Failed to add closed_at column to daily_kpi_facts:', err.message);
+            else console.log('[Migration] Added closed_at column to daily_kpi_facts');
+          });
+        }
+      });
 
 
       // Audit logs disabled
