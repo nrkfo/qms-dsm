@@ -583,20 +583,25 @@ export const Dashboard = () => {
                       >
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                           <div style={{ fontWeight: 'bold', color: 'var(--c-text-primary)' }}>
-                            {d.model || 'Модель не указана'} <span style={{ color: 'var(--c-text-muted)', fontWeight: 'normal', fontSize: '0.8rem' }}>({d.serial || 'БЕЗ S/N'})</span>
+                            {d.model || 'Модель не указана'}{' '}
+                            {d.mnTv && (
+                              <span style={{ color: 'var(--c-accent)', fontWeight: 500, fontSize: '0.8rem' }}>
+                                (MN ТВ: {d.mnTv})
+                              </span>
+                            )}
                           </div>
                           <div style={{ color: 'var(--c-danger)', fontWeight: 500 }}>
                             Дефект: {d.defects || d.defect || 'Не указан'}
                           </div>
-                          {d.comment && (
+                          {(d.comments || d.comment) && (
                             <div style={{ color: 'var(--c-text-secondary)', fontSize: '0.8rem', fontStyle: 'italic' }}>
-                              Комментарий: {d.comment}
+                              Комментарий: {d.comments || d.comment}
                             </div>
                           )}
                         </div>
                         
                         <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>
-                          <div>Инспектор {d.inspector || def.username || '—'}</div>
+                          <div style={{ fontWeight: 'bold', color: 'var(--c-text-primary)' }}>ОТК №{d.inspector || '—'}</div>
                           <div style={{ fontSize: '0.75rem', marginTop: '2px' }}>⏱ {timeStr}</div>
                         </div>
                       </div>
