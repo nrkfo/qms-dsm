@@ -110,7 +110,6 @@ export const KpiDashboard = () => {
     try {
       const lotIdParam = activeLot?.id ? `&lot_id=${activeLot.id}` : '';
       const logs = await api.get(`/logs/oqa_tv?date=${dateFilter}${lotIdParam}`);
-      const auditLogs = await api.get(`/audit-logs?date=${dateFilter}`);
       
       let breaks = [];
       try {
@@ -156,16 +155,6 @@ export const KpiDashboard = () => {
       });
 
       setHourlyData(Object.entries(hourly).map(([h, count]) => ({ hour: h, count })));
-
-      auditLogs.forEach((alog: any) => {
-        if (alog.action === 'UPDATE_LOG_OQA_TV') {
-          const logId = alog.details?.id;
-          const inspectorNum = logIdToInspector[logId];
-          if (inspectorNum && inspectors[inspectorNum]) {
-            inspectors[inspectorNum].updates++;
-          }
-        }
-      });
 
       // Reverting to hardcoded defaults as requested
       const inspectorsCount = 3;
