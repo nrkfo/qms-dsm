@@ -29,7 +29,6 @@ export const KpiDashboard = () => {
   const pulseRef = useRef<any>(null);
 
   const [lastBackupTime, setLastBackupTime] = useState<string | null>(null);
-  const [shiftClosedAt, setShiftClosedAt] = useState<string | null>(null);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -42,7 +41,6 @@ export const KpiDashboard = () => {
     try {
       await api.post('/auth/verify', { password: passwordInput });
       await useDataStore.getState().saveKpiFacts(dateFilter, mesFact || 0, currentAqlPlan);
-      await fetchShiftClosedStatus();
       setShowPasswordModal(false);
       setPasswordInput('');
     } catch (e: any) {
@@ -75,7 +73,6 @@ export const KpiDashboard = () => {
 
   useEffect(() => {
     fetchMesFact(dateFilter);
-    fetchShiftClosedStatus();
   }, [dateFilter]);
 
   useEffect(() => {
@@ -94,7 +91,6 @@ export const KpiDashboard = () => {
           fetchMesFact(dateFilter);
           fetchKpiData();
           fetchGlobalMetrics();
-          fetchShiftClosedStatus();
           fetchBackupStatus();
           setLastUpdate(new Date());
           setIsLive(true);
@@ -110,28 +106,11 @@ export const KpiDashboard = () => {
     try {
       const res = await api.get('/backup/status');
       if (res && res.lastBackupTime) {
-        setLastBackupTime(res.lastBackupTime);
+        const localTime = new Date(res.lastBackupTime).toLocaleString('ru-RU');
+        setLastBackupTime(localTime);
       }
     } catch (e) {
       console.error('Failed to fetch backup status', e);
-    }
-  };
-
-  const fetchShiftClosedStatus = async () => {
-    if (!dateFilter) {
-      setShiftClosedAt(null);
-      return;
-    }
-    try {
-      const res = await api.get(`/kpi/facts?date=${dateFilter}`);
-      if (res && res.closed_at) {
-        setShiftClosedAt(res.closed_at);
-      } else {
-        setShiftClosedAt(null);
-      }
-    } catch (e) {
-      console.error('Failed to fetch shift status', e);
-      setShiftClosedAt(null);
     }
   };
 
@@ -382,12 +361,7 @@ export const KpiDashboard = () => {
                 🔒 Завершить смену
               </button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--c-text-muted)', fontSize: '0.8rem', marginTop: '10px' }}>
-              <span>реальные данные из MES</span>
-              <span style={{ color: shiftClosedAt ? 'var(--c-success)' : 'var(--c-text-muted)' }}>
-                {shiftClosedAt ? `🏁 Смена закрыта в ${shiftClosedAt}` : '⏳ Смена активна'}
-              </span>
-            </div>
+            <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', marginTop: '10px' }}>реальные данные из MES</div>
          </div>
          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--c-success)' }}>
             <h4 style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>ВЫПОЛНЕНИЕ ПЛАНА (AQL)</h4>

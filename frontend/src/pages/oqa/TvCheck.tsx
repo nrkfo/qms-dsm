@@ -121,13 +121,30 @@ export const TvCheck = () => {
       await api.post('/auth/verify', { password: passInputValue });
       const record = pendingRecord;
       setEditingRecord(record);
-      setEditDefects(record.defects ? record.defects.split(', ').filter(Boolean) : []);
 
-      const commentParts = record.comments ? record.comments.split('; ') : [];
-      const testsFromComment = commentParts.filter((p: string) => tvTests.some(t => t.name === p));
-      const manualComment = commentParts.filter((p: string) => !tvTests.some(t => t.name === p)).join('; ');
+      // Load defects and strip English translation
+      let loadedDefects: string[] = [];
+      if (record.defects) {
+        const ruDefectsPart = record.defects.split(' / ')[0];
+        loadedDefects = ruDefectsPart.split(', ').map((d: string) => d.trim()).filter(Boolean);
+      }
+      setEditDefects(loadedDefects);
 
-      setEditTests(testsFromComment);
+      // Load tests and strip English translation
+      let loadedTests: string[] = [];
+      let manualComment = record.comments || '';
+
+      if (record.tests) {
+        const ruTestsPart = record.tests.split(' / ')[0];
+        loadedTests = ruTestsPart.split(', ').map((t: string) => t.trim()).filter(Boolean);
+      } else {
+        // Legacy fallback: parse from comments
+        const commentParts = record.comments ? record.comments.split('; ') : [];
+        loadedTests = commentParts.filter((p: string) => tvTests.some(t => t.name === p));
+        manualComment = commentParts.filter((p: string) => !tvTests.some(t => t.name === p)).join('; ');
+      }
+
+      setEditTests(loadedTests);
       setEditComment(manualComment);
       setEditInspector(record.inspector || '');
       setIsPassModalOpen(false);
@@ -169,11 +186,21 @@ export const TvCheck = () => {
         if (enTest && enTest.toLowerCase() !== finalEditTests.toLowerCase()) finalEditTests = `${finalEditTests} / ${enTest}`;
       }
 
+      let finalEditComment = editComment.trim();
+      if (finalEditComment) {
+        if (!finalEditComment.includes(' / ')) {
+          const en = await translateToEnglish(finalEditComment);
+          if (en && en.toLowerCase() !== finalEditComment.toLowerCase()) {
+            finalEditComment = `${finalEditComment} / ${en}`;
+          }
+        }
+      }
+
       const updatedData: any = {
         ...rest,
         defects: finalEditDefects,
         tests: finalEditTests,
-        comments: [editComment].filter(Boolean).join('; ')
+        comments: finalEditComment
       };
 
       if (user?.role === 'Admin') {

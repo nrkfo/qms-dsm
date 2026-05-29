@@ -987,6 +987,20 @@ app.get('/api/kpi/facts', authenticateToken, (req, res) => {
   });
 });
 
+app.get('/api/kpi/last-closed', authenticateToken, (req, res) => {
+  db.get(
+    'SELECT * FROM daily_kpi_facts WHERE closed_at IS NOT NULL ORDER BY date DESC LIMIT 1',
+    [],
+    (err, row: any) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!row) {
+        return res.json({ date: null, closed_at: null });
+      }
+      res.json(row);
+    }
+  );
+});
+
 app.post('/api/kpi/facts', authenticateToken, (req, res) => {
   const { date, mes_fact, aql_plan } = req.body;
   if (!date || typeof date !== 'string') {
@@ -1061,15 +1075,13 @@ app.get('/api/backup/status', authenticateToken, (req, res) => {
   const latestBackupPath = path.resolve(__dirname, '../backups/backup_latest.sqlite');
   if (fs.existsSync(latestBackupPath)) {
     const stats = fs.statSync(latestBackupPath);
-    const localTime = stats.mtime.toLocaleString('ru-RU');
-    return res.json({ lastBackupTime: localTime });
+    return res.json({ lastBackupTime: stats.mtime.toISOString() });
   }
   
   const dbPath = path.resolve(__dirname, '../database.sqlite');
   if (fs.existsSync(dbPath)) {
     const stats = fs.statSync(dbPath);
-    const localTime = stats.mtime.toLocaleString('ru-RU');
-    return res.json({ lastBackupTime: localTime });
+    return res.json({ lastBackupTime: stats.mtime.toISOString() });
   }
   
   res.json({ lastBackupTime: null });
