@@ -447,7 +447,7 @@ export const KpiDashboard = () => {
          </div>
       </div>
 
-      <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '25px', alignItems: 'start' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--c-accent)' }}>Производительность инспекторов</h3>
           <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
@@ -522,192 +522,198 @@ export const KpiDashboard = () => {
           </div>
         </div>
 
-        {/* Sidebar Analytics */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          {/* User Activity Tracker Card */}
-          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <style>{`
-              @keyframes pulse-neon {
-                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-                70% { transform: scale(1.2); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-              }
-            `}</style>
-            <h4 style={{ margin: '0 0 5px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Users size={16} color="var(--c-accent)" /> Активность пользователей
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
-              {allUsers.length === 0 ? (
-                <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '20px' }}>
-                  Загрузка пользователей...
-                </div>
-              ) : (
-                allUsers.map((u: any) => {
-                  const session = sessionsMap.get(u.id);
-                  const isOnline = !!session;
-                  
-                  return (
-                    <div 
-                      key={u.id} 
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        padding: '8px 10px',
-                        background: isOnline ? 'var(--c-bg-surface-elevated)' : 'transparent',
-                        borderRadius: '8px',
-                        border: isOnline ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid transparent',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {/* Avatar */}
-                        <div style={{ position: 'relative', width: '32px', height: '32px', borderRadius: '50%', background: isOnline ? 'var(--c-accent-muted)' : 'var(--c-bg-base)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: isOnline ? 'var(--c-accent)' : 'var(--c-text-muted)' }}>
-                            {u.username.substring(0, 2).toUpperCase()}
-                          </span>
-                          <span 
-                            style={{ 
-                              position: 'absolute', 
-                              bottom: '-1px', 
-                              right: '-1px', 
-                              width: '8px', 
-                              height: '8px', 
-                              borderRadius: '50%', 
-                              background: isOnline ? '#10b981' : '#6b7280', 
-                              boxShadow: isOnline ? '0 0 8px #10b981' : 'none',
-                              border: '1px solid var(--c-bg-base)',
-                              animation: isOnline ? 'pulse-neon 2s infinite' : 'none'
-                            }}
-                          />
+        {/* Analytics and Activity Section */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', borderTop: '1px solid var(--c-border)', paddingTop: '25px' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--c-accent)' }}>Активность пользователей и аналитика</h3>
+          <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '25px', alignItems: 'stretch' }}>
+            {/* User Activity Tracker Card */}
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <style>{`
+                @keyframes pulse-neon {
+                  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                  70% { transform: scale(1.2); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+                  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+                }
+              `}</style>
+              <h4 style={{ margin: '0 0 5px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Users size={16} color="var(--c-accent)" /> Активность пользователей
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
+                {allUsers.length === 0 ? (
+                  <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '20px' }}>
+                    Загрузка пользователей...
+                  </div>
+                ) : (
+                  allUsers.map((u: any) => {
+                    const session = sessionsMap.get(u.id);
+                    const isOnline = !!session;
+                    
+                    return (
+                      <div 
+                        key={u.id} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'space-between',
+                          padding: '10px 14px',
+                          background: isOnline ? 'var(--c-bg-surface-elevated)' : 'transparent',
+                          borderRadius: '8px',
+                          border: isOnline ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid var(--c-border)',
+                          transition: 'all 0.3s ease',
+                          gap: '15px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                          {/* Avatar */}
+                          <div style={{ flexShrink: 0, position: 'relative', width: '36px', height: '36px', borderRadius: '50%', background: isOnline ? 'var(--c-accent-muted)' : 'var(--c-bg-base)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: isOnline ? 'var(--c-accent)' : 'var(--c-text-muted)', userSelect: 'none' }}>
+                              {u.username.substring(0, 2).toUpperCase()}
+                            </span>
+                            <span 
+                              style={{ 
+                                position: 'absolute', 
+                                bottom: '-1px', 
+                                right: '-1px', 
+                                width: '9px', 
+                                height: '9px', 
+                                borderRadius: '50%', 
+                                background: isOnline ? '#10b981' : '#6b7280', 
+                                boxShadow: isOnline ? '0 0 8px #10b981' : 'none',
+                                border: '1.5px solid var(--c-bg-base)',
+                                animation: isOnline ? 'pulse-neon 2s infinite' : 'none'
+                              }}
+                            />
+                          </div>
+                          
+                          {/* User & Role */}
+                          <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--c-text-primary)' }}>
+                              {u.username}
+                            </span>
+                            <span style={{ 
+                              fontSize: '0.65rem', 
+                              padding: '2px 6px', 
+                              borderRadius: '4px',
+                              marginTop: '3px',
+                              alignSelf: 'flex-start',
+                              fontWeight: 500,
+                              flexShrink: 0,
+                              ...getRoleStyle(u.role)
+                            }}>
+                              {getRoleLabel(u.role)}
+                            </span>
+                          </div>
                         </div>
                         
-                        {/* User & Role */}
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--c-text-primary)' }}>
-                            {u.username}
-                          </span>
-                          <span style={{ 
-                            fontSize: '0.65rem', 
-                            padding: '1px 5px', 
-                            borderRadius: '4px',
-                            marginTop: '2px',
-                            alignSelf: 'flex-start',
-                            fontWeight: 500,
-                            ...getRoleStyle(u.role)
-                          }}>
-                            {getRoleLabel(u.role)}
-                          </span>
+                        {/* Location Badge */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
+                          {isOnline ? (
+                            <>
+                              <span style={{ 
+                                fontSize: '0.7rem', 
+                                fontWeight: 500, 
+                                color: '#8b5cf6', 
+                                background: 'rgba(139, 92, 246, 0.12)',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0
+                              }}>
+                                {getPageName(session.currentUrl)}
+                              </span>
+                              <span style={{ fontSize: '0.6rem', color: '#10b981', fontWeight: 500, flexShrink: 0 }}>
+                                активен
+                              </span>
+                            </>
+                          ) : (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--c-text-muted)', flexShrink: 0 }}>
+                              оффлайн
+                            </span>
+                          )}
                         </div>
                       </div>
-                      
-                      {/* Location Badge */}
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-                        {isOnline ? (
-                          <>
-                            <span style={{ 
-                              fontSize: '0.7rem', 
-                              fontWeight: 500, 
-                              color: '#8b5cf6', 
-                              background: 'rgba(139, 92, 246, 0.12)',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              border: '1px solid rgba(139, 92, 246, 0.2)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {getPageName(session.currentUrl)}
-                            </span>
-                            <span style={{ fontSize: '0.6rem', color: '#10b981', fontWeight: 500 }}>
-                              активен
-                            </span>
-                          </>
-                        ) : (
-                          <span style={{ fontSize: '0.7rem', color: 'var(--c-text-muted)' }}>
-                            оффлайн
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
-          
-          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
-             <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-               <TrendingUp size={16} color="var(--c-accent)" /> Распределение нагрузки (Проверки)
-             </h4>
-             <div style={{ width: '100%', height: 260, position: 'relative' }}>
-               <ResponsiveContainer width="100%" height="100%">
-                 <PieChart>
-                   <Pie
-                     data={ALL_MODULES.map(m => {
-                       const met = getModuleMetric(m.id);
-                       return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
-                     }).filter(m => m.value > 0)}
-                     cx="50%"
-                     cy="50%"
-                     innerRadius={45}
-                     outerRadius={85}
-                     paddingAngle={2}
-                     dataKey="value"
-                     stroke="none"
-                     isAnimationActive={false}
-                   >
-                     {ALL_MODULES.map((m, index) => {
-                       const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
-                       return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                     })}
-                   </Pie>
-                   <RechartsTooltip 
-                     contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
-                   />
-                 </PieChart>
-               </ResponsiveContainer>
-             </div>
-          </div>
 
-          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--c-accent-muted), var(--c-bg-surface-elevated))' }}>
-             <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--c-accent)' }}>Статус OQA</h4>
-             <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
-                {totalCheckedGlobal}
-             </div>
-             <div style={{ fontSize: '0.75rem', color: 'var(--c-text-muted)' }}>единиц проверено сегодня</div>
-          </div>
-          
-          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
-             <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem' }}>Легенда KPI</h4>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem' }}>
-                   <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--c-accent)', marginTop: '2px' }}></div>
-                   <div>
-                      <strong>Sampling Compliance:</strong>
-                      <div style={{ color: 'var(--c-text-muted)', fontSize: '0.7rem' }}>Выполнение индивидуального плана AQL (процент от нормы на смену).</div>
-                   </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem' }}>
-                   <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--c-success)', marginTop: '2px' }}></div>
-                   <div>
-                      <strong>Data Integrity:</strong>
-                      <div style={{ color: 'var(--c-text-muted)', fontSize: '0.7rem' }}>Достоверность данных. Снижается, если записи редактировались вручную.</div>
-                   </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem' }}>
-                   <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--c-danger)', marginTop: '2px' }}></div>
-                   <div>
-                      <strong>Lead Time:</strong>
-                      <div style={{ color: 'var(--c-text-muted)', fontSize: '0.7rem' }}>Среднее время проверки (Норма: 28 мин). Красный цвет — превышение.</div>
-                   </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem', alignItems: 'center', borderTop: '1px solid var(--c-border)', paddingTop: '10px' }}>
-                   <Zap size={14} color="var(--c-warning)" />
-                   <span style={{ color: 'var(--c-text-muted)' }}>Real-time обновление активно</span>
-                </div>
-             </div>
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+               <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                 <TrendingUp size={16} color="var(--c-accent)" /> Распределение нагрузки (Проверки)
+               </h4>
+               <div style={{ width: '100%', height: 260, position: 'relative' }}>
+                 <ResponsiveContainer width="100%" height="100%">
+                   <PieChart>
+                     <Pie
+                       data={ALL_MODULES.map(m => {
+                         const met = getModuleMetric(m.id);
+                         return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
+                       }).filter(m => m.value > 0)}
+                       cx="50%"
+                       cy="50%"
+                       innerRadius={45}
+                       outerRadius={85}
+                       paddingAngle={2}
+                       dataKey="value"
+                       stroke="none"
+                       isAnimationActive={false}
+                     >
+                       {ALL_MODULES.map((m, index) => {
+                         const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
+                         return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                       })}
+                     </Pie>
+                     <RechartsTooltip 
+                       contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
+                     />
+                   </PieChart>
+                 </ResponsiveContainer>
+               </div>
+            </div>
+
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--c-accent-muted), var(--c-bg-surface-elevated))' }}>
+               <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--c-accent)' }}>Статус OQA</h4>
+               <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
+                  {totalCheckedGlobal}
+               </div>
+               <div style={{ fontSize: '0.75rem', color: 'var(--c-text-muted)' }}>единиц проверено сегодня</div>
+            </div>
+            
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+               <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem' }}>Легенда KPI</h4>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem' }}>
+                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--c-accent)', marginTop: '2px' }}></div>
+                     <div>
+                        <strong>Sampling Compliance:</strong>
+                        <div style={{ color: 'var(--c-text-muted)', fontSize: '0.7rem' }}>Выполнение индивидуального плана AQL (процент от нормы на смену).</div>
+                     </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem' }}>
+                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--c-success)', marginTop: '2px' }}></div>
+                     <div>
+                        <strong>Data Integrity:</strong>
+                        <div style={{ color: 'var(--c-text-muted)', fontSize: '0.7rem' }}>Достоверность данных. Снижается, если записи редактировались вручную.</div>
+                     </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem' }}>
+                     <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--c-danger)', marginTop: '2px' }}></div>
+                     <div>
+                        <strong>Lead Time:</strong>
+                        <div style={{ color: 'var(--c-text-muted)', fontSize: '0.7rem' }}>Среднее время проверки (Норма: 28 мин). Красный цвет — превышение.</div>
+                     </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', fontSize: '0.75rem', alignItems: 'center', borderTop: '1px solid var(--c-border)', paddingTop: '10px' }}>
+                     <Zap size={14} color="var(--c-warning)" />
+                     <span style={{ color: 'var(--c-text-muted)' }}>Real-time обновление активно</span>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
       </div>
