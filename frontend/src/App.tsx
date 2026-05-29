@@ -22,6 +22,7 @@ import { Menu } from 'lucide-react';
 import { initAudioContext } from './utils/audio';
 import { GlobalUI } from './components/ui/GlobalUI';
 import { useDataStore } from './store/useDataStore';
+import { api } from './utils/api';
 
 // Layout
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -32,6 +33,25 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [location]);
+
+  // Send heartbeat periodically to track user activity/online status
+  useEffect(() => {
+    const token = localStorage.getItem('dsm_qms_token');
+    if (!token) return;
+
+    const sendHeartbeat = () => {
+      api.post('/users/heartbeat', { currentUrl: location.pathname })
+        .catch(err => console.error('Heartbeat error:', err));
+    };
+
+    // Send immediately on mount or path change
+    sendHeartbeat();
+
+    // Repeat every 15 seconds
+    const interval = setInterval(sendHeartbeat, 15000);
+
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   useEffect(() => {
     let eventSource: EventSource | null = null;

@@ -244,6 +244,21 @@ const UserManagement = () => {
   const [editPass, setEditPass] = useState('');
   const [editRole, setEditRole] = useState('Inspector');
 
+  const ROLES = [
+    { id: 'Admin', label: 'Админ' },
+    { id: 'Inspector', label: 'Инспектор' },
+    { id: 'Warehouse', label: 'Склад' },
+    { id: 'Production', label: 'Производство' },
+    { id: 'Technologist', label: 'Технолог' },
+    { id: 'Master', label: 'Мастер смены' },
+    { id: 'Viewer', label: 'Наблюдатель' }
+  ];
+
+  const getRoleLabel = (roleId: string) => {
+    const found = ROLES.find(r => r.id === roleId);
+    return found ? found.label : roleId;
+  };
+
   useEffect(() => { fetchUsers(); }, []);
   const fetchUsers = async () => { const data = await api.get('/users'); setUsers(data); };
   const handleCreateUser = async (e: React.FormEvent) => { e.preventDefault(); const defaultPerms = newRole === 'Admin' ? MODULES.map(m => m.id) : []; await api.post('/users', { username: newUname, password: newPass, role: newRole, permissions: defaultPerms }); fetchUsers(); setNewUname(''); setNewPass(''); };
@@ -263,7 +278,9 @@ const UserManagement = () => {
         <form onSubmit={handleCreateUser} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
           <input className="glass" placeholder="Логин" value={newUname} onChange={e=>setNewUname(e.target.value)} style={{flex:'1 1 200px', padding:'10px'}} />
           <input className="glass" type="password" placeholder="Пароль" value={newPass} onChange={e=>setNewPass(e.target.value)} style={{flex:'1 1 200px', padding:'10px'}} />
-          <select className="glass" value={newRole} onChange={e=>setNewRole(e.target.value)} style={{flex:'1 1 150px', padding:'10px'}}> <option value="Inspector">Инспектор</option> <option value="Admin">Админ</option> </select>
+          <select className="glass" value={newRole} onChange={e=>setNewRole(e.target.value)} style={{flex:'1 1 150px', padding:'10px'}}>
+            {ROLES.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+          </select>
           <button type="submit" style={{flex:'1 1 120px', padding:'10px 20px', background:'var(--c-accent)', border:'none', borderRadius:'4px', color:'#000'}}>Создать</button>
         </form>
       </div>
@@ -273,13 +290,15 @@ const UserManagement = () => {
             <form onSubmit={(e) => handleUpdateUser(e, u.id)} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
               <input className="glass" value={editUname} onChange={e=>setEditUname(e.target.value)} style={{flex:'1 1 180px', padding:'8px'}} required />
               <input className="glass" type="password" placeholder="Новый пароль" value={editPass} onChange={e=>setEditPass(e.target.value)} style={{flex:'1 1 180px', padding:'8px'}} />
-              <select className="glass" value={editRole} onChange={e=>setEditRole(e.target.value)} style={{flex:'1 1 120px', padding:'8px'}}> <option value="Inspector">Инспектор</option> <option value="Admin">Админ</option> </select>
+              <select className="glass" value={editRole} onChange={e=>setEditRole(e.target.value)} style={{flex:'1 1 120px', padding:'8px'}}>
+                {ROLES.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+              </select>
               <button type="submit" style={{flex:'1 1 100px', padding:'8px 15px', background:'var(--c-accent)', border:'none', borderRadius:'4px', color:'#000'}}>Сохранить</button>
               <button type="button" onClick={() => setEditingUser(null)} className="glass" style={{flex:'1 1 100px', padding:'8px 15px'}}>Отмена</button>
             </form>
           ) : (
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <span><strong>{u.username}</strong> ({u.role})</span>
+              <span><strong>{u.username}</strong> ({getRoleLabel(u.role)})</span>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => { setEditingUser(u.id); setEditUname(u.username); setEditPass(''); setEditRole(u.role); }} className="glass" style={{ padding: '5px 15px', fontSize: '0.8rem' }}>Изменить</button>
                 <button onClick={() => { setExpandedUser(expandedUser === u.id ? null : u.id); setDraftPerms(u.role === 'Admin' ? MODULES.map(m => m.id) : (u.permissions || [])); }} className="glass" style={{ padding: '5px 15px', fontSize: '0.8rem' }}>Права</button>

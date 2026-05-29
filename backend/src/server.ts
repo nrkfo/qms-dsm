@@ -58,6 +58,32 @@ const broadcast = (data: any) => {
   });
 };
 
+interface UserSession {
+  userId: number;
+  username: string;
+  role: string;
+  lastActive: number;
+  currentUrl: string;
+}
+
+let activeSessions: Record<number, UserSession> = {};
+
+// Clean up offline sessions (inactivity threshold: 30 seconds)
+setInterval(() => {
+  const now = Date.now();
+  let changed = false;
+  Object.keys(activeSessions).forEach(key => {
+    const userId = Number(key);
+    if (now - activeSessions[userId].lastActive > 30000) {
+      delete activeSessions[userId];
+      changed = true;
+    }
+  });
+  if (changed) {
+    broadcast({ type: 'USER_SESSIONS_UPDATED', sessions: Object.values(activeSessions) });
+  }
+}, 10000);
+
 // --- HELPERS ---
 const getSetting = (key: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -232,6 +258,38 @@ app.post('/api/auth/verify', authenticateToken, (req, res) => {
     if (valid) res.json({ success: true });
     else res.status(401).json({ error: 'Invalid password' });
   });
+});
+
+// Heartbeat and Active Sessions
+app.post('/api/users/heartbeat', authenticateToken, (req, res) => {
+  const { currentUrl } = req.body;
+  const user = (req as any).user;
+  if (!user || !user.id) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const now = Date.now();
+  const alreadyActive = !!activeSessions[user.id];
+  const oldUrl = activeSessions[user.id]?.currentUrl;
+
+  activeSessions[user.id] = {
+    userId: user.id,
+    username: user.username,
+    role: user.role,
+    lastActive: now,
+    currentUrl: currentUrl || '/'
+  };
+
+  res.json({ success: true });
+
+  // Broadcast if status changed or page changed
+  if (!alreadyActive || oldUrl !== currentUrl) {
+    broadcast({ type: 'USER_SESSIONS_UPDATED', sessions: Object.values(activeSessions) });
+  }
+});
+
+app.get('/api/users/active-sessions', authenticateToken, (req, res) => {
+  res.json(Object.values(activeSessions));
 });
 
 // Users CRUD
