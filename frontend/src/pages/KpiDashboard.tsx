@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { api } from '../utils/api';
 import { Users, Target, ShieldCheck, Clock, TrendingUp, AlertTriangle, Zap } from 'lucide-react';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip } from 'recharts';
 
 // Replicating OQA Production Logic for Dynamic AQL Plan
 
@@ -21,7 +22,6 @@ export const KpiDashboard = () => {
   const [showAllDates, setShowAllDates] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<any>(null);
-  const [hourlyData, setHourlyData] = useState<any[]>([]);
   const [globalMetrics, setGlobalMetrics] = useState<any[]>([]);
   const [currentAqlPlan, setCurrentAqlPlan] = useState(0);
   const [lastUpdate, setLastUpdate] = useState(new Date());
@@ -118,9 +118,6 @@ export const KpiDashboard = () => {
         console.error('Failed to fetch breaks', err);
       }
       
-      const hourly: any = {};
-      for (let i = 8; i < 22; i++) hourly[i] = 0;
-      
       const inspectors: any = {};
       const logIdToInspector: any = {};
       
@@ -144,8 +141,6 @@ export const KpiDashboard = () => {
 
         if (log.timestamp) {
           const time = new Date(log.timestamp);
-          const hour = time.getHours();
-          if (hourly[hour] !== undefined) hourly[hour]++;
           const ts = time.getTime();
           inspectors[inspectorNum].times.push(ts);
           if (!inspectors[inspectorNum].lastCheckTime || ts > inspectors[inspectorNum].lastCheckTime) {
@@ -153,8 +148,6 @@ export const KpiDashboard = () => {
           }
         }
       });
-
-      setHourlyData(Object.entries(hourly).map(([h, count]) => ({ hour: h, count })));
 
       // Reverting to hardcoded defaults as requested
       const inspectorsCount = 3;
@@ -225,6 +218,23 @@ export const KpiDashboard = () => {
 
   const oqaMetric = globalMetrics.find(m => m.module_id === 'oqa_tv') || { total_passed: 0, total_failed: 0 };
   const totalCheckedGlobal = oqaMetric.total_passed + oqaMetric.total_failed;
+
+  const ALL_MODULES = [
+    { id: 'oqa_tv', title: 'Выборочный контроль ГП', desc: 'Проверено ТВ' },
+    { id: 'oqa_pallets', title: 'Приемка паллет ГП', desc: 'Проверено поддонов' },
+    { id: 'oqa_labels', title: 'Проверка этикетки', desc: 'сканирований этикеток' },
+    { id: 'oqa_patrol', title: 'Журнал обхода', desc: 'обходов выполнено' },
+    { id: 'iqc_aql', title: 'Журнал входного контроля AQL', desc: 'партий проверено' },
+    { id: 'iqc_panels', title: 'Проверка панелей', desc: 'панелей проверено' },
+    { id: 'iqc_eps', title: 'Замеры пеновкладышей', desc: 'замеров сделано' },
+    { id: 'iqc_covers', title: 'Замеры крышек', desc: 'деталей проверено' },
+    { id: 'iqc_components', title: 'Проверка комплектующих', desc: 'позиций принято' },
+  ];
+
+  const getModuleMetric = (moduleId: string) => {
+    const metric = globalMetrics.find(m => m.module_id === moduleId);
+    return metric || { total_passed: 0, total_failed: 0 };
+  };
 
   const renderMetricCircle = (value: number, color: string, title: string, subtitle: string) => {
     const radius = 35;
@@ -429,29 +439,35 @@ export const KpiDashboard = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
              <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-               <Clock size={16} color="var(--c-accent)" /> Динамика (ТВ/час)
+               <TrendingUp size={16} color="var(--c-accent)" /> Распределение нагрузки (Проверки)
              </h4>
-             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '150px', paddingBottom: '20px', borderBottom: '1px solid var(--c-border)' }}>
-                {hourlyData.map((d: any) => {
-                  const max = Math.max(...hourlyData.map(h => h.count)) || 1;
-                  const height = (d.count / max) * 100;
-                  return (
-                    <div key={d.hour} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ 
-                          width: '100%', 
-                          height: `${height}%`, 
-                          background: d.count > 0 ? 'var(--c-accent)' : 'var(--c-bg-base)', 
-                          borderRadius: '2px 2px 0 0',
-                          minHeight: d.count > 0 ? '4px' : '0'
-                        }} title={`${d.hour}:00 - ${d.count} ТВ`}></div>
-                    </div>
-                  );
-                })}
-             </div>
-             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'var(--c-text-muted)', marginTop: '5px' }}>
-                <span>08:00</span>
-                <span>15:00</span>
-                <span>22:00</span>
+             <div style={{ width: '100%', height: 260, position: 'relative' }}>
+               <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                   <Pie
+                     data={ALL_MODULES.map(m => {
+                       const met = getModuleMetric(m.id);
+                       return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
+                     }).filter(m => m.value > 0)}
+                     cx="50%"
+                     cy="50%"
+                     innerRadius={45}
+                     outerRadius={85}
+                     paddingAngle={2}
+                     dataKey="value"
+                     stroke="none"
+                     isAnimationActive={false}
+                   >
+                     {ALL_MODULES.map((m, index) => {
+                       const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
+                       return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                     })}
+                   </Pie>
+                   <RechartsTooltip 
+                     contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
+                   />
+                 </PieChart>
+               </ResponsiveContainer>
              </div>
           </div>
 
