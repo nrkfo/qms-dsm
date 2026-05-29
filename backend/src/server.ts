@@ -987,6 +987,20 @@ app.get('/api/kpi/facts', authenticateToken, (req, res) => {
   });
 });
 
+app.get('/api/kpi/last-closed', authenticateToken, (req, res) => {
+  db.get(
+    'SELECT * FROM daily_kpi_facts WHERE closed_at IS NOT NULL ORDER BY date DESC LIMIT 1',
+    [],
+    (err, row: any) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!row) {
+        return res.json({ date: null, closed_at: null });
+      }
+      res.json(row);
+    }
+  );
+});
+
 app.post('/api/kpi/facts', authenticateToken, (req, res) => {
   const { date, mes_fact, aql_plan } = req.body;
   if (!date || typeof date !== 'string') {
