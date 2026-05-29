@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, memo } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { api } from '../utils/api';
@@ -56,6 +56,63 @@ const getRoleStyle = (role: string) => {
     default: return { background: 'rgba(255, 255, 255, 0.1)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.2)' };
   }
 };
+
+const LoadDistributionChart = memo(({ globalMetrics }: { globalMetrics: any[] }) => {
+  const ALL_MODULES = [
+    { id: 'oqa_tv', title: 'Выборочный контроль ГП', desc: 'Проверено ТВ' },
+    { id: 'oqa_pallets', title: 'Приемка паллет ГП', desc: 'Проверено поддонов' },
+    { id: 'oqa_labels', title: 'Проверка этикетки', desc: 'сканирований этикеток' },
+    { id: 'oqa_patrol', title: 'Журнал обхода', desc: 'обходов выполнено' },
+    { id: 'iqc_aql', title: 'Журнал входного контроля AQL', desc: 'партий проверено' },
+    { id: 'iqc_panels', title: 'Проверка панелей', desc: 'панелей проверено' },
+    { id: 'iqc_eps', title: 'Замеры пеновкладышей', desc: 'замеров сделано' },
+    { id: 'iqc_covers', title: 'Замеры крышек', desc: 'деталей проверено' },
+    { id: 'iqc_components', title: 'Проверка комплектующих', desc: 'позиций принято' },
+  ];
+
+  const getModuleMetric = (moduleId: string) => {
+    const metric = globalMetrics.find(m => m.module_id === moduleId);
+    return metric || { total_passed: 0, total_failed: 0 };
+  };
+
+  const chartData = ALL_MODULES.map(m => {
+    const met = getModuleMetric(m.id);
+    return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
+  }).filter(m => m.value > 0);
+
+  return (
+    <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
+       <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+         <TrendingUp size={16} color="var(--c-accent)" /> Распределение нагрузки (Проверки)
+       </h4>
+       <div style={{ width: '100%', height: 260, position: 'relative' }}>
+         <ResponsiveContainer width="100%" height="100%">
+           <PieChart>
+             <Pie
+               data={chartData}
+               cx="50%"
+               cy="50%"
+               innerRadius={45}
+               outerRadius={85}
+               paddingAngle={2}
+               dataKey="value"
+               stroke="none"
+               isAnimationActive={false}
+             >
+               {ALL_MODULES.map((m, index) => {
+                 const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
+                 return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+               })}
+             </Pie>
+             <RechartsTooltip 
+               contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
+             />
+           </PieChart>
+         </ResponsiveContainer>
+       </div>
+    </div>
+  );
+});
 
 export const KpiDashboard = () => {
   const { 
@@ -305,22 +362,7 @@ export const KpiDashboard = () => {
   const totalCheckedGlobal = oqaMetric.total_passed + oqaMetric.total_failed;
   const sessionsMap = new Map(activeSessions.map(s => [s.userId, s]));
 
-  const ALL_MODULES = [
-    { id: 'oqa_tv', title: 'Выборочный контроль ГП', desc: 'Проверено ТВ' },
-    { id: 'oqa_pallets', title: 'Приемка паллет ГП', desc: 'Проверено поддонов' },
-    { id: 'oqa_labels', title: 'Проверка этикетки', desc: 'сканирований этикеток' },
-    { id: 'oqa_patrol', title: 'Журнал обхода', desc: 'обходов выполнено' },
-    { id: 'iqc_aql', title: 'Журнал входного контроля AQL', desc: 'партий проверено' },
-    { id: 'iqc_panels', title: 'Проверка панелей', desc: 'панелей проверено' },
-    { id: 'iqc_eps', title: 'Замеры пеновкладышей', desc: 'замеров сделано' },
-    { id: 'iqc_covers', title: 'Замеры крышек', desc: 'деталей проверено' },
-    { id: 'iqc_components', title: 'Проверка комплектующих', desc: 'позиций принято' },
-  ];
 
-  const getModuleMetric = (moduleId: string) => {
-    const metric = globalMetrics.find(m => m.module_id === moduleId);
-    return metric || { total_passed: 0, total_failed: 0 };
-  };
 
   const renderMetricCircle = (value: number, color: string, title: string, subtitle: string) => {
     const radius = 35;
@@ -650,39 +692,7 @@ export const KpiDashboard = () => {
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
-               <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                 <TrendingUp size={16} color="var(--c-accent)" /> Распределение нагрузки (Проверки)
-               </h4>
-               <div style={{ width: '100%', height: 260, position: 'relative' }}>
-                 <ResponsiveContainer width="100%" height="100%">
-                   <PieChart>
-                     <Pie
-                       data={ALL_MODULES.map(m => {
-                         const met = getModuleMetric(m.id);
-                         return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
-                       }).filter(m => m.value > 0)}
-                       cx="50%"
-                       cy="50%"
-                       innerRadius={45}
-                       outerRadius={85}
-                       paddingAngle={2}
-                       dataKey="value"
-                       stroke="none"
-                       isAnimationActive={false}
-                     >
-                       {ALL_MODULES.map((m, index) => {
-                         const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
-                         return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                       })}
-                     </Pie>
-                     <RechartsTooltip 
-                       contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
-                     />
-                   </PieChart>
-                 </ResponsiveContainer>
-               </div>
-            </div>
+            <LoadDistributionChart globalMetrics={globalMetrics} />
 
             <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--c-accent-muted), var(--c-bg-surface-elevated))' }}>
                <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--c-accent)' }}>Статус OQA</h4>
