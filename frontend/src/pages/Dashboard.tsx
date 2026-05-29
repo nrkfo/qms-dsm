@@ -53,6 +53,7 @@ export const Dashboard = () => {
   const [flashingModules, setFlashingModules] = useState<Record<string, 'ok' | 'ng' | 'info'>>({});
   const prevMetricsRef = useRef<any[]>([]);
   const updatePulseRef = useRef<any>(null);
+  const [oqaTvDefects, setOqaTvDefects] = useState<any[]>([]);
 
   useEffect(() => {
     fetchLots();
@@ -64,6 +65,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     fetchMetrics();
+    fetchOqaTvDefects();
     if (selectedModule) fetchModuleLogs(selectedModule);
   }, [dateFilter, activeLot?.id, selectedModule]);
 
@@ -75,6 +77,7 @@ export const Dashboard = () => {
   useEffect(() => {
     const pollInterval = setInterval(() => {
       fetchMetrics();
+      fetchOqaTvDefects();
       if (selectedModule) {
         fetchModuleLogs(selectedModule);
       }
@@ -105,6 +108,7 @@ export const Dashboard = () => {
         console.log('Dashboard SSE connected successfully');
         if (isMounted) {
           fetchMetrics();
+          fetchOqaTvDefects();
           if (selectedModule) {
             fetchModuleLogs(selectedModule);
           }
@@ -118,6 +122,7 @@ export const Dashboard = () => {
             console.log('Real-time update received:', data);
             if (isMounted) {
               fetchMetrics();
+              fetchOqaTvDefects();
               if (selectedModule) {
                 fetchModuleLogs(selectedModule);
               }
@@ -193,6 +198,16 @@ export const Dashboard = () => {
       setMetrics(data);
     } catch (e) {
       console.error('Failed to fetch metrics', e);
+    }
+  };
+
+  const fetchOqaTvDefects = async () => {
+    try {
+      const data = await api.get(`/logs/oqa_tv?date=${dateFilter}&lot_id=${activeLot?.id || ''}`);
+      const filtered = data.filter((log: any) => log.status === 'NG' || log.status === 'Reject');
+      setOqaTvDefects(filtered);
+    } catch (e) {
+      console.error('Failed to fetch OQA TV defects', e);
     }
   };
 
@@ -531,6 +546,65 @@ export const Dashboard = () => {
                 </div>
               </div>
             )}
+
+            {/* OQA TV Defects Card */}
+            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', marginBottom: '30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--c-danger)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  ⚠️ Брак: Выборочный контроль ГП (OQA TV)
+                </h3>
+                <span style={{ background: 'var(--c-danger-muted)', color: 'var(--c-danger)', padding: '2px 8px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  Всего: {oqaTvDefects.length}
+                </span>
+              </div>
+
+              {oqaTvDefects.length === 0 ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--c-text-muted)', fontSize: '0.9rem' }}>
+                  Брака за выбранный период не обнаружено
+                </div>
+              ) : (
+                <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '5px' }}>
+                  {oqaTvDefects.map((def: any) => {
+                    const timeStr = def.timestamp ? new Date(def.timestamp).toLocaleTimeString() : '';
+                    const d = def.data || {};
+                    return (
+                      <div 
+                        key={def.id} 
+                        style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center', 
+                          padding: '10px 15px', 
+                          background: 'rgba(255, 51, 102, 0.05)', 
+                          border: '1px solid rgba(255, 51, 102, 0.15)', 
+                          borderRadius: 'var(--radius-md)',
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <div style={{ fontWeight: 'bold', color: 'var(--c-text-primary)' }}>
+                            {d.model || 'Модель не указана'} <span style={{ color: 'var(--c-text-muted)', fontWeight: 'normal', fontSize: '0.8rem' }}>({d.serial || 'БЕЗ S/N'})</span>
+                          </div>
+                          <div style={{ color: 'var(--c-danger)', fontWeight: 500 }}>
+                            Дефект: {d.defects || d.defect || 'Не указан'}
+                          </div>
+                          {d.comment && (
+                            <div style={{ color: 'var(--c-text-secondary)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                              Комментарий: {d.comment}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>
+                          <div>Инспектор {d.inspector || def.username || '—'}</div>
+                          <div style={{ fontSize: '0.75rem', marginTop: '2px' }}>⏱ {timeStr}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             <h3 style={{ margin: '0 0 15px 0', color: 'var(--c-text-primary)' }}>OQA</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
