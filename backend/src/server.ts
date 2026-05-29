@@ -1075,15 +1075,13 @@ app.get('/api/backup/status', authenticateToken, (req, res) => {
   const latestBackupPath = path.resolve(__dirname, '../backups/backup_latest.sqlite');
   if (fs.existsSync(latestBackupPath)) {
     const stats = fs.statSync(latestBackupPath);
-    const localTime = stats.mtime.toLocaleString('ru-RU');
-    return res.json({ lastBackupTime: localTime });
+    return res.json({ lastBackupTime: stats.mtime.toISOString() });
   }
   
   const dbPath = path.resolve(__dirname, '../database.sqlite');
   if (fs.existsSync(dbPath)) {
     const stats = fs.statSync(dbPath);
-    const localTime = stats.mtime.toLocaleString('ru-RU');
-    return res.json({ lastBackupTime: localTime });
+    return res.json({ lastBackupTime: stats.mtime.toISOString() });
   }
   
   res.json({ lastBackupTime: null });

@@ -106,7 +106,8 @@ export const KpiDashboard = () => {
     try {
       const res = await api.get('/backup/status');
       if (res && res.lastBackupTime) {
-        setLastBackupTime(res.lastBackupTime);
+        const localTime = new Date(res.lastBackupTime).toLocaleString('ru-RU');
+        setLastBackupTime(localTime);
       }
     } catch (e) {
       console.error('Failed to fetch backup status', e);
