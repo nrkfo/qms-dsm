@@ -13,6 +13,50 @@ const getAqlPlan = (produced: number, config: any) => {
   return Math.round(produced * ratio);
 };
 
+const getPageName = (path: string) => {
+  if (!path) return 'Неизвестно';
+  if (path.includes('/dashboard')) return '📊 Дашборд';
+  if (path.includes('/kpi')) return '📈 KPI сотрудников';
+  if (path.includes('/oqa/tv')) return '📺 Выборочный контроль ГП';
+  if (path.includes('/oqa/pallets')) return '📦 Приемка паллет ГП';
+  if (path.includes('/oqa/labels')) return '🏷️ Проверка этикетки';
+  if (path.includes('/oqa/patrol')) return '🚶 Журнал обхода';
+  if (path.includes('/iqc/aql-calculator')) return '🧮 Калькулятор AQL';
+  if (path.includes('/iqc/aql')) return '📋 Входной контроль AQL';
+  if (path.includes('/iqc/panels')) return '🧱 Проверка панелей';
+  if (path.includes('/iqc/eps')) return '📐 Замеры пеновкладышей';
+  if (path.includes('/iqc/covers')) return '⚙️ Замеры крышек';
+  if (path.includes('/iqc/components')) return '🧩 Проверка комплектующих';
+  if (path.includes('/admin')) return '🛠️ Панель администратора';
+  return path;
+};
+
+const getRoleLabel = (role: string) => {
+  switch (role) {
+    case 'Admin': return 'Администратор';
+    case 'Inspector': return 'Инспектор';
+    case 'Warehouse': return 'Склад';
+    case 'Production': return 'Производство';
+    case 'Technologist': return 'Технолог';
+    case 'Master': return 'Мастер смены';
+    case 'Viewer': return 'Наблюдатель';
+    default: return role;
+  }
+};
+
+const getRoleStyle = (role: string) => {
+  switch (role) {
+    case 'Admin': return { background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' };
+    case 'Inspector': return { background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' };
+    case 'Warehouse': return { background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' };
+    case 'Production': return { background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' };
+    case 'Technologist': return { background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' };
+    case 'Master': return { background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)' };
+    case 'Viewer': return { background: 'rgba(107, 114, 128, 0.15)', color: '#9ca3af', border: '1px solid rgba(107, 114, 128, 0.3)' };
+    default: return { background: 'rgba(255, 255, 255, 0.1)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.2)' };
+  }
+};
+
 export const KpiDashboard = () => {
   const { 
     settings, fetchSettings, activeLot, fetchLots,
@@ -29,6 +73,8 @@ export const KpiDashboard = () => {
   const pulseRef = useRef<any>(null);
 
   const [lastBackupTime, setLastBackupTime] = useState<string | null>(null);
+  const [activeSessions, setActiveSessions] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -51,10 +97,30 @@ export const KpiDashboard = () => {
     }
   };
 
+  const fetchAllUsers = async () => {
+    try {
+      const data = await api.get('/users');
+      setAllUsers(data);
+    } catch (e) {
+      console.error('Failed to fetch users', e);
+    }
+  };
+
+  const fetchActiveSessions = async () => {
+    try {
+      const data = await api.get('/users/active-sessions');
+      setActiveSessions(data);
+    } catch (e) {
+      console.error('Failed to fetch active sessions', e);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
     fetchLots();
     fetchBackupStatus();
+    fetchAllUsers();
+    fetchActiveSessions();
   }, []);
 
   useEffect(() => {
@@ -96,6 +162,9 @@ export const KpiDashboard = () => {
           setIsLive(true);
           if (pulseRef.current) clearTimeout(pulseRef.current);
           pulseRef.current = setTimeout(() => setIsLive(false), 2000);
+        } else if (data.type === 'USER_SESSIONS_UPDATED') {
+          console.log('User sessions update received:', data.sessions);
+          setActiveSessions(data.sessions);
         }
       } catch (e) { console.error(e); }
     };
@@ -234,6 +303,7 @@ export const KpiDashboard = () => {
 
   const oqaMetric = globalMetrics.find(m => m.module_id === 'oqa_tv') || { total_passed: 0, total_failed: 0 };
   const totalCheckedGlobal = oqaMetric.total_passed + oqaMetric.total_failed;
+  const sessionsMap = new Map(activeSessions.map(s => [s.userId, s]));
 
   const ALL_MODULES = [
     { id: 'oqa_tv', title: 'Выборочный контроль ГП', desc: 'Проверено ТВ' },
@@ -454,6 +524,119 @@ export const KpiDashboard = () => {
 
         {/* Sidebar Analytics */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          {/* User Activity Tracker Card */}
+          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <style>{`
+              @keyframes pulse-neon {
+                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                70% { transform: scale(1.2); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+              }
+            `}</style>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Users size={16} color="var(--c-accent)" /> Активность пользователей
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
+              {allUsers.length === 0 ? (
+                <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '20px' }}>
+                  Загрузка пользователей...
+                </div>
+              ) : (
+                allUsers.map((u: any) => {
+                  const session = sessionsMap.get(u.id);
+                  const isOnline = !!session;
+                  
+                  return (
+                    <div 
+                      key={u.id} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        padding: '8px 10px',
+                        background: isOnline ? 'var(--c-bg-surface-elevated)' : 'transparent',
+                        borderRadius: '8px',
+                        border: isOnline ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid transparent',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {/* Avatar */}
+                        <div style={{ position: 'relative', width: '32px', height: '32px', borderRadius: '50%', background: isOnline ? 'var(--c-accent-muted)' : 'var(--c-bg-base)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: isOnline ? 'var(--c-accent)' : 'var(--c-text-muted)' }}>
+                            {u.username.substring(0, 2).toUpperCase()}
+                          </span>
+                          <span 
+                            style={{ 
+                              position: 'absolute', 
+                              bottom: '-1px', 
+                              right: '-1px', 
+                              width: '8px', 
+                              height: '8px', 
+                              borderRadius: '50%', 
+                              background: isOnline ? '#10b981' : '#6b7280', 
+                              boxShadow: isOnline ? '0 0 8px #10b981' : 'none',
+                              border: '1px solid var(--c-bg-base)',
+                              animation: isOnline ? 'pulse-neon 2s infinite' : 'none'
+                            }}
+                          />
+                        </div>
+                        
+                        {/* User & Role */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--c-text-primary)' }}>
+                            {u.username}
+                          </span>
+                          <span style={{ 
+                            fontSize: '0.65rem', 
+                            padding: '1px 5px', 
+                            borderRadius: '4px',
+                            marginTop: '2px',
+                            alignSelf: 'flex-start',
+                            fontWeight: 500,
+                            ...getRoleStyle(u.role)
+                          }}>
+                            {getRoleLabel(u.role)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Location Badge */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                        {isOnline ? (
+                          <>
+                            <span style={{ 
+                              fontSize: '0.7rem', 
+                              fontWeight: 500, 
+                              color: '#8b5cf6', 
+                              background: 'rgba(139, 92, 246, 0.12)',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              border: '1px solid rgba(139, 92, 246, 0.2)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {getPageName(session.currentUrl)}
+                            </span>
+                            <span style={{ fontSize: '0.6rem', color: '#10b981', fontWeight: 500 }}>
+                              активен
+                            </span>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--c-text-muted)' }}>
+                            оффлайн
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+          
           <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
              <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                <TrendingUp size={16} color="var(--c-accent)" /> Распределение нагрузки (Проверки)
