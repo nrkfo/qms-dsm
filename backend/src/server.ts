@@ -1717,58 +1717,22 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
   }
 });
 
-// --- MAINTENANCE JOB (Retention & Backups) ---
-const runDatabaseBackup = async () => {
-  try {
-    const backupsDir = path.resolve(__dirname, '../backups');
-    if (!fs.existsSync(backupsDir)) {
-      try {
-        fs.mkdirSync(backupsDir, { recursive: true });
-      } catch (mkdirErr: any) {
-        throw mkdirErr;
-      }
+// --- AUTOMATED BACKUP (Python sqlite3.backup every 30 minutes) ---
+const runDatabaseBackup = () => {
+  const { exec } = require('child_process');
+  const pythonScriptPath = path.join(__dirname, 'backup.py');
+  logger.info('Запуск фонового бэкапа базы данных через Python...');
+  
+  exec(`python3 "${pythonScriptPath}"`, (error: any, stdout: string, stderr: string) => {
+    if (error) {
+      logger.error(`Сбой автоматического бэкапа: ${error.message}`);
+      return;
     }
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const backupFile = `backup_${todayStr}.sqlite`;
-    const backupPath = path.join(backupsDir, backupFile);
-
-    if (fs.existsSync(backupPath)) {
-      try {
-        fs.unlinkSync(backupPath);
-      } catch (unlinkErr) {}
+    if (stderr) {
+      logger.warn(`Предупреждение при выполнении бэкапа: ${stderr}`);
     }
-
-    db.run(`VACUUM INTO ?`, [backupPath], (err) => {
-      if (!err) {
-        try {
-          const files = fs.readdirSync(backupsDir);
-          const backupFiles = files
-            .filter(f => f.startsWith('backup_') && f.endsWith('.sqlite'))
-            .map(f => {
-              const fullPath = path.join(backupsDir, f);
-              const stat = fs.statSync(fullPath);
-              return { name: f, path: fullPath, mtime: stat.mtimeMs };
-            });
-
-          backupFiles.sort((a, b) => a.mtime - b.mtime);
-
-          if (backupFiles.length > 14) {
-            const filesToDelete = backupFiles.slice(0, backupFiles.length - 14);
-            filesToDelete.forEach(file => {
-              try {
-                fs.unlinkSync(file.path);
-              } catch (delErr) {}
-            });
-          }
-        } catch (rotationErr: any) {}
-      }
-    });
-  } catch (err: any) {}
-};
-
-const runMaintenance = async () => {
-  await runDatabaseBackup();
+    logger.info(`Результат бэкапа: ${stdout.trim()}`);
+  });
 };
 
 const autoCloseShift = async () => {
@@ -1857,21 +1821,21 @@ const autoCloseShift = async () => {
   } catch (e: any) {}
 };
 
-// Check every minute if it's time for maintenance or auto-closing shifts
+// Check every minute if it's time for auto-closing shifts
 setInterval(() => {
   const now = new Date();
   const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  
-  // Check maintenance/backup schedule
-  getSetting('backup_schedule').then(sched => {
-    if (sched && time === sched) runMaintenance();
-  });
 
   // Check shift auto-close schedule
   getSetting('auto_close_shift_time').then(closeTime => {
     if (closeTime && time === closeTime) autoCloseShift();
   });
 }, 60000);
+
+// Setup Python SQLite backup interval (every 30 minutes)
+// Immediately run first backup on startup, then repeat every 30 minutes
+runDatabaseBackup();
+setInterval(runDatabaseBackup, 30 * 60 * 1000);
 
 
 app.listen(PORT, () => {

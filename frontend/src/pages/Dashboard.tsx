@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { api } from '../utils/api';
@@ -46,11 +46,13 @@ export const Dashboard = () => {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [moduleLogs, setModuleLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const [photoViewerImages, setPhotoViewerImages] = useState<string[] | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
   const [flashingModules, setFlashingModules] = useState<Record<string, 'ok' | 'ng' | 'info'>>({});
   const prevMetricsRef = useRef<any[]>([]);
+  const updatePulseRef = useRef<any>(null);
 
   useEffect(() => {
     fetchLots();
