@@ -3,7 +3,8 @@ import { DsmTable } from '../../components/ui/DsmTable';
 import { useDataStore } from '../../store/useDataStore';
 import { exportToExcel } from '../../utils/excel';
 import { formatDate } from '../../utils/date';
-import { api, translateToEnglish } from '../../utils/api';
+import { api } from '../../utils/api';
+import { translateToEnglish } from '../../utils/translator';
 import { ModalPortal } from '../../components/ui/ModalPortal';
 import { useAuthStore } from '../../store/useAuthStore';
 

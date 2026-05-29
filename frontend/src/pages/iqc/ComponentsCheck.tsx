@@ -4,7 +4,8 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useDataStore } from '../../store/useDataStore';
 import { exportToExcel } from '../../utils/excel';
 import { formatDate } from '../../utils/date';
-import { api, translateToEnglish } from '../../utils/api';
+import { api } from '../../utils/api';
+import { translateToEnglish } from '../../utils/translator';
 import { Search, Plus, Trash2, Settings, Printer } from 'lucide-react';
 
 export const ComponentsCheck = () => {
