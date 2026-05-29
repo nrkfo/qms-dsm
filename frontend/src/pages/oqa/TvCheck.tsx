@@ -169,11 +169,21 @@ export const TvCheck = () => {
         if (enTest && enTest.toLowerCase() !== finalEditTests.toLowerCase()) finalEditTests = `${finalEditTests} / ${enTest}`;
       }
 
+      let finalEditComment = editComment.trim();
+      if (finalEditComment) {
+        if (!finalEditComment.includes(' / ')) {
+          const en = await translateToEnglish(finalEditComment);
+          if (en && en.toLowerCase() !== finalEditComment.toLowerCase()) {
+            finalEditComment = `${finalEditComment} / ${en}`;
+          }
+        }
+      }
+
       const updatedData: any = {
         ...rest,
         defects: finalEditDefects,
         tests: finalEditTests,
-        comments: [editComment].filter(Boolean).join('; ')
+        comments: finalEditComment
       };
 
       if (user?.role === 'Admin') {
