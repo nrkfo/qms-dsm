@@ -5,6 +5,7 @@ import { playSound } from '../../utils/audio';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDataStore } from '../../store/useDataStore';
 import { Trash2 } from 'lucide-react';
+import { api } from '../../utils/api';
 
 export const LabelsCheck = () => {
   const { 
@@ -116,7 +117,6 @@ export const LabelsCheck = () => {
     setIsVerifying(true);
     setPasswordError('');
     try {
-      const { api } = await import('../../utils/api');
       await api.post('/auth/verify', { password: passwordInput });
       setShowPasswordModal(false);
       setPasswordInput('');

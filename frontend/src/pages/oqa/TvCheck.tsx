@@ -4,7 +4,8 @@ import { exportToExcel } from '../../utils/excel';
 import { formatDate } from '../../utils/date';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDataStore } from '../../store/useDataStore';
-import { api, translateToEnglish } from '../../utils/api';
+import { api } from '../../utils/api';
+import { translateToEnglish } from '../../utils/translator';
 
 const DEFECT_LIST = [
   'Внешний вид', 'Электробезопасность', 'Первое включение', 'Линза/кнопки ПДУ',

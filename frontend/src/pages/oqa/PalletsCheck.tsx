@@ -4,7 +4,8 @@ import { formatDate } from '../../utils/date';
 import { playSound } from '../../utils/audio';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDataStore } from '../../store/useDataStore';
-import { api, translateToEnglish } from '../../utils/api';
+import { api } from '../../utils/api';
+import { translateToEnglish } from '../../utils/translator';
 import { Search, FileSpreadsheet, Trash2, Tv } from 'lucide-react';
 
 export const PalletsCheck = () => {

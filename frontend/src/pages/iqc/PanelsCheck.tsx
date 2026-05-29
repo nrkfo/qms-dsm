@@ -11,7 +11,8 @@ import { compressImage, compressImageMax } from '../../utils/image';
 
 import { ModalPortal } from '../../components/ui/ModalPortal';
 import { useAuthStore } from '../../store/useAuthStore';
-import { api, translateToEnglish } from '../../utils/api';
+import { api } from '../../utils/api';
+import { translateToEnglish } from '../../utils/translator';
 import { FileDown, Image as ImageIcon, X, Loader2, Download } from 'lucide-react';
 
 export const PanelsCheck = () => {

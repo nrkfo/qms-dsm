@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDataStore } from '../../store/useDataStore';
-import { translateToEnglish } from '../../utils/api';
+import { translateToEnglish } from '../../utils/translator';
 import { DsmTable } from '../../components/ui/DsmTable';
+import { api } from '../../utils/api';
 import { CheckCircle2, Save, History, LayoutGrid } from 'lucide-react';
 
 const DEFAULT_CHECKPOINTS = [
@@ -125,8 +126,6 @@ export const PatrolCheck = () => {
     setIsVerifying(true);
     setPasswordError('');
     try {
-      // Import and use api directly or make sure it's available. Actually we need to import api.
-      const { api } = await import('../../utils/api');
       await api.post('/auth/verify', { password: passwordInput });
       setShowPasswordModal(false);
       setPasswordInput('');

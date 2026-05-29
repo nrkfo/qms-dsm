@@ -19,6 +19,7 @@ import { AqlCalculator } from './pages/AqlCalculator';
 import { useAuthStore, hydrateAuth } from './store/useAuthStore';
 import { useThemeStore } from './store/useThemeStore';
 import { Menu } from 'lucide-react';
+import { initAudioContext } from './utils/audio';
 import { GlobalUI } from './components/ui/GlobalUI';
 import { useDataStore } from './store/useDataStore';
 
@@ -154,7 +155,7 @@ function App() {
 
     // Warm up audio context on first user interaction
     const handleInteraction = () => {
-      import('./utils/audio').then(m => m.initAudioContext());
+      initAudioContext();
       window.removeEventListener('click', handleInteraction);
     };
     window.addEventListener('click', handleInteraction);
