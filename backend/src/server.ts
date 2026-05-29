@@ -994,14 +994,15 @@ app.post('/api/kpi/facts', authenticateToken, (req, res) => {
   }
   const user = (req as any).user;
 
+  const closedAtStr = new Date().toLocaleString('ru-RU');
   db.run(
-    'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan) VALUES (?, ?, ?)',
-    [date, mes_fact ?? 0, aql_plan ?? 0],
+    'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan, closed_at) VALUES (?, ?, ?, ?)',
+    [date, mes_fact ?? 0, aql_plan ?? 0, closedAtStr],
     (err) => {
       if (err) return res.status(500).json({ error: err.message });
       logAudit(user.id, 'SAVE_KPI_FACTS', { date, mes_fact, aql_plan });
       broadcast({ type: 'DATA_UPDATED', module: 'kpi_facts' });
-      res.json({ success: true, date, mes_fact, aql_plan });
+      res.json({ success: true, date, mes_fact, aql_plan, closed_at: closedAtStr });
     }
   );
 });
@@ -1052,6 +1053,26 @@ app.get('/api/backup/download', authenticateToken, (req, res) => {
   const path = require('path');
   const dbPath = path.resolve(__dirname, '../database.sqlite');
   res.download(dbPath, 'dsm_qms_backup.sqlite');
+});
+
+app.get('/api/backup/status', authenticateToken, (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const latestBackupPath = path.resolve(__dirname, '../backups/backup_latest.sqlite');
+  if (fs.existsSync(latestBackupPath)) {
+    const stats = fs.statSync(latestBackupPath);
+    const localTime = stats.mtime.toLocaleString('ru-RU');
+    return res.json({ lastBackupTime: localTime });
+  }
+  
+  const dbPath = path.resolve(__dirname, '../database.sqlite');
+  if (fs.existsSync(dbPath)) {
+    const stats = fs.statSync(dbPath);
+    const localTime = stats.mtime.toLocaleString('ru-RU');
+    return res.json({ lastBackupTime: localTime });
+  }
+  
+  res.json({ lastBackupTime: null });
 });
 
 // Helper to convert JSON arrays to CSV with semicolon delimiter and UTF-8 BOM
@@ -1633,10 +1654,11 @@ const autoCloseShift = async () => {
     const planVal = Math.round(factVal * ratio);
 
     // 5. Save/Replace daily_kpi_facts
+    const closedAtStr = new Date().toLocaleString('ru-RU');
     await new Promise<void>((resolve, reject) => {
       db.run(
-        'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan) VALUES (?, ?, ?)',
-        [today, factVal, planVal],
+        'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan, closed_at) VALUES (?, ?, ?, ?)',
+        [today, factVal, planVal, closedAtStr],
         (err) => {
           if (err) reject(err);
           else resolve();
