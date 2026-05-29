@@ -544,8 +544,16 @@ export const KpiDashboard = () => {
                     Загрузка пользователей...
                   </div>
                 ) : (
-                  allUsers.map((u: any) => {
-                    const session = sessionsMap.get(u.id);
+                  [...allUsers]
+                    .sort((a, b) => {
+                      const aOnline = sessionsMap.has(a.id);
+                      const bOnline = sessionsMap.has(b.id);
+                      if (aOnline && !bOnline) return -1;
+                      if (!aOnline && bOnline) return 1;
+                      return a.username.localeCompare(b.username);
+                    })
+                    .map((u: any) => {
+                      const session = sessionsMap.get(u.id);
                     const isOnline = !!session;
                     
                     return (
