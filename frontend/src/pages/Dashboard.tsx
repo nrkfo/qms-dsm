@@ -518,7 +518,7 @@ export const Dashboard = () => {
             <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', marginBottom: '30px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--c-danger)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  ⚠️ Брак: Выборочный контроль ГП (OQA TV)
+                  ⚠️ Дефекты: Выборочный контроль ГП
                 </h3>
                 <span style={{ background: 'var(--c-danger-muted)', color: 'var(--c-danger)', padding: '2px 8px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                   Всего: {oqaTvDefects.length}
@@ -530,7 +530,14 @@ export const Dashboard = () => {
                   Брака за выбранный период не обнаружено
                 </div>
               ) : (
-                <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '5px' }}>
+                <div style={{ 
+                  maxHeight: oqaTvDefects.length > 5 ? '350px' : 'none', 
+                  overflowY: oqaTvDefects.length > 5 ? 'auto' : 'visible', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '10px', 
+                  paddingRight: '5px' 
+                }}>
                   {oqaTvDefects.map((def: any) => {
                     const timeStr = def.timestamp ? new Date(def.timestamp).toLocaleTimeString() : '';
                     const d = def.data || {};
