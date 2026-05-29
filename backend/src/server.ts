@@ -6,7 +6,6 @@ import db from './db';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import cron from 'node-cron';
 import ExcelJS from 'exceljs';
 import { requestWithRetry, TimeoutError } from './utils/httpClient';
 import { setupLogger } from './utils/logger';
@@ -1502,22 +1501,67 @@ app.post('/api/reports/panels-excel', authenticateToken, async (req: Request, re
   }
 });
 
-// --- AUTOMATED BACKUP (Python sqlite3.backup every 30 minutes) ---
+// --- AUTOMATED BACKUP (Native Node.js SQLite VACUUM INTO every 30 minutes) ---
 const runDatabaseBackup = () => {
-  const { exec } = require('child_process');
-  const pythonScriptPath = path.join(__dirname, 'backup.py');
-  logger.info('Запуск фонового бэкапа базы данных через Python...');
-  
-  exec(`python3 "${pythonScriptPath}"`, (error: any, stdout: string, stderr: string) => {
-    if (error) {
-      logger.error(`Сбой автоматического бэкапа: ${error.message}`);
-      return;
+  const backupsDir = path.resolve(__dirname, '../backups');
+  try {
+    if (!fs.existsSync(backupsDir)) {
+      fs.mkdirSync(backupsDir, { recursive: true });
     }
-    if (stderr) {
-      logger.warn(`Предупреждение при выполнении бэкапа: ${stderr}`);
-    }
-    logger.info(`Результат бэкапа: ${stdout.trim()}`);
-  });
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const backupFileName = `backup_${todayStr}.sqlite`;
+    const tempBackupPath = path.join(backupsDir, `backup_temp_${Date.now()}.sqlite`);
+    const finalBackupPath = path.join(backupsDir, backupFileName);
+    const latestBackupPath = path.join(backupsDir, 'backup_latest.sqlite');
+
+    logger.info('Запуск фонового бэкапа базы данных (SQLite VACUUM INTO)...');
+
+    db.run(`VACUUM INTO ?`, [tempBackupPath], (err) => {
+      if (err) {
+        logger.error(`Сбой автоматического бэкапа (VACUUM INTO): ${err.message}`);
+        if (fs.existsSync(tempBackupPath)) {
+          try { fs.unlinkSync(tempBackupPath); } catch (e) {}
+        }
+        return;
+      }
+
+      try {
+        // Atomic replace for today's backup file
+        if (fs.existsSync(finalBackupPath)) {
+          fs.unlinkSync(finalBackupPath);
+        }
+        fs.renameSync(tempBackupPath, finalBackupPath);
+
+        // Also copy/link to backup_latest.sqlite for backward compatibility
+        if (fs.existsSync(latestBackupPath)) {
+          fs.unlinkSync(latestBackupPath);
+        }
+        fs.copyFileSync(finalBackupPath, latestBackupPath);
+
+        logger.info(`Бэкап базы данных успешно завершен: ${backupFileName}`);
+
+        // Rotates backups: keep only last 14 days of backup_YYYY-MM-DD.sqlite files
+        const files = fs.readdirSync(backupsDir);
+        const backupFiles = files
+          .filter(f => f.startsWith('backup_') && f.endsWith('.sqlite') && f !== 'backup_latest.sqlite')
+          .map(f => ({ name: f, path: path.join(backupsDir, f), mtime: fs.statSync(path.join(backupsDir, f)).mtime.getTime() }))
+          .sort((a, b) => b.mtime - a.mtime); // Newest first
+
+        if (backupFiles.length > 14) {
+          const toDelete = backupFiles.slice(14);
+          toDelete.forEach(f => {
+            fs.unlinkSync(f.path);
+            logger.info(`Удален устаревший файл бэкапа: ${f.name}`);
+          });
+        }
+      } catch (e: any) {
+        logger.error(`Ошибка при сохранении бэкапа или ротации: ${e.message}`);
+      }
+    });
+  } catch (err: any) {
+    logger.error(`Непредвиденный сбой при инициализации бэкапа: ${err.message}`);
+  }
 };
 
 const autoCloseShift = async () => {
@@ -1617,9 +1661,9 @@ setInterval(() => {
   });
 }, 60000);
 
-// Setup Python SQLite backup interval (every 30 minutes)
-// Immediately run first backup on startup, then repeat every 30 minutes
-runDatabaseBackup();
+// Setup Native SQLite backup interval (every 30 minutes)
+// Run first backup 5 seconds after startup to allow initial migrations to settle, then repeat every 30 minutes
+setTimeout(runDatabaseBackup, 5000);
 setInterval(runDatabaseBackup, 30 * 60 * 1000);
 
 
