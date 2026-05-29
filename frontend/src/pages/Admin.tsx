@@ -155,7 +155,7 @@ const Admin = () => {
                 <div><label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Лимит проверки этикеток (мс)</label><input className="glass" type="number" value={localSettings.label_timer_limit || ''} onChange={e=>setLocalSettings({...localSettings, label_timer_limit: e.target.value})} style={{ width: '100%', padding: '12px' }} /></div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
                 <div><label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Политика AQL</label>
                   <select className="glass" value={localSettings.aql_mode || 'Normal'} onChange={e=>setLocalSettings({...localSettings, aql_mode: e.target.value})} style={{ width: '100%', padding: '12px' }}>
                     <option value="Normal">Normal (Нормальный)</option>
@@ -163,7 +163,6 @@ const Admin = () => {
                     <option value="Reduced">Reduced (Ослабленный)</option>
                   </select>
                 </div>
-                <div><label style={{display:'block', fontSize:'12px', marginBottom:'8px'}}>Время бэкапа (ЧЧ:ММ)</label><input className="glass" type="text" placeholder="03:00" value={localSettings.backup_schedule || ''} onChange={e=>setLocalSettings({...localSettings, backup_schedule: e.target.value})} style={{ width: '100%', padding: '12px' }} /></div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
