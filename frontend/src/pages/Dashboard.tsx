@@ -480,39 +480,6 @@ export const Dashboard = () => {
                        </div>
                      </div>
                   </div>
-
-                  {/* Workload by module - Pie Chart */}
-                  <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
-                     <h4 style={{ margin: '0 0 20px 0', color: 'var(--c-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>Распределение нагрузки (Проверки)</h4>
-                     <div style={{ width: '100%', height: 300, position: 'relative' }}>
-                       <ResponsiveContainer width="100%" height="100%">
-                         <PieChart>
-                           <Pie
-                             data={ALL_MODULES.map(m => {
-                               const met = getModuleMetric(m.id);
-                               return { name: m.title.split(' ').slice(0, 2).join(' '), value: met.total_passed + met.total_failed };
-                             }).filter(m => m.value > 0)}
-                             cx="50%"
-                             cy="50%"
-                             innerRadius={50}
-                             outerRadius={100}
-                             paddingAngle={2}
-                             dataKey="value"
-                             stroke="none"
-                             isAnimationActive={false}
-                           >
-                             {ALL_MODULES.map((m, index) => {
-                               const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
-                               return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                             })}
-                           </Pie>
-                           <RechartsTooltip 
-                             contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)', borderRadius: '8px' }}
-                           />
-                         </PieChart>
-                       </ResponsiveContainer>
-                     </div>
-                  </div>
                   
                   {/* Defect volume trend */}
                   <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)' }}>
