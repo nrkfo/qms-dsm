@@ -122,20 +122,7 @@ export const Dashboard = () => {
                 fetchModuleLogs(selectedModule);
               }
               
-              // Trigger immediate SSE-based card flash!
-              if (data.module && data.module !== 'lots') {
-                const flashType = (data.status === 'OK' || data.status === 'Accept') ? 'ok' : 'ng';
-                setFlashingModules(prev => ({ ...prev, [data.module]: flashType }));
-                setTimeout(() => {
-                  if (isMounted) {
-                    setFlashingModules(prev => {
-                      const updated = { ...prev };
-                      delete updated[data.module];
-                      return updated;
-                    });
-                  }
-                }, 1500);
-              }
+              // SSE-based card flash disabled to reduce system load
               // Also refresh lots if they were updated
               if (data.module === 'lots') {
                 fetchLots();
@@ -195,18 +182,7 @@ export const Dashboard = () => {
         }
       });
       
-      if (hasChanges) {
-        setFlashingModules(prev => ({ ...prev, ...newFlashes }));
-        Object.keys(newFlashes).forEach(modId => {
-          setTimeout(() => {
-            setFlashingModules(prev => {
-              const updated = { ...prev };
-              delete updated[modId];
-              return updated;
-            });
-          }, 1500);
-        });
-      }
+      // Card flash disabled to reduce system load
     }
     prevMetricsRef.current = metrics;
   }, [metrics]);
@@ -252,7 +228,7 @@ export const Dashboard = () => {
   const renderModuleCard = (m: any) => {
     const met = getModuleMetric(m.id);
     const total = met.total_passed + met.total_failed;
-    const flashClass = flashingModules[m.id] ? ` flash-${flashingModules[m.id]}` : '';
+    const flashClass = '';
     return (
       <div 
         key={m.id} 
@@ -363,7 +339,7 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
@@ -414,7 +390,7 @@ export const Dashboard = () => {
           <>
             {/* Charts Section */}
             {metrics.length > 0 && (
-              <div style={{ marginBottom: '40px' }} className="animate-fade-in">
+              <div style={{ marginBottom: '40px' }}>
                 <h3 style={{ margin: '0 0 20px 0', color: 'var(--c-text-primary)' }}>Сводная аналитика (KPI)</h3>
                 
                 <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px' }}>
@@ -438,8 +414,8 @@ export const Dashboard = () => {
                              itemStyle={{ color: 'var(--c-text-primary)' }}
                            />
                            <Legend wrapperStyle={{ bottom: 0 }} />
-                           <Bar dataKey="OK" name="Годно (OK)" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
-                           <Bar dataKey="NG" name="Брак (NG)" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                           <Bar dataKey="OK" name="Годно (OK)" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} isAnimationActive={false} />
+                           <Bar dataKey="NG" name="Брак (NG)" stackId="a" fill="#EF4444" radius={[4, 4, 0, 0]} isAnimationActive={false} />
                          </BarChart>
                        </ResponsiveContainer>
                      </div>
@@ -463,6 +439,7 @@ export const Dashboard = () => {
                              paddingAngle={5}
                              dataKey="value"
                              stroke="none"
+                             isAnimationActive={false}
                            >
                              {[
                                { name: 'Годно (OK)', value: ALL_MODULES.reduce((acc, m) => acc + getModuleMetric(m.id).total_passed, 0), color: '#10B981' },
@@ -507,6 +484,7 @@ export const Dashboard = () => {
                              paddingAngle={2}
                              dataKey="value"
                              stroke="none"
+                             isAnimationActive={false}
                            >
                              {ALL_MODULES.map((m, index) => {
                                const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#6366F1', '#14B8A6', '#F43F5E'];
@@ -545,7 +523,7 @@ export const Dashboard = () => {
                            <RechartsTooltip 
                              contentStyle={{ backgroundColor: 'var(--c-bg-surface-elevated)', borderColor: 'var(--c-border)', color: 'var(--c-text-primary)' }}
                            />
-                           <Area type="monotone" dataKey="NG" name="Количество брака" stroke="#EF4444" fillOpacity={1} fill="url(#colorNG)" />
+                           <Area type="monotone" dataKey="NG" name="Количество брака" stroke="#EF4444" fillOpacity={1} fill="url(#colorNG)" isAnimationActive={false} />
                          </AreaChart>
                        </ResponsiveContainer>
                      </div>
@@ -565,7 +543,7 @@ export const Dashboard = () => {
             </div>
           </>
         ) : (
-          <div className="glass-panel animate-slide-up" style={{ padding: '0', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <div className="glass-panel" style={{ padding: '0', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
             <div style={{ padding: '20px', background: 'var(--c-bg-surface-elevated)', borderBottom: '1px solid var(--c-border)', display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <button 

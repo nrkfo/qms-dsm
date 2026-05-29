@@ -253,7 +253,6 @@ export const KpiDashboard = () => {
               strokeDasharray={circumference} 
               strokeDashoffset={offset} 
               strokeLinecap="round"
-              style={{ transition: 'stroke-dashoffset 0.8s ease' }}
             />
           </svg>
           <div style={{ position: 'absolute', fontSize: '1rem', fontWeight: 'bold' }}>{Math.round(value)}%</div>
@@ -267,12 +266,12 @@ export const KpiDashboard = () => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '100%', padding: '0 20px' }}>
+    <div style={{ maxWidth: '100%', padding: '0 20px' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <div>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
             <TrendingUp color="var(--c-accent)" size={28} /> KPI сотрудников
-            {isLive && <Zap size={20} color="var(--c-warning)" className="animate-pulse" />}
+            {isLive && <Zap size={20} color="var(--c-warning)" />}
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isLive ? 'var(--c-warning)' : 'var(--c-success)', transition: 'background 0.3s' }}></div>
@@ -420,7 +419,7 @@ export const KpiDashboard = () => {
                         </span>
                       </div>
                       <div style={{ height: '6px', background: 'var(--c-bg-base)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${Math.min(100, personalTarget > 0 ? (insp.totalChecked / personalTarget) * 100 : 0)}%`, height: '100%', background: compliance >= 100 ? 'var(--c-success)' : 'var(--c-accent)', transition: 'width 1s ease' }}></div>
+                        <div style={{ width: `${Math.min(100, personalTarget > 0 ? (insp.totalChecked / personalTarget) * 100 : 0)}%`, height: '100%', background: compliance >= 100 ? 'var(--c-success)' : 'var(--c-accent)' }}></div>
                       </div>
                     </div>
                     {insp.avgLeadTime > insp.leadTimeTarget && <span title="Превышение среднего времени"><AlertTriangle size={18} color="var(--c-danger)" /></span>}
@@ -449,14 +448,13 @@ export const KpiDashboard = () => {
                   const height = (d.count / max) * 100;
                   return (
                     <div key={d.hour} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                       <div style={{ 
-                         width: '100%', 
-                         height: `${height}%`, 
-                         background: d.count > 0 ? 'var(--c-accent)' : 'var(--c-bg-base)', 
-                         borderRadius: '2px 2px 0 0',
-                         minHeight: d.count > 0 ? '4px' : '0',
-                         transition: 'height 0.5s ease'
-                       }} title={`${d.hour}:00 - ${d.count} ТВ`}></div>
+                        <div style={{ 
+                          width: '100%', 
+                          height: `${height}%`, 
+                          background: d.count > 0 ? 'var(--c-accent)' : 'var(--c-bg-base)', 
+                          borderRadius: '2px 2px 0 0',
+                          minHeight: d.count > 0 ? '4px' : '0'
+                        }} title={`${d.hour}:00 - ${d.count} ТВ`}></div>
                     </div>
                   );
                 })}
