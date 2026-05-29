@@ -527,7 +527,7 @@ export const KpiDashboard = () => {
           <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--c-accent)' }}>Активность пользователей и аналитика</h3>
           <div className="grid-mobile-1col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '25px', alignItems: 'stretch' }}>
             {/* User Activity Tracker Card */}
-            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: '20px', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <style>{`
                 @keyframes pulse-neon {
                   0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
