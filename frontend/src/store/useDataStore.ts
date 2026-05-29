@@ -219,7 +219,12 @@ export const useDataStore = create<DataState>((set, get) => {
           }
           await api.put(`/logs/${moduleId}/${id}`, data);
         } else {
-          await api.put(`/logs/${moduleId}/${id}`, { data, status });
+          const updatedData = {
+            ...data,
+            updates: (data.updates || 0) + 1,
+            is_edited: true
+          };
+          await api.put(`/logs/${moduleId}/${id}`, { data: updatedData, status });
         }
       } catch (e) {
         console.error(`Failed to update ${moduleId} log`, e);

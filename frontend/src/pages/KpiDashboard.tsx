@@ -281,6 +281,10 @@ export const KpiDashboard = () => {
         inspectors[inspectorNum].totalChecked++;
         logIdToInspector[log.id] = inspectorNum;
 
+        if (log.data?.updates) {
+          inspectors[inspectorNum].updates += Number(log.data.updates);
+        }
+
         if (log.timestamp) {
           const time = new Date(log.timestamp);
           const ts = time.getTime();
