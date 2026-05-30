@@ -1885,15 +1885,76 @@ setInterval(() => {
   getSetting('auto_close_shift_time').then(closeTime => {
     if (closeTime && time === closeTime) autoCloseShift();
   });
+
+  // Check Google Drive auto-backup schedule
+  getSetting('auto_backup_time').then(backupTime => {
+    if (backupTime && time === backupTime && !isAutoBackupRunning) {
+      isAutoBackupRunning = true;
+      runGoogleDriveAutoBackup().finally(() => {
+        setTimeout(() => { isAutoBackupRunning = false; }, 60000);
+      });
+    }
+  });
 }, 60000);
+
+const runGoogleDriveAutoBackup = async () => {
+  const tempBackupPath = path.resolve(__dirname, `../backups/backup_auto_${Date.now()}.sqlite`);
+  try {
+    const driveLink = await getSetting('google_drive_link');
+    const driveCreds = await getSetting('google_drive_credentials');
+    if (!driveLink || !driveCreds) return;
+
+    const backupsDir = path.dirname(tempBackupPath);
+    if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true });
+
+    await new Promise<void>((resolve, reject) => {
+      db.run(`VACUUM INTO ?`, [tempBackupPath], (err) => {
+        if (err) reject(err); else resolve();
+      });
+    });
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const fileName = `backup_auto_${todayStr}_${Date.now()}.sqlite`;
+    await uploadToGoogleDrive(tempBackupPath, fileName, driveLink, driveCreds);
+    logger.info('Автоматический бэкап в Google Drive успешно завершен.');
+  } catch (err: any) {
+    logger.error('Сбой при автоматическом бэкапе в Google Drive:', err);
+  } finally {
+    if (fs.existsSync(tempBackupPath)) {
+      try { fs.unlinkSync(tempBackupPath); } catch (e) {}
+    }
+  }
+};
+
+app.post('/api/system/update', authenticateToken, async (req, res) => {
+  const user = (req as any).user;
+  if (user.role !== 'Admin') return res.status(403).json({ error: 'Доступ ограничен' });
+  const { password } = req.body;
+  if (!password) return res.status(400).json({ error: 'Требуется пароль системы для перезапуска' });
+
+  const { exec } = require('child_process');
+  
+  // Return success immediately so the frontend knows the process started
+  res.json({ success: true, message: 'Скрипт обновления запущен. Система будет перезапущена через несколько секунд...' });
+  
+  // Run the update script detached (piping password directly to the script via stdin)
+  setTimeout(() => {
+    exec(`echo "${password}" | /home/nur/Рабочий\\ стол/qms-dsm/update.sh`, (error: any, stdout: any, stderr: any) => {
+      if (error) {
+        logger.error('Ошибка при обновлении системы: ' + error.message);
+      } else {
+        logger.info('Система успешно обновлена: ' + stdout);
+      }
+    });
+  }, 2000);
+});
 
 // Setup Native SQLite backup interval (every 30 minutes)
 // Run first backup 5 seconds after startup to allow initial migrations to settle, then repeat every 30 minutes
 setTimeout(runDatabaseBackup, 5000);
 setInterval(runDatabaseBackup, 30 * 60 * 1000);
 
-
 app.listen(PORT, () => {
-  console.log(`DSM-QMS Backend running on http://localhost:${PORT}`);
+  console.log(`QMS Backend running on http://localhost:${PORT}`);
 });
 
