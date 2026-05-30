@@ -399,8 +399,7 @@ export const ComponentsCheck = () => {
        'Name': r.name,
        'To Check': r.toCheck,
        'Checked': r.checked,
-       'Note': r.note,
-       'Warning': r.isWarning ? 'Yes' : 'No'
+       'Note': r.note
     }));
     const lotName = activeLot?.name ? `_Lot_${activeLot.name}` : '';
     const fileName = `Components_Report${lotName}_${new Date().toISOString().split('T')[0]}`;
