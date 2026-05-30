@@ -37,6 +37,34 @@ const Admin = () => {
   const [isTestingDrive, setIsTestingDrive] = useState(false);
   const [isUploadingDrive, setIsUploadingDrive] = useState(false);
 
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updatePassword, setUpdatePassword] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleSystemUpdate = async () => {
+    if (!updatePassword) {
+      showToast('Введите системный пароль (sudo)', 'warning');
+      return;
+    }
+    setIsUpdating(true);
+    try {
+      const response = await api.post('/system/update', { password: updatePassword });
+      if (response.success) {
+        showToast(response.message || 'Обновление запущено, система скоро перезапустится...', 'success');
+        setShowUpdateModal(false);
+        setUpdatePassword('');
+        // Optional reload after some time
+        setTimeout(() => window.location.reload(), 15000);
+      } else {
+        showToast(response.error || 'Ошибка обновления', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Ошибка подключения к серверу при обновлении', 'error');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleTestGoogleDrive = async () => {
     if (!localSettings.google_drive_link || !localSettings.google_drive_credentials) {
       showToast('Заполните ссылку на папку и JSON-ключ для проверки', 'warning');
@@ -364,14 +392,77 @@ const Admin = () => {
                     {isUploadingDrive ? '⌛ ВЫГРУЗКА...' : '📤 ВЫГРУЗИТЬ СЕЙЧАС'}
                   </button>
                 </div>
+
+                <div style={{ marginTop: '10px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', marginBottom: '8px', color: 'var(--c-text-muted)' }}>Ежедневный автобэкап (ЧЧ:ММ)</label>
+                  <input 
+                    className="glass" 
+                    type="time" 
+                    value={localSettings.auto_backup_time || ''} 
+                    onChange={e => setLocalSettings({...localSettings, auto_backup_time: e.target.value})} 
+                    style={{ width: '100%', padding: '12px', border: '1px solid var(--c-border)' }} 
+                  />
+                  <div style={{ fontSize: '11px', color: 'var(--c-text-muted)', fontStyle: 'italic', marginTop: '5px' }}>
+                    * В указанное время сервер автоматически сделает бэкап и отправит его на Google Drive. Оставьте пустым для отключения.
+                  </div>
+                </div>
               </div>
               
-              <button onClick={handleSaveSettings} style={{ padding: '15px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}> Сохранить </button>
+              <h4 style={{ margin: '15px 0 0 0', color: 'var(--c-accent)' }}>Обновление системы (через GitHub)</h4>
+              <div style={{ background: 'var(--c-bg-surface-elevated)', padding: '20px', borderRadius: '6px', border: '1px solid var(--c-border)' }}>
+                <p style={{ fontSize: '13px', margin: '0 0 15px 0', color: 'var(--c-text-muted)' }}>Запуск автоматического обновления программы из репозитория GitHub. Сервер перезагрузится автоматически.</p>
+                <button 
+                  type="button" 
+                  onClick={() => setShowUpdateModal(true)} 
+                  style={{ width: '100%', padding: '12px', background: 'transparent', color: 'var(--c-danger)', border: '1px solid var(--c-danger-muted)', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  🚀 ПРОВЕРИТЬ ОБНОВЛЕНИЯ И ОБНОВИТЬ
+                </button>
+              </div>
+              
+              <button onClick={handleSaveSettings} style={{ padding: '15px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}> Сохранить настройки </button>
             </div>
           </div>
         </div>
         )}
       </div>
+
+      {/* System Update Modal */}
+      {showUpdateModal && (
+        <ModalPortal>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-panel" style={{ width: '400px', padding: '30px', borderRadius: '12px', position: 'relative' }}>
+              <h3 style={{ margin: '0 0 15px 0', color: 'var(--c-text-primary)' }}>Обновление системы</h3>
+              <p style={{ fontSize: '13px', color: 'var(--c-text-muted)', marginBottom: '20px' }}>Для выполнения команды <code style={{color: 'var(--c-accent)'}}>sudo systemctl restart</code> необходим пароль системного пользователя ОС Linux (например, пользователя <code style={{color: 'var(--c-accent)'}}>nur</code>).</p>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', marginBottom: '8px' }}>Пароль системы (sudo):</label>
+                <input 
+                  type="password" 
+                  className="glass" 
+                  value={updatePassword} 
+                  onChange={e => setUpdatePassword(e.target.value)} 
+                  placeholder="Введите пароль..." 
+                  style={{ width: '100%', padding: '12px' }} 
+                  autoFocus
+                />
+              </div>
+              
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button onClick={() => setShowUpdateModal(false)} className="glass" style={{ padding: '10px 15px', color: 'var(--c-text-muted)', border: '1px solid var(--c-border)', borderRadius: '4px', cursor: 'pointer' }}>Отмена</button>
+                <button 
+                  onClick={handleSystemUpdate} 
+                  disabled={!updatePassword || isUpdating}
+                  className="glass" 
+                  style={{ padding: '10px 20px', background: isUpdating ? 'var(--c-border)' : 'var(--c-danger)', color: '#fff', border: 'none', borderRadius: '4px', cursor: (updatePassword && !isUpdating) ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
+                >
+                  {isUpdating ? 'Обновление...' : 'Начать обновление'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
     </div>
   );
 };

@@ -1873,7 +1873,10 @@ const autoCloseShift = async () => {
   } catch (e: any) {}
 };
 
-// Check every minute if it's time for auto-closing shifts
+// Auto-backup state
+let isAutoBackupRunning = false;
+
+// Check every minute if it's time for auto-closing shifts or Google Drive auto-backup
 setInterval(() => {
   const now = new Date();
   const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
