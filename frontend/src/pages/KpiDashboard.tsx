@@ -664,7 +664,7 @@ export const KpiDashboard = () => {
                         </div>
                         
                         {/* Location Badge */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
                           {isOnline ? (
                             <>
                               <span style={{ 
@@ -683,6 +683,21 @@ export const KpiDashboard = () => {
                               }}>
                                 {getPageName(session.currentUrl)}
                               </span>
+                              {session.selectedLotName && (
+                                <span style={{ 
+                                  fontSize: '0.65rem', 
+                                  fontWeight: 500, 
+                                  color: 'var(--c-accent)', 
+                                  background: 'rgba(124, 58, 237, 0.08)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  border: '1px solid var(--c-accent-muted)',
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0
+                                }}>
+                                  Лот: {session.selectedLotName}
+                                </span>
+                              )}
                               <span style={{ fontSize: '0.6rem', color: '#10b981', fontWeight: 500, flexShrink: 0 }}>
                                 активен
                               </span>

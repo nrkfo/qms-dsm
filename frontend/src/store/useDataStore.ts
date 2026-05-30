@@ -58,11 +58,11 @@ interface DataState {
   addTvTest: (name: string, description: string) => Promise<void>;
   updateTvTest: (id: number, name: string, description: string) => Promise<void>;
   deleteTvTest: (id: number) => Promise<void>;
-  // Components Master
   componentsMaster: any[];
   fetchComponentsMaster: (modelId?: number) => Promise<void>;
   addComponentMaster: (article: string, name: string, modelId: number) => Promise<void>;
   importComponentsMaster: (modelId: number, components: any[]) => Promise<void>;
+  updateComponentMaster: (id: number, article: string, name: string) => Promise<void>;
   deleteComponentMaster: (id: number) => Promise<void>;
   // MES Integration
   mesFact: number | null;
@@ -372,6 +372,10 @@ export const useDataStore = create<DataState>((set, get) => {
       // We need to know the current model to refresh properly, or just fetch all
       await api.delete(`/components-master/${id}`);
       set(s => ({ componentsMaster: s.componentsMaster.filter(c => c.id !== id) }));
+    },
+    updateComponentMaster: async (id, article, name) => {
+      await api.put(`/components-master/${id}`, { article, name });
+      set(s => ({ componentsMaster: s.componentsMaster.map(c => c.id === id ? { ...c, article, name } : c) }));
     },
     fetchMesFact: async (dateFilter) => {
       const activeLot = get().activeLot;
