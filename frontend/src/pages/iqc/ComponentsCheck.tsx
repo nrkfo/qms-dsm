@@ -22,6 +22,7 @@ export const ComponentsCheck = () => {
 
   // Print Modal & Warehouse List State
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isMissingModalOpen, setIsMissingModalOpen] = useState(false);
   const [arrivedQty, setArrivedQty] = useState<number | ''>('');
   const [aqlLevel, setAqlLevel] = useState<string>('ii');
 
@@ -54,6 +55,15 @@ export const ComponentsCheck = () => {
 
     if (matches.length > 0) {
       const found = matches.sort((a, b) => b.article.length - a.article.length)[0];
+      
+      const isAlreadyChecked = records.some(r => r.article.toLowerCase() === found.article.toLowerCase());
+      if (isAlreadyChecked) {
+        showToast(`Компонент ${found.article} уже проверен!`, 'warning');
+        setScanBuffer('');
+        setArticleId('');
+        return;
+      }
+
       setArticleId(found.id);
       showToast(`Выбрано: ${found.article}`, 'success');
       setTimeout(() => {
@@ -70,11 +80,23 @@ export const ComponentsCheck = () => {
       const trimmedVal = scanBuffer.trim();
       if (!trimmedVal) return;
 
-      const found = componentsMaster.some(c => 
-        trimmedVal.toLowerCase().includes(c.article.toLowerCase())
-      );
+      const matches = componentsMaster.filter(c => {
+        const art = c.article.toLowerCase();
+        const bcode = trimmedVal.toLowerCase();
+        if (art.length < 4) return bcode === art;
+        return bcode.includes(art);
+      });
 
-      if (!found) {
+      if (matches.length > 0) {
+        const found = matches.sort((a, b) => b.article.length - a.article.length)[0];
+        const isAlreadyChecked = records.some(r => r.article.toLowerCase() === found.article.toLowerCase());
+        if (isAlreadyChecked) {
+          showToast(`Компонент ${found.article} уже проверен!`, 'warning');
+          setScanBuffer('');
+          setArticleId('');
+          return;
+        }
+      } else {
         showToast(`Артикул не найден в списке: ${trimmedVal}`, 'error');
       }
     }
@@ -98,6 +120,12 @@ export const ComponentsCheck = () => {
 
   const activeModel = tvModels.find(m => m.id === activeLot?.tv_model_id);
   const tvModelName = activeModel ? activeModel.name : '—';
+
+  const totalRequired = componentsMaster.length;
+  const verifiedCount = componentsMaster.filter(c => 
+    records.some(r => r.article.toLowerCase() === c.article.toLowerCase())
+  ).length;
+  const remainingCount = Math.max(0, totalRequired - verifiedCount);
 
   const getAqlSampleSize = (lotSize: number, level: string = 'ii'): number => {
     if (!lotSize || lotSize < 2) return lotSize || 0;
@@ -238,6 +266,83 @@ export const ComponentsCheck = () => {
     setArrivedQty('');
   };
 
+  const handlePrintMissing = () => {
+    const missing = componentsMaster.filter(
+      c => !records.some(r => r.article.toLowerCase() === c.article.toLowerCase())
+    );
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast('Не удалось открыть окно печати. Пожалуйста, разрешите всплывающие окна.', 'error');
+      return;
+    }
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Недостающие комплектующие</title>
+          <style>
+            @page {
+              size: auto;
+              margin: 15mm;
+            }
+            body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; color: #000; background: #fff; }
+            h2 { text-align: center; margin-bottom: 5px; font-size: 20px; }
+            .subtitle { text-align: center; margin-bottom: 25px; font-size: 14px; color: #555; }
+            .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
+            .info-table td { padding: 6px 0; font-size: 13px; }
+            .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .data-table th, .data-table td { border: 1px solid #000; padding: 8px 10px; text-align: left; font-size: 12px; }
+            .data-table th { background-color: #f5f5f5; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h2>СПИСОК НЕДОСТАЮЩИХ КОМПЛЕКТУЮЩИХ</h2>
+          <div class="subtitle">Требуется добрать на складе / проверить</div>
+          <table class="info-table">
+            <tr>
+              <td style="width: 50%;"><strong>Лот:</strong> ${activeLot?.name || '—'}</td>
+              <td style="width: 50%;"><strong>Модель ТВ:</strong> ${tvModelName}</td>
+            </tr>
+            <tr>
+              <td><strong>Дата печати:</strong> ${new Date().toLocaleDateString('ru-RU')}</td>
+              <td><strong>Всего не хватает:</strong> ${missing.length} поз.</td>
+            </tr>
+          </table>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 40px; text-align: center;">№</th>
+                <th style="width: 150px;">Артикул</th>
+                <th>Наименование</th>
+                <th style="width: 100px; text-align: center;">Подпись</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${missing.map((c, index) => `
+                <tr>
+                  <td style="text-align: center;">${index + 1}</td>
+                  <td style="font-weight: bold;">${c.article}</td>
+                  <td>${c.name}</td>
+                  <td>&nbsp;</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
 
 
   const loadData = async () => {
@@ -251,6 +356,12 @@ export const ComponentsCheck = () => {
     if (!articleId) return showToast('Выберите компонент', 'warning');
     const comp = componentsMaster.find(c => c.id === Number(articleId));
     if (!comp) return;
+
+    const isAlreadyChecked = records.some(r => r.article.toLowerCase() === comp.article.toLowerCase());
+    if (isAlreadyChecked) {
+      showToast(`Компонент ${comp.article} уже проверен!`, 'warning');
+      return;
+    }
 
     let finalNote = note;
     if (note.trim()) {
@@ -342,6 +453,43 @@ export const ComponentsCheck = () => {
               <button onClick={exportExcel} className="glass hover-scale" style={{ padding: '8px 15px', color: 'var(--c-accent)', border: '1px solid var(--c-accent)', borderRadius: '4px' }}>Выгрузить Excel</button>
             </div>
           </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', marginBottom: '25px' }}>
+            <div className="glass" style={{ padding: '10px 20px', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--c-border)', display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--c-text-muted)' }}>Прогресс проверки:</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#10b981' }}>{verifiedCount}</span>
+              <span style={{ fontSize: '1.2rem', color: 'var(--c-text-muted)' }}>/</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--c-text-primary)' }}>{totalRequired}</span>
+            </div>
+            {remainingCount > 0 ? (
+              <div 
+                onClick={() => setIsMissingModalOpen(true)}
+                style={{ 
+                  padding: '10px 20px', 
+                  borderRadius: '8px', 
+                  background: 'rgba(239, 68, 68, 0.1)', 
+                  border: '1px solid var(--c-danger)', 
+                  color: 'var(--c-danger)', 
+                  cursor: 'pointer', 
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease-in-out'
+                }}
+                className="hover-scale"
+                title="Нажмите, чтобы увидеть отсутствующие компоненты"
+              >
+                <span>Не хватает:</span>
+                <span style={{ fontSize: '1.2rem', textDecoration: 'underline' }}>{remainingCount}</span>
+              </div>
+            ) : (
+              <div style={{ padding: '10px 20px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981', fontWeight: 'bold' }}>
+                Все компоненты проверены! 🎉
+              </div>
+            )}
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', alignItems: 'end' }}>
             <div style={{ gridColumn: 'span 2' }}>
               <label style={{ display: 'block', fontSize: '11px', marginBottom: '5px', color: 'var(--c-accent)', fontWeight: 'bold' }}>СКАНИРОВАНИЕ АРТИКУЛА (Штрих-код)</label>
@@ -352,15 +500,43 @@ export const ComponentsCheck = () => {
                 value={scanBuffer} 
                 onChange={e => handleScan(e.target.value)}
                 onKeyDown={handleScanKeyDown}
-                style={{ width: '100%', padding: '12px', background: 'var(--c-bg-surface-elevated)', color: 'var(--c-accent)', border: '1px solid var(--c-accent)', fontSize: '1.1rem', fontWeight: 'bold' }} 
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  background: 'var(--c-bg-surface-elevated)', 
+                  color: articleId ? '#10b981' : 'var(--c-accent)', 
+                  border: articleId ? '2px solid #10b981' : '1px solid var(--c-accent)', 
+                  fontSize: '1.1rem', 
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease'
+                }} 
               />
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <label style={{ display: 'block', fontSize: '11px', marginBottom: '5px', color: 'var(--c-text-muted)' }}>Или выберите вручную (Артикул - Наименование)</label>
-              <select className="glass" value={articleId} onChange={e => setArticleId(e.target.value === '' ? '' : Number(e.target.value))} style={{ width: '100%', padding: '8px', background: 'var(--c-bg-surface)', color: 'var(--c-text-primary)' }}>
-                <option value="">Выберите...</option>
-                {componentsMaster.map(c => <option key={c.id} value={c.id}>{c.article} - {c.name}</option>)}
-              </select>
+              <label style={{ display: 'block', fontSize: '11px', marginBottom: '5px', color: 'var(--c-text-muted)' }}>Информация о найденном компоненте</label>
+              <div 
+                className="glass" 
+                style={{ 
+                  width: '100%', 
+                  padding: '11px 12px', 
+                  background: articleId ? 'rgba(16, 185, 129, 0.15)' : 'var(--c-bg-surface-elevated)', 
+                  color: articleId ? '#10b981' : 'var(--c-text-muted)', 
+                  border: articleId ? '2px solid #10b981' : '1px solid var(--c-border)', 
+                  borderRadius: '4px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  height: '46px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {articleId ? (
+                  `${componentsMaster.find(c => c.id === articleId)?.article} — ${componentsMaster.find(c => c.id === articleId)?.name}`
+                ) : (
+                  'Ожидание сканирования...'
+                )}
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', marginBottom: '5px', color: 'var(--c-text-muted)' }}>На проверку</label>
@@ -477,6 +653,62 @@ export const ComponentsCheck = () => {
                   Отмена
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isMissingModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
+          <div className="glass-panel animate-fade-in" style={{ width: '600px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', padding: '30px', background: 'var(--c-bg-surface-elevated)', border: '1px solid var(--c-border)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: 'var(--c-danger)' }}>Недостающие комплектующие ({remainingCount} поз.)</h3>
+              <button onClick={() => setIsMissingModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--c-text-primary)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+            </div>
+            
+            <div style={{ overflowY: 'auto', flex: 1, marginBottom: '20px', maxHeight: '50vh' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--c-border)', color: 'var(--c-text-secondary)', textAlign: 'left', fontSize: '0.85rem' }}>
+                    <th style={{ padding: '8px' }}>Артикул</th>
+                    <th style={{ padding: '8px' }}>Наименование</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {componentsMaster
+                    .filter(c => !records.some(r => r.article.toLowerCase() === c.article.toLowerCase()))
+                    .map(c => (
+                      <tr key={c.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.9rem' }}>
+                        <td style={{ padding: '10px 8px', fontWeight: 'bold', color: 'var(--c-accent)' }}>{c.article}</td>
+                        <td style={{ padding: '10px 8px', color: 'var(--c-text-secondary)' }}>{c.name}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={handlePrintMissing}
+                style={{ 
+                  flex: 2, 
+                  padding: '12px', 
+                  background: 'var(--c-accent)', 
+                  color: '#000', 
+                  border: 'none', 
+                  borderRadius: '6px', 
+                  fontWeight: 'bold', 
+                  cursor: 'pointer'
+                }}
+              >
+                Печать недостающих
+              </button>
+              <button 
+                onClick={() => setIsMissingModalOpen(false)} 
+                style={{ flex: 1, padding: '12px', background: 'var(--c-bg-surface)', color: 'var(--c-text-primary)', border: '1px solid var(--c-border)', borderRadius: '6px', cursor: 'pointer' }}
+              >
+                Закрыть
+              </button>
             </div>
           </div>
         </div>

@@ -65,6 +65,7 @@ interface UserSession {
   role: string;
   lastActive: number;
   currentUrl: string;
+  selectedLotName?: string | null;
 }
 
 let activeSessions: Record<number, UserSession> = {};
@@ -263,7 +264,7 @@ app.post('/api/auth/verify', authenticateToken, (req, res) => {
 
 // Heartbeat and Active Sessions
 app.post('/api/users/heartbeat', authenticateToken, (req, res) => {
-  const { currentUrl } = req.body;
+  const { currentUrl, selectedLotName } = req.body;
   const user = (req as any).user;
   if (!user || !user.id) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -272,19 +273,21 @@ app.post('/api/users/heartbeat', authenticateToken, (req, res) => {
   const now = Date.now();
   const alreadyActive = !!activeSessions[user.id];
   const oldUrl = activeSessions[user.id]?.currentUrl;
+  const oldLot = activeSessions[user.id]?.selectedLotName;
 
   activeSessions[user.id] = {
     userId: user.id,
     username: user.username,
     role: user.role,
     lastActive: now,
-    currentUrl: currentUrl || '/'
+    currentUrl: currentUrl || '/',
+    selectedLotName: selectedLotName || null
   };
 
   res.json({ success: true });
 
-  // Broadcast if status changed or page changed
-  if (!alreadyActive || oldUrl !== currentUrl) {
+  // Broadcast if status changed, page changed, or selected lot changed
+  if (!alreadyActive || oldUrl !== currentUrl || oldLot !== selectedLotName) {
     broadcast({ type: 'USER_SESSIONS_UPDATED', sessions: Object.values(activeSessions) });
   }
 });
@@ -890,6 +893,15 @@ app.delete('/api/components-master/:id', authenticateToken, (req, res) => {
     res.json({ success: true });
   });
 });
+
+app.put('/api/components-master/:id', authenticateToken, (req, res) => {
+  const { article, name } = req.body;
+  db.run('UPDATE components_master SET article = ?, name = ? WHERE id = ?', [article, name, req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 
 // --- TV MODELS & TESTS ---
 app.get('/api/tv/models', authenticateToken, (req, res) => {

@@ -1112,11 +1112,15 @@ const LabelSettingsManagement = () => {
 };
 
 const ComponentsSettingsManagement = () => {
-  const { tvModels, componentsMaster, fetchComponentsMaster, addComponentMaster, importComponentsMaster, deleteComponentMaster, showToast, showConfirm } = useDataStore();
+  const { tvModels, componentsMaster, fetchComponentsMaster, addComponentMaster, importComponentsMaster, updateComponentMaster, deleteComponentMaster, showToast, showConfirm } = useDataStore();
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
   const [article, setArticle] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editArticle, setEditArticle] = useState('');
+  const [editName, setEditName] = useState('');
 
   useEffect(() => {
     if (selectedModelId) {
@@ -1263,10 +1267,82 @@ const ComponentsSettingsManagement = () => {
                 <tbody>
                   {componentsMaster.map(comp => (
                     <tr key={comp.id} style={{ borderBottom: '1px solid var(--c-border)', fontSize: '0.9rem' }}>
-                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{comp.article}</td>
-                      <td style={{ padding: '12px' }}>{comp.name}</td>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>
+                        {editingId === comp.id ? (
+                          <input 
+                            className="glass" 
+                            value={editArticle} 
+                            onChange={e => setEditArticle(e.target.value)} 
+                            style={{ padding: '6px 10px', width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--c-accent-muted)', color: '#fff', borderRadius: '4px' }} 
+                          />
+                        ) : (
+                          comp.article
+                        )}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        {editingId === comp.id ? (
+                          <input 
+                            className="glass" 
+                            value={editName} 
+                            onChange={e => setEditName(e.target.value)} 
+                            style={{ padding: '6px 10px', width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--c-accent-muted)', color: '#fff', borderRadius: '4px' }} 
+                          />
+                        ) : (
+                          comp.name
+                        )}
+                      </td>
                       <td style={{ padding: '12px', textAlign: 'center' }}>
-                        <button onClick={() => { showConfirm('Удалить этот компонент?', () => deleteComponentMaster(comp.id), undefined, 'danger'); }} style={{ color: 'var(--c-danger)', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+                        {editingId === comp.id ? (
+                          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                            <button 
+                              onClick={async () => {
+                                if (!editArticle.trim() || !editName.trim()) {
+                                  showToast('Заполните все поля', 'warning');
+                                  return;
+                                }
+                                try {
+                                  await updateComponentMaster(comp.id, editArticle.trim(), editName.trim());
+                                  setEditingId(null);
+                                  showToast('Изменения сохранены', 'success');
+                                } catch (err) {
+                                  showToast('Ошибка при обновлении', 'error');
+                                }
+                              }} 
+                              style={{ color: '#10b981', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', padding: '0 4px' }}
+                              title="Сохранить"
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              onClick={() => setEditingId(null)} 
+                              style={{ color: 'var(--c-text-muted)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', padding: '0 4px' }}
+                              title="Отмена"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                            <button 
+                              onClick={() => {
+                                setEditingId(comp.id);
+                                setEditArticle(comp.article);
+                                setEditName(comp.name);
+                              }} 
+                              style={{ color: 'var(--c-accent)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', padding: '0 4px' }}
+                              title="Редактировать"
+                            >
+                              ✎
+                            </button>
+                            <button 
+                              onClick={() => { showConfirm('Удалить этот компонент?', () => deleteComponentMaster(comp.id), undefined, 'danger'); }} 
+                              style={{ color: 'var(--c-danger)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', padding: '0 4px' }}
+                              title="Удалить"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

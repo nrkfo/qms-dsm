@@ -28,7 +28,7 @@ import { api } from './utils/api';
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const location = useLocation();
-  const { fetchLastLabelCheckTime } = useDataStore();
+  const { fetchLastLabelCheckTime, activeLot } = useDataStore();
 
   useEffect(() => {
     setIsMobileSidebarOpen(false);
@@ -40,7 +40,10 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     if (!token) return;
 
     const sendHeartbeat = () => {
-      api.post('/users/heartbeat', { currentUrl: location.pathname })
+      api.post('/users/heartbeat', { 
+        currentUrl: location.pathname,
+        selectedLotName: activeLot?.name || null
+      })
         .catch(err => console.error('Heartbeat error:', err));
     };
 
@@ -51,7 +54,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     const interval = setInterval(sendHeartbeat, 15000);
 
     return () => clearInterval(interval);
-  }, [location.pathname]);
+  }, [location.pathname, activeLot?.name]);
 
   useEffect(() => {
     let eventSource: EventSource | null = null;
