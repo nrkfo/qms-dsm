@@ -374,6 +374,12 @@ export const useDataStore = create<DataState>((set, get) => {
       set(s => ({ componentsMaster: s.componentsMaster.filter(c => c.id !== id) }));
     },
     fetchMesFact: async (dateFilter) => {
+      const activeLot = get().activeLot;
+      if (activeLot?.status === 'closed') {
+        set({ mesFact: null, mesLoading: false });
+        return;
+      }
+
       const today = new Date().toISOString().split('T')[0];
       const targetDate = dateFilter || today;
       
@@ -456,7 +462,7 @@ export const useDataStore = create<DataState>((set, get) => {
             } catch { /* ignored */ }
           }
           
-          await api.post('/kpi/facts', { date: today, mes_fact: factVal, aql_plan: planVal });
+          await api.post('/kpi/facts', { date: today, mes_fact: factVal, aql_plan: planVal, lot_id: get().activeLot?.id });
         } else {
           // If live fetch fails or is 0, fallback to database saved today value
           const dbFact = await api.get(`/kpi/facts?date=${today}`);
@@ -485,7 +491,7 @@ export const useDataStore = create<DataState>((set, get) => {
     },
     saveKpiFacts: async (date, mesFact, aqlPlan) => {
       try {
-        await api.post('/kpi/facts', { date, mes_fact: mesFact, aql_plan: aqlPlan });
+        await api.post('/kpi/facts', { date, mes_fact: mesFact, aql_plan: aqlPlan, lot_id: get().activeLot?.id });
         set({ mesFact: mesFact });
         get().showToast('KPI показатели успешно сохранены в базе', 'success');
       } catch (e) {

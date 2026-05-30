@@ -9,6 +9,7 @@ import multer from 'multer';
 import ExcelJS from 'exceljs';
 import { requestWithRetry, TimeoutError } from './utils/httpClient';
 import { setupLogger } from './utils/logger';
+import { uploadToGoogleDrive } from './utils/googleDrive';
 
 const logger = setupLogger('Бэкенд');
 const app = express();
@@ -1060,23 +1061,34 @@ app.get('/api/kpi/last-closed', authenticateToken, (req, res) => {
 });
 
 app.post('/api/kpi/facts', authenticateToken, (req, res) => {
-  const { date, mes_fact, aql_plan } = req.body;
+  const { date, mes_fact, aql_plan, lot_id } = req.body;
   if (!date || typeof date !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid date' });
   }
   const user = (req as any).user;
 
-  const closedAtStr = new Date().toLocaleString('ru-RU');
-  db.run(
-    'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan, closed_at) VALUES (?, ?, ?, ?)',
-    [date, mes_fact ?? 0, aql_plan ?? 0, closedAtStr],
-    (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-      logAudit(user.id, 'SAVE_KPI_FACTS', { date, mes_fact, aql_plan });
-      broadcast({ type: 'DATA_UPDATED', module: 'kpi_facts' });
-      res.json({ success: true, date, mes_fact, aql_plan, closed_at: closedAtStr });
+  const lotQuery = lot_id 
+    ? { sql: 'SELECT status FROM lots WHERE id = ?', params: [lot_id] }
+    : { sql: 'SELECT status FROM lots ORDER BY id DESC LIMIT 1', params: [] };
+
+  db.get(lotQuery.sql, lotQuery.params, (errLot, rowLot: any) => {
+    if (errLot) return res.status(500).json({ error: errLot.message });
+    if (rowLot && rowLot.status === 'closed') {
+      return res.status(400).json({ error: 'Невозможно завершить смену: текущий лот закрыт.' });
     }
-  );
+
+    const closedAtStr = new Date().toLocaleString('ru-RU');
+    db.run(
+      'INSERT OR REPLACE INTO daily_kpi_facts (date, mes_fact, aql_plan, closed_at) VALUES (?, ?, ?, ?)',
+      [date, mes_fact ?? 0, aql_plan ?? 0, closedAtStr],
+      (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        logAudit(user.id, 'SAVE_KPI_FACTS', { date, mes_fact, aql_plan });
+        broadcast({ type: 'DATA_UPDATED', module: 'kpi_facts' });
+        res.json({ success: true, date, mes_fact, aql_plan, closed_at: closedAtStr });
+      }
+    );
+  });
 });
 
 app.get('/api/settings', authenticateToken, (req, res) => {
@@ -1125,6 +1137,97 @@ app.get('/api/backup/download', authenticateToken, (req, res) => {
   const path = require('path');
   const dbPath = path.resolve(__dirname, '../database.sqlite');
   res.download(dbPath, 'dsm_qms_backup.sqlite');
+});
+
+app.post('/api/backup/google-drive/test', authenticateToken, async (req, res) => {
+  const user = (req as any).user;
+  if (user.role !== 'Admin') {
+    return res.status(403).json({ error: 'Доступ ограничен' });
+  }
+
+  const { google_drive_link, google_drive_credentials } = req.body;
+  if (!google_drive_link || !google_drive_credentials) {
+    return res.status(400).json({ error: 'Необходимо указать ссылку на папку и JSON-ключ сервисного аккаунта.' });
+  }
+
+  const tempBackupPath = path.resolve(__dirname, `../backups/backup_test_${Date.now()}.sqlite`);
+  
+  try {
+    // 1. Create backups directory if missing
+    const backupsDir = path.dirname(tempBackupPath);
+    if (!fs.existsSync(backupsDir)) {
+      fs.mkdirSync(backupsDir, { recursive: true });
+    }
+
+    // 2. Perform safe non-blocking SQLite VACUUM INTO
+    await new Promise<void>((resolve, reject) => {
+      db.run(`VACUUM INTO ?`, [tempBackupPath], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+
+    // 3. Upload to Google Drive
+    const fileName = `qms_test_backup_${new Date().toISOString().split('T')[0]}_${Date.now()}.sqlite`;
+    const message = await uploadToGoogleDrive(tempBackupPath, fileName, google_drive_link, google_drive_credentials);
+
+    res.json({ success: true, message });
+  } catch (err: any) {
+    logger.error('Сбой при проверке бэкапа в Google Drive:', err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    // Clean up temporary backup file
+    if (fs.existsSync(tempBackupPath)) {
+      try { fs.unlinkSync(tempBackupPath); } catch (e) {}
+    }
+  }
+});
+
+app.post('/api/backup/google-drive/upload-now', authenticateToken, async (req, res) => {
+  const user = (req as any).user;
+  if (user.role !== 'Admin') {
+    return res.status(403).json({ error: 'Доступ ограничен' });
+  }
+
+  const tempBackupPath = path.resolve(__dirname, `../backups/backup_manual_${Date.now()}.sqlite`);
+
+  try {
+    const driveLink = await getSetting('google_drive_link');
+    const driveCreds = await getSetting('google_drive_credentials');
+
+    if (!driveLink || !driveCreds) {
+      return res.status(400).json({ error: 'Резервное копирование в Google Drive не настроено. Укажите ссылку на папку и JSON-ключ в настройках.' });
+    }
+    
+    // 1. Create backups directory if missing
+    const backupsDir = path.dirname(tempBackupPath);
+    if (!fs.existsSync(backupsDir)) {
+      fs.mkdirSync(backupsDir, { recursive: true });
+    }
+
+    // 2. Safe SQLite VACUUM INTO
+    await new Promise<void>((resolve, reject) => {
+      db.run(`VACUUM INTO ?`, [tempBackupPath], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+
+    // 3. Upload
+    const todayStr = new Date().toISOString().split('T')[0];
+    const fileName = `backup_manual_${todayStr}_${Date.now()}.sqlite`;
+    const message = await uploadToGoogleDrive(tempBackupPath, fileName, driveLink, driveCreds);
+
+    res.json({ success: true, message });
+  } catch (err: any) {
+    logger.error('Сбой при ручной загрузке бэкапа в Google Drive:', err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    // Clean up temporary backup file
+    if (fs.existsSync(tempBackupPath)) {
+      try { fs.unlinkSync(tempBackupPath); } catch (e) {}
+    }
+  }
 });
 
 app.get('/api/backup/status', authenticateToken, (req, res) => {
@@ -1658,6 +1761,22 @@ const runDatabaseBackup = () => {
 const autoCloseShift = async () => {
   try {
     const today = new Date().toISOString().split('T')[0];
+    
+    // Check if there are any active lots in the system
+    const hasActiveLot = await new Promise<boolean>((resolve) => {
+      db.get("SELECT id FROM lots WHERE status = 'active' LIMIT 1", [], (err, row: any) => {
+        if (row) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
+    });
+
+    if (!hasActiveLot) {
+      logger.info('Автозавершение смены пропущено: в системе нет активных лотов.');
+      return;
+    }
     
     // 1. Fetch settings
     let mesUrl = await getSetting('mes_dashboard_url') || 'http://192.168.210.210:8000/tablo/lines/1/dashboard/';

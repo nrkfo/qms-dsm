@@ -450,34 +450,38 @@ export const KpiDashboard = () => {
             <h4 style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>ФАКТ ВЫПУСКА (MES)</h4>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginTop: '5px' }}>
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--c-text-primary)' }}>
-                {mesFact ?? '...'} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>шт</span>
+                {activeLot?.status === 'closed' ? '—' : (mesFact ?? '...')} {activeLot?.status !== 'closed' && <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>шт</span>}
               </div>
-              <button
-                onClick={() => {
-                  setPasswordInput('');
-                  setPasswordError('');
-                  setShowPasswordModal(true);
-                }}
-                className="hover-scale"
-                style={{
-                  padding: '6px 12px',
-                  background: 'var(--c-accent)',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                🔒 Завершить смену
-              </button>
+              {activeLot?.status !== 'closed' && (
+                <button
+                  onClick={() => {
+                    setPasswordInput('');
+                    setPasswordError('');
+                    setShowPasswordModal(true);
+                  }}
+                  className="hover-scale"
+                  style={{
+                    padding: '6px 12px',
+                    background: 'var(--c-accent)',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🔒 Завершить смену
+                </button>
+              )}
             </div>
-            <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', marginTop: '10px' }}>реальные данные из MES</div>
+            <div style={{ color: 'var(--c-text-muted)', fontSize: '0.8rem', marginTop: '10px' }}>
+              {activeLot?.status === 'closed' ? '🔒 Лот закрыт (интеграция MES отключена)' : 'реальные данные из MES'}
+            </div>
          </div>
          <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid var(--c-success)' }}>
             <h4 style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>ВЫПОЛНЕНИЕ ПЛАНА (AQL)</h4>
