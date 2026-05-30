@@ -56,3 +56,10 @@ chmod +x install.sh
 - Ручной перезапуск бэкенда: `sudo systemctl restart qms-backend`
 - Логи бэкенда: `tail -f backend.log`
 - Перезапустить Nginx (фронтенд): `sudo docker restart qms-nginx`
+
+### 🐳 Управление Docker контейнерами:
+- Посмотреть все запущенные контейнеры: `sudo docker ps`
+- Посмотреть все контейнеры (даже остановленные): `sudo docker ps -a`
+- Посмотреть логи контейнера (фронтенд): `sudo docker logs qms-nginx`
+- Посмотреть логи в реальном времени: `sudo docker logs -f qms-nginx`
+- Посмотреть потребление ресурсов (ОЗУ/CPU): `sudo docker stats`
