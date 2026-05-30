@@ -1231,7 +1231,7 @@ const ComponentsSettingsManagement = () => {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
-        console.log('Raw Excel rows:', rows);
+
 
         // Find header row (the first row that contains both 'артикул' and 'наименование' in any column)
         let headerRowIndex = -1;
@@ -1268,7 +1268,7 @@ const ComponentsSettingsManagement = () => {
           name: String(row[nameColIndex] || '').trim()
         })).filter(c => c.article && c.name);
 
-        console.log('Detected components:', components);
+
 
         if (components.length === 0) {
           showToast('В файле не найдено данных под заголовками.', 'error');

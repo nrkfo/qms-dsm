@@ -61,7 +61,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     let reconnectTimeout: any = null;
 
     const connectSSE = () => {
-      console.log('Global SSE: Connecting...');
+
       eventSource = new EventSource('/api/events');
 
       eventSource.onmessage = (event) => {
@@ -69,7 +69,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
           const data = JSON.parse(event.data);
           if (data.type === 'DATA_UPDATED') {
             if (data.module === 'oqa_labels') {
-              console.log('Global SSE: Label check update received, syncing timer.');
+
               fetchLastLabelCheckTime();
               // Dispatch custom event to notify mounted components like LabelsCheck.tsx to refresh
               window.dispatchEvent(new CustomEvent('oqa_labels_updated'));
