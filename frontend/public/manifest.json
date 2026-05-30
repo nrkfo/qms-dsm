@@ -1,6 +1,6 @@
 {
-  "short_name": "QMS-DSM",
-  "name": "QMS-DSM System",
+  "short_name": "QMS",
+  "name": "QMS System",
   "icons": [
     {
       "src": "/vite.svg",

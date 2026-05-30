@@ -129,7 +129,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         >
           <Menu size={24} />
         </button>
-        <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--c-accent)', letterSpacing: '0.5px' }}>QMS-DSM</span>
+        <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--c-accent)', letterSpacing: '0.5px' }}>QMS</span>
         <div style={{ width: '24px' }} />
       </div>
       

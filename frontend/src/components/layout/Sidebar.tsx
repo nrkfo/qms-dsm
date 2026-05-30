@@ -99,7 +99,7 @@ export const Sidebar = () => {
     }}>
       <div style={{ marginBottom: '12px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', marginBottom: '10px' }}>
-          {!isCollapsed && <h2 style={{ color: 'var(--c-accent)', margin: 0, textShadow: 'var(--shadow-neon)' }}>QMS-DSM</h2>}
+          {!isCollapsed && <h2 style={{ color: 'var(--c-accent)', margin: 0, textShadow: 'var(--shadow-neon)' }}>QMS</h2>}
           
           {!isMobile && (
             <button onClick={() => setIsCollapsed(!isCollapsedState)} className="glass" style={{ padding: '6px', display: 'flex', borderRadius: 'var(--radius-sm)' }}>
@@ -321,8 +321,14 @@ export const Sidebar = () => {
             background: 'transparent', cursor: 'pointer'
           }}
         >
-          <LogOut size={16} /> {!isCollapsed && <span>Выйти</span>}
         </button>
+        
+        {/* Footer License */}
+        {!isCollapsed && (
+          <div style={{ marginTop: '10px', fontSize: '10px', color: 'var(--c-text-muted)', textAlign: 'center', lineHeight: '1.3' }}>
+            Copyright &copy; 2026 Izenov Nurbolat / DS Multimedia CA.<br/>All rights reserved.<br/>Proprietary and confidential.
+          </div>
+        )}
       </div>
     </aside>
   );
