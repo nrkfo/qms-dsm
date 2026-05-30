@@ -12,7 +12,9 @@ export const Sidebar = () => {
   const [isLabelAlarm, setIsLabelAlarm] = useState(false);
   const [isLotModalOpen, setIsLotModalOpen] = useState(false);
   const [draftLotId, setDraftLotId] = useState<number | null>(activeLot?.id || null);
-  const [isCollapsedState, setIsCollapsed] = useState(false);
+  const [isCollapsedState, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('dsm_sidebar_collapsed') === 'true';
+  });
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const navigate = useNavigate();
 
@@ -102,7 +104,11 @@ export const Sidebar = () => {
           {!isCollapsed && <h2 style={{ color: 'var(--c-accent)', margin: 0, textShadow: 'var(--shadow-neon)' }}>QMS</h2>}
           
           {!isMobile && (
-            <button onClick={() => setIsCollapsed(!isCollapsedState)} className="glass" style={{ padding: '6px', display: 'flex', borderRadius: 'var(--radius-sm)' }}>
+            <button onClick={() => {
+              const newState = !isCollapsedState;
+              setIsCollapsed(newState);
+              localStorage.setItem('dsm_sidebar_collapsed', String(newState));
+            }} className="glass" style={{ padding: '6px', display: 'flex', borderRadius: 'var(--radius-sm)' }}>
               {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             </button>
           )}
@@ -321,11 +327,13 @@ export const Sidebar = () => {
             background: 'transparent', cursor: 'pointer'
           }}
         >
+          <LogOut size={18} />
+          {!isCollapsed && <span>Выйти</span>}
         </button>
         
         {/* Footer License */}
         {!isCollapsed && (
-          <div style={{ marginTop: '10px', fontSize: '10px', color: 'var(--c-text-muted)', textAlign: 'center', lineHeight: '1.3' }}>
+          <div style={{ marginTop: '10px', fontSize: '10.5px', color: 'var(--c-text-muted)', textAlign: 'center', lineHeight: '1.4', fontWeight: 'bold' }}>
             Copyright &copy; 2026 Izenov Nurbolat / DS Multimedia CA.<br/>All rights reserved.<br/>Proprietary and confidential.
           </div>
         )}
