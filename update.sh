@@ -3,6 +3,9 @@
 # Остановка скрипта при ошибке
 set -e
 
+# Читаем пароль из stdin (передан из Node.js)
+read -r PASSWORD
+
 echo "======================================"
 echo "QMS Обновление Системы"
 echo "======================================"
@@ -24,10 +27,10 @@ npm run build
 cd ..
 
 echo "4. Перезапуск бэкенда (systemd)..."
-systemctl restart qms-backend
+echo "$PASSWORD" | sudo -S systemctl restart qms-backend
 
 echo "5. Перезапуск Nginx (Docker)..."
-docker restart qms-nginx
+echo "$PASSWORD" | sudo -S docker restart qms-nginx
 
 echo "======================================"
 echo "Обновление успешно завершено!"
