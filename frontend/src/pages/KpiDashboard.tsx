@@ -210,7 +210,7 @@ export const KpiDashboard = () => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'DATA_UPDATED') {
-          console.log('Real-time update received:', data);
+
           fetchMesFact(dateFilter);
           fetchKpiData();
           fetchGlobalMetrics();
@@ -220,7 +220,7 @@ export const KpiDashboard = () => {
           if (pulseRef.current) clearTimeout(pulseRef.current);
           pulseRef.current = setTimeout(() => setIsLive(false), 2000);
         } else if (data.type === 'USER_SESSIONS_UPDATED') {
-          console.log('User sessions update received:', data.sessions);
+
           setActiveSessions(data.sessions);
         }
       } catch (e) { console.error(e); }

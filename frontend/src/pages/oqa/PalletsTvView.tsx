@@ -58,7 +58,7 @@ export const PalletsTvView = () => {
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'activeLot_dsm') {
-        console.log('[TV] activeLot storage event detected:', e.newValue);
+
         try {
           if (e.newValue) {
             const parsed = JSON.parse(e.newValue);
@@ -89,11 +89,11 @@ export const PalletsTvView = () => {
     const connectSSE = () => {
       if (!isMounted) return;
       
-      console.log('[TV] Connecting to real-time events...');
+
       eventSource = new EventSource('/api/events');
 
       eventSource.onopen = () => {
-        console.log('[TV] SSE connection established successfully');
+
         if (isMounted) {
           setSseConnected(true);
           // Re-fetch data on successful connection to make sure we didn't miss anything while offline
@@ -105,12 +105,12 @@ export const PalletsTvView = () => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'DATA_UPDATED' && data.module === 'oqa_pallets') {
-            console.log('[TV] Real-time pallet update detected:', data);
+
             if (isMounted) setSseConnected(true);
 
             // 1. Auto-switch active lot if a new scan came in under a different lot ID!
             if (data.action === 'create' && data.lot_id && (!activeLot || Number(activeLot.id) !== Number(data.lot_id))) {
-              console.log('[TV] New scan belongs to a different lot. Automatically switching active lot to:', data.lot_id);
+
               await useDataStore.getState().fetchLots();
               const latestLots = useDataStore.getState().lots;
               const matchingLot = latestLots.find((l: any) => Number(l.id) === Number(data.lot_id));

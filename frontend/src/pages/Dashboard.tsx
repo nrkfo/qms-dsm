@@ -101,11 +101,11 @@ export const Dashboard = () => {
     const connectSSE = () => {
       if (!isMounted) return;
 
-      console.log('Connecting to real-time events on Dashboard...');
+
       eventSource = new EventSource('/api/events');
 
       eventSource.onopen = () => {
-        console.log('Dashboard SSE connected successfully');
+
         if (isMounted) {
           fetchMetrics();
           fetchOqaTvDefects();
@@ -119,7 +119,7 @@ export const Dashboard = () => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'DATA_UPDATED') {
-            console.log('Real-time update received:', data);
+
             if (isMounted) {
               fetchMetrics();
               fetchOqaTvDefects();
