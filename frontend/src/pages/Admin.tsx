@@ -34,6 +34,47 @@ const Admin = () => {
 
   const [activeTab, setActiveTab] = useState('settings');
   const [localSettings, setLocalSettings] = useState<any>({});
+  const [isTestingDrive, setIsTestingDrive] = useState(false);
+  const [isUploadingDrive, setIsUploadingDrive] = useState(false);
+
+  const handleTestGoogleDrive = async () => {
+    if (!localSettings.google_drive_link || !localSettings.google_drive_credentials) {
+      showToast('Заполните ссылку на папку и JSON-ключ для проверки', 'warning');
+      return;
+    }
+    setIsTestingDrive(true);
+    try {
+      const response = await api.post('/backup/google-drive/test', {
+        google_drive_link: localSettings.google_drive_link,
+        google_drive_credentials: localSettings.google_drive_credentials
+      });
+      if (response.success) {
+        showToast('Пробный бэкап успешно выгружен на Google Drive!', 'success');
+      } else {
+        showToast(response.error || 'Ошибка при выгрузке пробного бэкапа', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Ошибка подключения к серверу при проверке', 'error');
+    } finally {
+      setIsTestingDrive(false);
+    }
+  };
+
+  const handleUploadDriveNow = async () => {
+    setIsUploadingDrive(true);
+    try {
+      const response = await api.post('/backup/google-drive/upload-now', {});
+      if (response.success) {
+        showToast('Текущий бэкап успешно выгружен на Google Drive!', 'success');
+      } else {
+        showToast(response.error || 'Ошибка выгрузки', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Ошибка при запуске ручной выгрузки', 'error');
+    } finally {
+      setIsUploadingDrive(false);
+    }
+  };
 
   useEffect(() => {
     fetchLots();
@@ -219,6 +260,110 @@ const Admin = () => {
                 >
                   🗄️ СКАЧАТЬ БД (.SQLITE)
                 </button>
+              </div>
+              
+              <h4 style={{ margin: '15px 0 0 0', color: 'var(--c-accent)' }}>Интеграция с Google Drive</h4>
+              <div style={{ background: 'var(--c-bg-surface-elevated)', padding: '20px', borderRadius: '6px', border: '1px solid var(--c-border)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--c-text-muted)', lineHeight: '1.5', background: 'rgba(var(--c-accent-rgb), 0.05)', padding: '12px', borderRadius: '4px', borderLeft: '3px solid var(--c-accent)' }}>
+                  💡 <strong>Поддерживаются два способа авторизации:</strong><br />
+                  1. <strong>Личный Google Диск (рекомендуется)</strong>: Вставьте URL-адрес веб-приложения Google Apps Script во второе поле.<br />
+                  2. <strong>Корпоративный аккаунт</strong>: Вставьте JSON-содержимое сервисного аккаунта Google Cloud во второе поле.
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', marginBottom: '8px', color: 'var(--c-text-muted)' }}>Ссылка на папку Google Drive</label>
+                  <input 
+                    className="glass" 
+                    value={localSettings.google_drive_link || ''} 
+                    onChange={e => setLocalSettings({...localSettings, google_drive_link: e.target.value})} 
+                    placeholder="https://drive.google.com/drive/folders/..." 
+                    style={{ width: '100%', padding: '12px', border: '1px solid var(--c-border)' }} 
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', marginBottom: '8px', color: 'var(--c-text-muted)' }}>JSON-ключ Сервисного аккаунта ИЛИ URL Google Apps Script</label>
+                  <textarea 
+                    className="glass" 
+                    value={localSettings.google_drive_credentials || ''} 
+                    onChange={e => setLocalSettings({...localSettings, google_drive_credentials: e.target.value})} 
+                    placeholder="Вставьте JSON-ключ { ... } или https://script.google.com/macros/s/..." 
+                    rows={6}
+                    style={{ width: '100%', padding: '12px', fontFamily: 'monospace', fontSize: '12px', border: '1px solid var(--c-border)', resize: 'vertical' }} 
+                  />
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--c-border-muted)', paddingTop: '15px' }}>
+                  <details style={{ fontSize: '12px', color: 'var(--c-text-muted)' }}>
+                    <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: 'var(--c-accent)', outline: 'none' }}>
+                      📋 Код для настройки личного Google Диска (Google Apps Script)
+                    </summary>
+                    <div style={{ marginTop: '10px' }}>
+                      <p style={{ margin: '0 0 10px 0' }}>Создайте пустой проект в <a href="https://script.google.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--c-accent)', textDecoration: 'underline' }}>Google Apps Script</a>, вставьте следующий код и нажмите <strong>«Новое развертывание»</strong> (тип: Веб-приложение, доступ: Все):</p>
+                      <pre style={{ background: '#000', padding: '12px', borderRadius: '4px', overflowX: 'auto', fontSize: '11px', border: '1px solid var(--c-border)' }}>
+{`function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var folderId = data.folderId;
+    var fileName = data.fileName;
+    var fileContent = data.fileContent;
+    var folder = folderId ? DriveApp.getFolderById(folderId) : DriveApp.getRootFolder();
+    var decoded = Utilities.base64Decode(fileContent);
+    var blob = Utilities.newBlob(decoded, "application/octet-stream", fileName);
+    var file = folder.createFile(blob);
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      message: "Файл успешно загружен на Google Диск: " + file.getName()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}
+                      </pre>
+                    </div>
+                  </details>
+                </div>
+
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <button 
+                    type="button" 
+                    disabled={isTestingDrive}
+                    onClick={handleTestGoogleDrive} 
+                    style={{ 
+                      flex: 1, 
+                      padding: '12px', 
+                      background: 'transparent', 
+                      color: 'var(--c-accent)', 
+                      border: '1px solid var(--c-accent)', 
+                      borderRadius: '4px', 
+                      fontWeight: 'bold', 
+                      cursor: isTestingDrive ? 'not-allowed' : 'pointer',
+                      opacity: isTestingDrive ? 0.6 : 1
+                    }}
+                  >
+                    {isTestingDrive ? '⌛ ПРОВЕРКА...' : '🔄 ПРОБНЫЙ БЭКАП'}
+                  </button>
+                  <button 
+                    type="button" 
+                    disabled={isUploadingDrive}
+                    onClick={handleUploadDriveNow} 
+                    style={{ 
+                      flex: 1, 
+                      padding: '12px', 
+                      background: 'transparent', 
+                      color: 'var(--c-text-primary)', 
+                      border: '1px solid var(--c-border)', 
+                      borderRadius: '4px', 
+                      fontWeight: 'bold', 
+                      cursor: isUploadingDrive ? 'not-allowed' : 'pointer',
+                      opacity: isUploadingDrive ? 0.6 : 1
+                    }}
+                  >
+                    {isUploadingDrive ? '⌛ ВЫГРУЗКА...' : '📤 ВЫГРУЗИТЬ СЕЙЧАС'}
+                  </button>
+                </div>
               </div>
               
               <button onClick={handleSaveSettings} style={{ padding: '15px', background: 'var(--c-accent)', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}> Сохранить </button>

@@ -263,6 +263,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
       db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('api_key', 'qms_dsm_mes_connect_2024_static_prod')`);
       db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('mes_dashboard_url', '')`);
       db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('auto_close_shift_time', '17:00')`);
+      db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('google_drive_link', '')`);
+      db.run(`INSERT OR IGNORE INTO global_settings (key, value) VALUES ('google_drive_credentials', '')`);
 
       // Add default admin if not exists (password: admin)
       db.run(`INSERT OR IGNORE INTO users (username, password, role, permissions) VALUES ('admin', '$2b$10$m0IhNu/sYYVr7yHGLdw1veWWK8Kp4687PSJ1e97RYXckFXSUtZ9.S', 'Admin', '["admin_panel","oqa_tv","oqa_pallets","oqa_labels","iqc_aql","iqc_panels","iqc_eps","iqc_covers","iqc_components","oqa_patrol"]')`);
