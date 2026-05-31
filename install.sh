@@ -29,11 +29,13 @@ echo "--------------------------------------"
 
 echo "1. Установка зависимостей бэкенда..."
 cd backend
+rm -rf node_modules
 npm install
 cd ..
 
 echo "2. Установка зависимостей фронтенда и сборка..."
 cd frontend
+rm -rf node_modules
 npm install
 npm run build
 cd ..
